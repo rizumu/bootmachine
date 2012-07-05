@@ -5,22 +5,23 @@ Bootmachine is a bootstrapping tool for securely provisioning
 virtual servers up until the point where customized configuration
 management begins.
 
-The bootmachine's goal is to allow getting started and switching
-between the options with as little effort as possible.
+The bootmachine's goal is to allow getting started with, maintenance
+of, and exploring new stack options through a simple and highly
+customizable interface.
 
 Providers
 ---------
 
 Currently supported:
 
-    * Rackspace Openstack Compute API v1
-    * Rackspace Openstack Compute API v2
+    * Rackspace Openstack Compute API v1 via openstack.compute
+    * Rackspace Openstack Compute API v2 via python-novaclient
     * Non-rackspace Openstack Compute via python-novaclient
     * Write your own
 
 Next in the queue:
 
-    * Amazon EC2
+    * Amazon EC2 via boto
     * Virtualbox / Vagrant
     * Write your own
 

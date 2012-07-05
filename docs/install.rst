@@ -13,7 +13,8 @@ understand them, at least a little, before proceeding::
     * http://pypi.python.org/pypi/virtualenv
     * http://pypi.python.org/pypi/pip
 
-Next create a virtualenv for the bootmachine::
+If you don't already have a virtualenv that you would like to use,
+first create a new virtualenv for the bootmachine::
 
     $ cd ~/.virtualenvs/
     $ virtualenv --no-site-packages --distribute bootmachine
@@ -32,13 +33,14 @@ Now, customize the example settings file and for your stack. A
 suggestion is to instead store these private files a private git
 repository.
 
-Some info on choosing the type of encryption for your ssh key:
+Some info on choosing the type of encryption for your ssh key::
 
     https://wiki.archlinux.org/index.php/SSH_Keys#Generating_an_SSH_key_pair
     http://pthree.org/2011/02/17/elliptic-curve-cryptography-in-openssh/
 
-Note:
-   NOTE: Elliptic curve cryptography is excluded from Fedora
+.. note::
+
+   Elliptic curve cryptography is excluded from Fedora
    presumably due to patent concerns. Check Fedora 18 once released.
    http://comments.gmane.org/gmane.linux.redhat.fedora.legal/1576
 

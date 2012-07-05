@@ -1,35 +1,62 @@
 Motivation
 ==========
 
-There are multiple options when it comes to distros, cloud providers and
-configuration management tools. The bootmachine's goal is to allow
-getting started and switching between the options with as little
-effort as possible.
+There are many options when it comes to server providers,
+configuration management tools, and distros. The bootmachine's goal is
+to reduce maintenance and overhead when managing a server stack, but
+through its pluggable api it also simplifies exploring new options.
 
-    * Arch Linux | Debian | Fedora | Ubuntu | write your own...
-    * Rackspace Openstack Cloudservers | Amazon EC2 | write your own..
-    * Salt | Chef | Puppet | write your own...
+The bootmachine is written in PEP8 compliant Python and is at its most
+basic, simply a specialized Fabric libary.
 
-The bootmachine will boot each new server as defined in the
-``settings.py``, install a configuration management tool
-on the server, and finally use the configuration management tool to
-provision the server to a secure state.
+Providers:
+
+    * Rackspace Openstack API v1+v2
+    * Amazon EC2 (forthcoming)
+    * Write your own..
+
+Configurators:
+
+    * Salt 0.10.1 http://saltstack.org/
+    * Chef (forthcoming)
+    * Puppet (forthcoming)
+    * Write your own...
+
+Distros:
+
+    * Arch Linux
+    * Fedora 16+17
+    * Ubuntu 12.04 LTS
+    * Debian 6 (forthcoming)
+    * Gentoo 11.0 (forthcoming)
+    * OpenSUSE 12 (forthcoming)
+    * CentOS 6.2 (forthcoming)
+    * Red Hat Enterprise Linux 6 (forthcoming)
+    * write your own...
+
+First, the bootmachine boots each new server as defined in its
+``settings.py`` using the distro and provider of your choice. Next it
+bootstaps setting up the distro and installs the configuration
+management tool of your choice. Finally it uses the configuration
+management tool to provision the server to a secure state. The
+supplied states/recipes handle iptables, ssh, users, and not much
+more. The idea is to keep things simple, but it is up to you to
+customize the stack to your preferences.
+
+For example, you could create a new stack with four Arch Linux servers
+using the Rackspace api. After defining your settings and running `fab
+bootmachine`. Salt is installed and the server is configured as the
+states tell it to be. The stack could contain a loadbalancer, cache,
+application, and database server. It is up to you to define the
+individual roles, but the bootmachine gets you as close as it can to a
+secure and ready system before personalization takes over.
 
 Booting
 =======
 
 Bootmachine simplifies the initial boot phase of creating new servers,
-by reading configuration from
-``settings.PROVIDER_BACKENDS``.  Select from the built-in
-cloud providers, or write a custom ``provider_backend``.
-
-Currently supported providers are:
-
-    * openstack|rackspace
-
-Next in the queue:
-
-    * amazon
+by reading configuration from ``settings.SERVERS``. Select from the
+built-in cloud providers, or write a custom ``settings.PROVIDER_MODULE``.
 
 .. note::
 
@@ -47,32 +74,11 @@ not yet booted. It will then boot each new server, with its defined
 distro and size, and next install the configuration management tool
 of your choice.
 
-Currently supported distros are:
-
-    * Arch Linux
-    * Ubuntu
-    * Fedora
-
-Next in the queue:
-
-    * Debian
-
-Currently supported configuration management tools are:
-
-    * Salt
-
-Next in the queue:
-
-    * Chef
-    * Puppet
-
 .. note::
 
-    The bootmachine supports a configuration with multiple providers
-    and distros, but it is assumed that only *one* configuration
-    management tool will be used.
-
-.. note::
+    The bootmachine supports a stack with multiple distros, but it is
+    assumed that only *one* provider and *one* configuration
+    management tool will be used per stack.
 
     Although you may boot a mixture of distro types, it is advised
     against because this will most likely create unnecessary
@@ -80,10 +86,10 @@ Next in the queue:
     management tools could have conflicting versions per distro.
     If you know what your doing than go ahead, otherwise be warned.
 
-
-After the configuration management tool of choice is bootstrapped, the
-last step is to provision the server to a secure state, following community
-approved best-practices.
+After your configuration management tool of choice is bootstrapped on
+the new servers, the last step is provisioning the server to a secure
+state. For this it following community approved best-practices in the
+supplied salt-states, chef/puppet recipes, etc.
 
 Bootmachine adheres to the Slicehost provisioning documentation and
 the Arch Linux wiki:

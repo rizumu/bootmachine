@@ -3,13 +3,14 @@ bootmachine  overview and usage
 
 The ``bootmachine-admin start`` command simply copies two files
 to the current working directory. A standard Fabric ``fabfile.py`` and
-a ``settings.py`` for which you need to customize.
+a ``settings.py`` for which you need to customize. Additionally it
+copies over the ``configuration`` folder containing the initial
+states/recipes to configure the servers.
 
 After customizing your settings, all it takes to convert bare metal
 servers from aluminium into rhodium is one simple Fabric command::
 
     $ fab bootmachine
-
 
 Internally this does two things. First ``provider.bootem`` checks if
 there are any non-booted servers listed in the
@@ -40,10 +41,12 @@ ip addresses::
 
     $ fab provider
 
-Or since you already have ``openstack-compute`` installed, you could
-just as easily::
+Or if you already have ``openstack-compute`` or ``python-novaclient``
+installed, you could just as easily::
 
     $ openstack-compute list
+         or
+    $ nova list
 
 All available commands can be seen by typing::
 
