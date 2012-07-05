@@ -14,11 +14,11 @@ Providers
 Currently supported:
 
     * Rackspace Openstack Compute API v1
+    * Rackspace Openstack Compute API v2
     * Write your own
 
 Next in the queue:
 
-    * Rackspace Openstack Compute API v2
     * Amazon EC2
     * Non-rackspace Openstack Compute
     * Virtualbox
@@ -32,7 +32,7 @@ Currently supported:
     * Arch Linux
     * Ubuntu
     * Fedora
-    * Debian (ready, but waiting for salt to land in the repos)
+    * Debian (ready, but waiting for salt to land in the repos or a workaround)
     * Write your own
 
 Next in the queue:
