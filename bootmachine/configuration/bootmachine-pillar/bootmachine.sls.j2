@@ -1,0 +1,41 @@
+# SERVERS
+servers:
+{% for server in bootmachine_servers %}
+  {{ server.name }}:
+    public_ip: {{ server.public_ip }}
+    private_ip: {{ server.private_ip }}
+    roles: {{ server.roles }}
+{% endfor %}
+
+# SSH
+ssh_port: {{ ssh_port }}
+
+# SALT
+saltmaster_hostname: {{ saltmaster_hostname }}
+
+saltmaster_private_ip: {{ saltmaster_private_ip }}
+
+saltmaster_public_ip: {{ saltmaster_public_ip }}
+
+saltminion_private_ips:
+{% for server in bootmachine_servers %}
+  - {{ server.private_ip }}
+{% endfor %}
+
+
+# USERS
+users:
+{% for user in ssh_users %}
+  {{ user.username }}:
+    fullname: {{ user.fullname }}
+    uid: {{ user.uid }}
+    gid: {{ user.uid }}
+    group: {{ user.username }}
+    extra_groups: [sshers, wheel, ops]
+    ssh_auth:
+      keys: [
+{% for key in user.ssh_keys %}
+       {{ key.enc }} {{ key.hash }}== {{ key.comment }},
+{% endfor %}
+      ]
+{% endfor %}

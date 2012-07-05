@@ -1,0 +1,3 @@
+Server = http://mirror.devnu11.net/archlinux/$repo/os/$arch
+Server = http://mirror.yellowfiber.net/archlinux/$repo/os/$arch
+Server = http://mirror.ece.vt.edu/archlinux/$repo/os/$arch

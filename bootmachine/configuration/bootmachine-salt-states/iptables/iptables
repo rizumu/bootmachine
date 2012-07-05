@@ -1,0 +1,4 @@
+#!/bin/sh
+sudo sh -c '/sbin/iptables-save > /etc/iptables.save'
+sudo /sbin/iptables --flush
+sudo sh -c '/sbin/iptables-restore < /etc/iptables.up.rules'

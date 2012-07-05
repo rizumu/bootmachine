@@ -1,0 +1,12 @@
+include:
+  - edit.vim
+  - edit.emacs-nox
+  - edit.zile
+  - hosts
+  - iptables
+  - salt
+  - ssh
+  - sudo
+  - swap
+  - tags
+  - xcbc

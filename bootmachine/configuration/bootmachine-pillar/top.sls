@@ -1,0 +1,4 @@
+base:
+  '*':
+    - bootmachine
+    - pacman

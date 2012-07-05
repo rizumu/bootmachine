@@ -1,0 +1,11 @@
+master: {{ saltmaster_ip }}
+
+grains:
+  roles:
+{% for server, args in servers.iteritems() %}
+{% for role in args['roles'] %}
+{% if server == hostname %}
+    - {{ role }}
+{% endif %}
+{% endfor %}
+{% endfor %}

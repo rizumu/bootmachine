@@ -1,0 +1,3 @@
+zile:
+  pkg:
+    - installed

@@ -1,0 +1,19 @@
+# Config file for GRUB - The GNU GRand Unified Bootloader
+# /boot/grub/menu.lst
+
+# general configuration:
+timeout   5
+default   0
+color light-blue/black light-cyan/blue
+
+# (0) Arch Linux
+title  Arch Linux  [/boot/vmlinuz-linux]
+root   (hd0,0)
+kernel /boot/vmlinuz-linux root=/dev/xvda1 roconsole=hvc0
+initrd /boot/initramfs-linux.img
+
+# (1) Arch Linux LTS (fallback)
+title  Arch Linux  [/boot/vmlinuz-linux-lts]
+root   (hd0,0)
+kernel /boot/vmlinuz-linux-lts root=/dev/xvda1 roconsole=hvc0
+initrd /boot/initramfs-linux-lts.img

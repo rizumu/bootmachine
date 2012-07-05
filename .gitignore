@@ -1,0 +1,10 @@
+build
+dist
+MANIFEST
+*.egg-info
+*.egg
+docs/_build/
+
+*.pyc
+
+bootmachine.sls
