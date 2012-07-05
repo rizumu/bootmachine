@@ -15,13 +15,13 @@ Currently supported:
 
     * Rackspace Openstack Compute API v1
     * Rackspace Openstack Compute API v2
+    * Non-rackspace Openstack Compute via python-novaclient
     * Write your own
 
 Next in the queue:
 
     * Amazon EC2
-    * Non-rackspace Openstack Compute
-    * Virtualbox
+    * Virtualbox / Vagrant
     * Write your own
 
 Distros
