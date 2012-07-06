@@ -4,16 +4,20 @@ BOOTMACHINE: A-Z transmutation of aluminium into rhodium.
 import copy
 import sys
 import telnetlib
+import time
 
 from fabric.api import env, local, task, run, sudo
 from fabric.decorators import parallel, task
 from fabric.colors import blue, cyan, green, magenta, red, white, yellow
 from fabric.contrib.files import contains, exists
+from fabric.exceptions import NetworkError
+from fabric.network import connect
 from fabric.operations import put, reboot
 from fabric.utils import abort
 
 import settings
 
+from bootmachine import known_hosts
 from bootmachine.settings_validator import validate_settings
 validate_settings(settings)
 
@@ -48,6 +52,7 @@ def bootmachine():
     Usage:
         fab bootmachine
     """
+    local_user = env.user
     # set environment variables
     master()
     env.new_server_booted = False
@@ -67,9 +72,10 @@ def bootmachine():
             configurator.launch()
             launch_attempts = 1
             break
-    print(green("all servers are configured."))
+    print(green("the configurator has been run for all servers."))
 
     # ensure that the servers have been properly configured
+    env.user = local_user
     master()
     for server in env.bootmachine_servers:
         while server.port != int(settings.SSH_PORT):
@@ -82,24 +88,6 @@ def bootmachine():
     local("fab all reboot_servers")  # to catch cases when configurator changes the kernel
     local("fab all ssh_test")
     print(green("all servers are booted, provisioned, and configured."))
-
-
-@task
-@parallel
-def reboot_servers():
-    """
-    Simply reboot the servers
-
-    Usage:
-        fab all reboot_servers
-    """
-    try:
-        telnetlib.Telnet(env.host, 22)
-        env.user = "root"
-    except IOError:
-        telnetlib.Telnet(env.host, int(settings.SSH_PORT))
-        env.port = int(settings.SSH_PORT)
-    reboot()
 
 
 @task
@@ -146,9 +134,6 @@ def provision():
 
     print(cyan("... {ip_addr} has started provisioning.".format(ip_addr=server.public_ip)))
 
-    # permanently add server to the local list of known hosts
-    local("ssh {user}@{ip_addr} -o StrictHostKeyChecking=no &".format(user=env.user, ip_addr=server.public_ip))
-
     # upgrade distro
     distro = import_module(server.distro_module)
     distro.bootstrap()
@@ -156,6 +141,27 @@ def provision():
     # bootstrap configurator
     configurator.install(distro)
     configurator.start(distro)
+
+
+@task
+@parallel
+def reboot_servers():
+    """
+    Simply reboot the servers
+
+    Usage:
+        fab all reboot_servers
+    """
+    try:
+        telnetlib.Telnet(env.host, 22)
+        env.user = "root"
+    except IOError:
+        telnetlib.Telnet(env.host, int(settings.SSH_PORT))
+        env.port = int(settings.SSH_PORT)
+    try:
+        reboot()
+    except:
+        time.sleep(20)
 
 
 @task
@@ -196,7 +202,6 @@ def master():
     Set the env variables for a command only to be run on the master server.
     """
     __shared_setup()
-
     for server in env.bootmachine_servers:
         if server.name == env.master_server.name:
             env.port = server.port
@@ -211,7 +216,6 @@ def __shared_setup():
     Set the env variables common to both master() and all().
     """
     provider.get_ips()
-
     for server in env.bootmachine_servers:
         if server.name == settings.MASTER:
             env.master_server = server
@@ -225,3 +229,10 @@ def __shared_setup():
             server.provisioned = True
             server.user = env.user
             server.port = int(settings.SSH_PORT)
+        # prevent prompts and warnings related to ssh keys:
+        # a) skips false man-in-the-middle warnings
+        # b) adds a missing key to ~/.ssh/known_hosts
+        try:
+            connect(server.user, server.public_ip, server.port)
+        except NetworkError:
+            known_hosts.add(server.public_ip)

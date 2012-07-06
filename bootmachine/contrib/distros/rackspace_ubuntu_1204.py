@@ -59,10 +59,10 @@ def start_salt():
     Launch a salt-minion daemon on all servers, including the saltmaster.
     """
     if env.host == env.master_server.public_ip:
-        run("service salt-master restart")
+        run("service salt-master restart", pty=False)
 
     sed("/etc/salt/minion", "#master: salt", "master: {0}".format(env.master_server.private_ip))
-    run("service salt-minion restart")
+    run("service salt-minion restart", pty=False)
 
 
 def restart_salt():
@@ -71,8 +71,8 @@ def restart_salt():
     """
     with fabric_settings(warn_only=True):
         if env.host == env.master_server.public_ip:
-            sudo("service salt-master restart")
+            sudo("service salt-master restart", pty=False)
             time.sleep(3)
-            sudo("service salt-minion restart")
+            sudo("service salt-minion restart", pty=False)
         else:
-            sudo("service salt-minion restart")
+            sudo("service salt-minion restart", pty=False)

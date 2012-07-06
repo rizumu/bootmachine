@@ -56,11 +56,11 @@ def start_salt():
     # run("cp /etc/salt/minion.template /etc/salt/minion")
     # if env.host == env.master_server.public_ip:
     #     run("cp /etc/salt/master.template /etc/salt/master")
-    #     run("service salt-master restart")
+    #     run("service salt-master restart", pty=False)
     #     time.sleep(3)
 
     # sed("/etc/salt/minion", "#master: salt", "master: {0}".format(env.master_server.private_ip))
-    # run("service salt-minion restart")
+    # run("service salt-minion restart", pty=False)
 
 
 def restart_salt():

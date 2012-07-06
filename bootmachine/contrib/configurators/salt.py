@@ -12,6 +12,8 @@ from fabric.utils import abort
 
 from jinja2 import Template
 
+from bootmachine import known_hosts
+
 import settings
 
 
@@ -67,6 +69,7 @@ def launch():
     upload_saltstates(bootmachine=True)
 
     run("iptables -F")  # flush iptables before accepting minions and calling highstate
+    time.sleep(10)  # sleep a little to give minions a chance to become visible
     accept_minions()
     pillar_update()
 
@@ -153,7 +156,11 @@ def pillar_update():
         ssh_users = settings.SSH_USERS,
     ))
     # TODO: only upload and refresh when file has changes
-    local("scp -P {0} {1}bootmachine.sls {2}@{3}:/tmp/bootmachine.sls".format(env.port, pillar_dir, env.user, env.host))
+    try:
+        local("scp -P {0} {1}bootmachine.sls {2}@{3}:/tmp/bootmachine.sls".format(env.port, pillar_dir, env.user, env.host))
+    except:
+        known_hosts.update(env.host)
+        local("scp -P {0} {1}bootmachine.sls {2}@{3}:/tmp/bootmachine.sls".format(env.port, pillar_dir, env.user, env.host))
     sudo("mv /tmp/bootmachine.sls /srv/pillar/bootmachine.sls")
     sudo("salt '*' saltutil.refresh_pillar")
 
