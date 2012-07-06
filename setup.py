@@ -131,7 +131,6 @@ setup(
     #scripts = ["bootmachine/bin/bootmachine-admin.py"],
     classifiers=[
         "Development Status :: 3 - Alpha",
-        "Framework :: FW Independent",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
