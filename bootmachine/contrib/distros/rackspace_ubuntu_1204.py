@@ -18,10 +18,6 @@ def bootstrap():
 
     Only the bare essentials, the configuration manager will take care of the rest.
     """
-    BASE_PACKAGES = [
-        "build-essential",
-        "python-software-properties",
-    ]
     run("/usr/sbin/locale-gen en_US.UTF-8 && /usr/sbin/update-locale LANG=en_US.UTF-8")
     run("aptitude update")
     with fabric_settings(warn_only=True):
@@ -29,7 +25,7 @@ def bootstrap():
         # http://askubuntu.com/questions/146921/how-do-i-apt-get-y-dist-upgrade-without-a-grub-config-prompt
         run('DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade')
     reboot()
-    run("aptitude install -y {base_packages}".format(base_packages=" ".join(BASE_PACKAGES)))
+    run("aptitude install -y build-essential")
 
 
 def upgrade_ubuntu():
@@ -44,10 +40,8 @@ def install_salt(installer="ppa"):
     Install salt via ppa with aptitude.
     """
     if installer == "ppa":
-        run("add-apt-repository --yes ppa:chris-lea/libpgm")
-        run("add-apt-repository --yes ppa:chris-lea/zeromq")
+        run("aptitude install -y python-software-properties")
         run("add-apt-repository --yes ppa:saltstack/salt")
-        run("apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4759FA960E27C0A6")
         with fabric_settings(warn_only=True):
             run("aptitude update")
         if env.host == env.master_server.public_ip:
