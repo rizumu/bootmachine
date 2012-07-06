@@ -175,13 +175,16 @@ def bootem(servers=None):
 
 
 @task
-def destroy(servername):
+def destroy(servername, sleep=True):
     """
     Kill a server, destroying its data. Achtung!
     Usage:
         fab provider.destroy:servername
     """
     local("nova delete {name} || true".format(name=servername))
+    env.bootmachine_servers = list_servers(as_list=True)
+    if sleep:
+        time.sleep(5)
 
 
 @task
@@ -192,7 +195,8 @@ def destroyem():
         fab provider.destroyem
     """
     for server in settings.SERVERS:
-        destroy(server["servername"])
+        destroy(server["servername"], sleep=False)
+    time.sleep(5)
 
 
 def get_ips(roles=[], port="22", ip_type="public", append_port=True):
