@@ -1,6 +1,6 @@
 import os
 
-from bootmachine.settings_dist import *
+from bootmachine.settings_tests import *
 
 
 CONFIGURATOR_MODULE = "bootmachine.contrib.configurators.salt"

@@ -6,5 +6,5 @@ MANIFEST
 docs/_build/
 
 *.pyc
-
+settings_tests.py
 bootmachine.sls
