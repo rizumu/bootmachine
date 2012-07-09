@@ -141,6 +141,7 @@ def provision():
     # bootstrap configurator
     configurator.install(distro)
     configurator.start(distro)
+    run("iptables -F")  # before calling the configurator flush to clear any defaults
 
 
 @task

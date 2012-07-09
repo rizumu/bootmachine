@@ -2,7 +2,7 @@ import os
 import sys
 import time
 
-from fabric.api import env, local, run, sudo
+from fabric.api import env, local, sudo
 from fabric.colors import blue, cyan, green, magenta, red, white, yellow
 from fabric.context_managers import settings as fabric_settings
 from fabric.contrib.files import contains, exists
@@ -68,7 +68,6 @@ def launch():
 
     upload_saltstates(bootmachine=True)
 
-    run("iptables -F")  # flush iptables before accepting minions and calling highstate
     time.sleep(10)  # sleep a little to give minions a chance to become visible
     accept_minions()
     pillar_update()
