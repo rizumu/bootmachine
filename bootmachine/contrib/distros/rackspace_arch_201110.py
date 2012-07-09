@@ -105,10 +105,10 @@ def start_salt():
     run("cp /etc/salt/minion.template /etc/salt/minion")
     if env.host == env.master_server.public_ip:
         run("cp /etc/salt/master.template /etc/salt/master")
-        sed("/etc/rc.conf", "crond sshd", "crond sshd @salt-master @salt-minion")
+        sed("/etc/rc.conf", "crond sshd", "crond sshd iptables @salt-master @salt-minion")
         run("rc.d start salt-master", pty=False)
     else:
-        sed("/etc/rc.conf", "crond sshd", "crond sshd @salt-minion")
+        sed("/etc/rc.conf", "crond sshd", "crond sshd iptables @salt-minion")
     sed("/etc/salt/minion", "#master: salt", "master: {0}".format(env.master_server.private_ip))
     run("rc.d start salt-minion", pty=False)
 
