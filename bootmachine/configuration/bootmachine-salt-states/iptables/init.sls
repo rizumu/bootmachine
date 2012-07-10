@@ -1,14 +1,15 @@
-# TODO
-# http://www.ml.reddit.com/r/archlinux/comments/s38q1/having_some_issues_with_logging_iptables/
-# In addition, you should add the iptables daemon to start on boot to your rc.conf
-#    DAEMONS=(... iptables network ...)
-
 include:
   - ssh
 
-{% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
-/etc/iptables.up.rules:
+iptables-rules:
   file.managed:
+{% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
+    - name: /etc/iptables.up.rules
+{% elif grains['os'] == 'Arch' or grains['os'] == 'Fedora' %}
+    - name: /etc/iptables/iptables.rules
+    - require:
+      - pkg: iptables
+{% endif %}
     - user: root
     - group: root
     - mode: 644
@@ -17,12 +18,11 @@ include:
     - template: jinja
     - defaults:
         ssh_port: 22
-{% if pillar['ssh_port'] %}
     - context:
         ssh_port: {{ pillar['ssh_port'] }}
         saltminion_private_ips: {{ pillar['saltminion_private_ips'] }}
-{% endif %}
 
+{% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
 /etc/network/if-pre-up.d/iptables:
   file.managed:
     - source: salt://iptables/iptables
@@ -44,24 +44,6 @@ iptables:
     - enabled: True
     - require:
       - pkg: iptables
-
-/etc/iptables/iptables.rules:
-  file.managed:
-    - source: salt://iptables/rules.j2
-    - template: jinja
-    - user: root
-    - group: root
-    - mode: 644
-    - makedirs: True
-    - require:
-      - pkg: iptables
-    - defaults:
-        ssh_port: 22
-{% if pillar['ssh_port'] %}
-    - context:
-        ssh_port: {{ pillar['ssh_port'] }}
-        saltminion_private_ips: {{ pillar['saltminion_private_ips'] }}
-{% endif %}
 
 iptables-restore < /etc/iptables/iptables.rules:
   cmd.wait:
