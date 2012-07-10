@@ -111,6 +111,6 @@ Include = /etc/pacman.d/mirrorlist
 #Server = file:///home/custompkgs
 
 {% for repo in extra_repos %}
-[{{ repo.name }}]
+[{{ repo }}]
 Server = {{ repo.url }}/$arch
 {% endfor %}

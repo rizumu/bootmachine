@@ -1,4 +1,4 @@
 base:
   '*':
     - bootmachine
-    - pacman
+    - deploymachine
