@@ -1,4 +1,1 @@
-base:
-  '*':
-    - bootmachine
-    - pacman
+../../../../bootmachine/configuration/bootmachine-pillar/top.sls
