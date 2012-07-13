@@ -19,11 +19,11 @@ SERVERS = [
      "flavor": "1",
      "image": "Arch 2011.10",
      "distro_module": "bootmachine.contrib.distros.rackspace_arch_201110"},
-    {"servername": "rackspacev1-salt-arch201110-b",
-     "roles": ["application"],
-     "flavor": "1",
-     "image": "Arch 2011.10",
-     "distro_module": "bootmachine.contrib.distros.rackspace_arch_201110"},
+    # {"servername": "rackspacev1-salt-arch201110-b",
+    #  "roles": ["application"],
+    #  "flavor": "1",
+    #  "image": "Arch 2011.10",
+    #  "distro_module": "bootmachine.contrib.distros.rackspace_arch_201110"},
 ]
 
 SSH_PUBLIC_KEY = os.path.join(os.environ["HOME"], ".ssh", "id_rsa.pub")
