@@ -60,15 +60,15 @@ def bootstrap():
     reboot()
 
     # full system upgrade and installtion of a few essential packages and another reboot for good measure
-    run("pacman -Syyu --noconfirm")
-    run("pacman -S --noconfirm base-devel")
-    run("pacman -S --noconfirm curl git rsync")
+    run("pacman --noconfirm -Syyu")
+    run("pacman --noconfirm -S base-devel")
+    run("pacman --noconfirm -S curl git rsync")
     reboot()
 
     # install yaourt
     append("/etc/pacman.conf", "\n[archlinuxfr]\nServer = http://repo.archlinux.fr/$arch", use_sudo=True)
     run("pacman -Syy")
-    run("pacman -S --noconfirm yaourt")
+    run("pacman --noconfirm -S yaourt")
 
     # create a user, named 'aur', to safely install packages under fakeroot
     # uid and gid values auto increment from 1000
@@ -89,9 +89,9 @@ def install_salt(installer="aur"):
     # TODO: figure out how to run yaourt under fakeroot
     # TODO: support installation or freezing at an older version
     if installer == "aur":
-        sudo("yaourt -S --noconfirm salt", user="aur")
+        sudo("yaourt --noconfirm -S salt", user="aur")
     elif installer == "aur-git":
-        sudo("yaourt -S --noconfirm salt-git", user="aur")
+        sudo("yaourt --noconfirm -S salt-git", user="aur")
     else:
         raise NotImplementedError()
 
