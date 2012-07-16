@@ -1,13 +1,9 @@
-import os
-import sys
 import time
 
-from fabric.api import cd, env, run, sudo
+from fabric.api import env, run, sudo
 from fabric.context_managers import settings as fabric_settings
-from fabric.contrib.files import append, contains, put, sed, uncomment
+from fabric.contrib.files import append, sed, uncomment
 from fabric.operations import reboot
-
-import settings
 
 
 DISTRO = "ARCH_201110"

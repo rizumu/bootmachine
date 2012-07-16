@@ -1,5 +1,3 @@
-import base64
-import os
 import time
 
 from telnetlib import Telnet
@@ -199,7 +197,7 @@ def destroyem():
     time.sleep(5)
 
 
-def get_ips(roles=[], port="22", ip_type="public", append_port=True):
+def get_ips(roles=None, ip_type="public", append_port=True):
     """
     Internal bootmachine method to get an ip list (public or private) of all servers for the
     given role(s) or all servers if no roles were provided. Optionally disable appending of

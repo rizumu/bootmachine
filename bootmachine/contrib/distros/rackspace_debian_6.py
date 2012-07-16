@@ -1,8 +1,4 @@
-import os
-import sys
-import time
-
-from fabric.api import cd, env, run
+from fabric.api import env, run
 from fabric.contrib.files import append, contains, sed
 from fabric.context_managers import settings as fabric_settings
 from fabric.operations import reboot
@@ -18,13 +14,10 @@ def bootstrap():
 
     Only the bare essentials, the configuration manager will take care of the rest.
     """
-    BASE_PACKAGES = [
-        "build-essential",
-    ]
     run("/usr/sbin/locale-gen en_US.UTF-8 && /usr/sbin/update-locale LANG=en_US.UTF-8")
     with fabric_settings(warn_only=True):
         run("aptitude update && aptitude -y dist-upgrade")
-        run("aptitude install -y {base_packages}".format(base_packages=" ".join(BASE_PACKAGES)))
+        run("aptitude install -y build-essential")
     reboot()
 
 

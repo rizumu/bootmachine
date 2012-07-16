@@ -1,4 +1,3 @@
-import os
 import sys
 import time
 
@@ -52,7 +51,7 @@ def restart():
         __import__(distro_module)
         distro = sys.modules[distro_module]
     except ImportError:
-        abort("Unable to import the module: {0}".format(module))
+        abort("Unable to import the module: {0}".format(distro_module))
 
     distro.restart_salt()
 
@@ -66,7 +65,7 @@ def launch():
     if env.host != env.master_server.public_ip:
         abort("tried to launch on a non-master server")
 
-    upload_saltstates(bootmachine=True)
+    upload_saltstates()
 
     time.sleep(10)  # sleep a little to give minions a chance to become visible
     accept_minions()
@@ -97,7 +96,7 @@ def highstate(match="'*'"):
 
 
 @task
-def upload_saltstates(bootmachine=False):
+def upload_saltstates():
     """
     Upload the salt states to all servers.
     It's a little more complicated then it needs to be,
@@ -107,9 +106,6 @@ def upload_saltstates(bootmachine=False):
     """
     if env.host != env.master_server.public_ip:
         abort("tried to upload salttates on a non-master server")
-
-    ss_dir = settings.SALTSTATES_DIR
-    pillar_dir = settings.PILLAR_DIR
 
     # rsync pillar and salt files to the fabric users local directory
     rsync_project(local_dir=settings.SALTSTATES_DIR, remote_dir="./salt/", delete=True,
@@ -209,6 +205,6 @@ def list_minions():
 
 
 @task
-def change_master_ip(ip):
+def change_master_ip(ip_address):
     "TODO: allowing changing of the master ip, say on a master only rebuild."
     raise NotImplementedError()

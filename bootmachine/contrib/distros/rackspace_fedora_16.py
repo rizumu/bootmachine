@@ -1,10 +1,8 @@
-import os
-import sys
 import time
 
-from fabric.api import cd, env, run, sudo
+from fabric.api import env, run, sudo
 from fabric.context_managers import settings as fabric_settings
-from fabric.contrib.files import append, put, sed, uncomment
+from fabric.contrib.files import append, sed
 from fabric.operations import reboot
 
 
@@ -19,7 +17,7 @@ def bootstrap():
     Only the bare essentials, salt takes care of the rest.
 
     """
-    BASE_PACKAGES = [
+    base_packages = [
         "curl",
         "git",
         "rsync",
@@ -29,7 +27,7 @@ def bootstrap():
     append("/etc/sysconfig/i18n", 'LC_ALL="en_US.UTF-8"')
     run("yum update --assumeyes")
     run("yum groupinstall --assumeyes 'Development Tools'")
-    run("yum install --assumeyes {pkgs}".format(pkgs=" ".join(BASE_PACKAGES)))
+    run("yum install --assumeyes {pkgs}".format(pkgs=" ".join(base_packages)))
     reboot()
 
 

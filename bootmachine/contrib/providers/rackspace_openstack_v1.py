@@ -1,4 +1,3 @@
-import os
 import time
 
 from telnetlib import Telnet
@@ -8,7 +7,6 @@ import openstack.compute
 from fabric.api import env, local
 from fabric.decorators import task
 from fabric.colors import blue, cyan, green, magenta, red, white, yellow
-from fabric.operations import prompt
 from fabric.utils import abort
 
 import settings
@@ -181,7 +179,7 @@ def destroyem():
         destroy(server["servername"])
 
 
-def get_ips(roles=[], port="22", ip_type="public", append_port=True):
+def get_ips(roles=None, ip_type="public", append_port=True):
     """
     Internal bootmachine method to get an ip list (public or private) of all servers for the
     given role(s) or all servers if no roles were provided. Optionally disable appending of

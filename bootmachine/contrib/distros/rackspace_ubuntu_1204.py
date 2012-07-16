@@ -1,9 +1,7 @@
-import os
-import sys
 import time
 
-from fabric.api import cd, env, run, sudo
-from fabric.contrib.files import append, contains, sed
+from fabric.api import env, run, sudo
+from fabric.contrib.files import sed
 from fabric.context_managers import settings as fabric_settings
 from fabric.operations import reboot
 
