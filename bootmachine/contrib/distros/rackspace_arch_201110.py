@@ -33,14 +33,16 @@ def bootstrap():
     run("printf 'n\nY\n' | pacman -S --force filesystem")
     run("printf 'n\nY\n' | pacman -S tzdata")
     run("printf 'n\nY\n' | pacman -S haveged")
+    # https://www.archlinux.org/news/the-lib-directory-becomes-a-symlink/
+    run("pacman --noconfirm -U http://pkgbuild.com/~allan/glibc-2.16.0-1-x86_64.pkg.tar.xz")
 
     # upgrade pacman
-    run("pacman -S --noconfirm pacman")
+    run("pacman --noconfirm -S pacman")
     # haveged generates the entropy necessary for making a pacman gpg key
     run("rc.d start haveged", pty=False)
     run("pacman-key --init")
     run("rc.d stop haveged", pty=False)
-    run("pacman -Rns --noconfirm haveged")
+    run("pacman --noconfirm -Rns haveged")
     # sign the master pacman keys https://wiki.archlinux.org/index.php/Pacman-key#Master_keys
     # Note: Level 3 'marginal trust' is suggested, but had to trust level of 4 because of an unknown error.
     run("for key in 6AC6A4C2 824B18E8 4C7EA887 FFF979E7 CDFD6BB0; \
