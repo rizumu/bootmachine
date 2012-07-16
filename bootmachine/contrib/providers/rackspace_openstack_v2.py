@@ -168,7 +168,11 @@ def bootem(servers=None):
         else:
             time.sleep(sleep_interval)
             slept += sleep_interval
-            print(yellow("... waited {0} seconds.".format(slept)))
+            if slept <= 60:
+                print(yellow("... waited {0} seconds.".format(slept)))
+            else:
+                minutes, seconds = divmod(slept, 60)
+                print(yellow("... waited {0} min and {1} sec".format(minutes, seconds)))
             env.bootmachine_servers = list_servers(as_list=True)
 
 
