@@ -16,26 +16,32 @@ def bootstrap():
 
     Only the bare essentials, the configurator will take care of the rest.
     """
-    # manually set hostname so salt finds proper hostname via socket.gethostname()
+    # manually set hostname so salt finds it via socket.gethostname()
     for server in env.bootmachine_servers:
         if server.public_ip == env.host:
             sed("/etc/hosts", "# End of file", "")
             append("/etc/hosts", "{0} {1}".format(server.public_ip, server.name))
             append("/etc/hosts", "{0} {1}".format(server.private_ip, server.name))
             append("/etc/hosts", "\n# End of file")
+
     # pre upgrade maintenance (updating filesystem and tzdata before pacman)
     run("pacman -Syy")
     run("rm -rf /var/run /var/lock")
     run("printf 'n\nY\n' | pacman -S --force filesystem")
     run("printf 'n\nY\n' | pacman -S tzdata")
+
+    # haveged generates the entropy necessary for making the pacman gpg key
     run("printf 'n\nY\n' | pacman -S haveged")
+    run("rc.d start haveged", pty=False)
+
+    # upgrade everything except glibc
     # https://www.archlinux.org/news/the-lib-directory-becomes-a-symlink/
     run("pacman --noconfirm -U http://pkgbuild.com/~allan/glibc-2.16.0-1-x86_64.pkg.tar.xz")
+    run("rm /etc/profile.d/locale.sh")
+    run("printf 'n\nY\nY\nY\nY\nY\nY\nY\nY\nY\nY\n' | pacman -Su --ignore glibc")
 
-    # upgrade pacman
-    run("pacman --noconfirm -S pacman")
-    # haveged generates the entropy necessary for making a pacman gpg key
-    run("rc.d start haveged", pty=False)
+    # configure pacman
+    run("rc.d restart haveged")
     run("pacman-key --init")
     run("rc.d stop haveged", pty=False)
     run("pacman --noconfirm -Rns haveged")
@@ -48,42 +54,46 @@ def bootstrap():
     # ARGH!!! printf won't work here!!!
     #run("printf 'Y\nY\nY\nY\nY\nY\nY\nY\n' | pacman-key --populate archlinux", shell=False)
 
-    # configure new kernel and reboot (before system upgrade!!)
-    run("printf 'y\ny\nY\nY\nY\nY\nY\nY\nY\nY\nY\n' | pacman --force -S  linux mkinitcpio udev")  # key accepting does work here
-    sed("/etc/mkinitcpio.conf", "xen-", "xen_")  # patch: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6
-    sed("/etc/mkinitcpio.conf", "usbinput", "usbinput fsck")
-    run("mkinitcpio -p linux")
-    reboot()
-
-    # full system upgrade and installtion of a few essential packages and another reboot for good measure
-    run("pacman --noconfirm -Syyu")
+    # install essential packages
     run("pacman --noconfirm -S base-devel")
     run("pacman --noconfirm -S curl git rsync")
-    reboot()
-
-    # install yaourt
     append("/etc/pacman.conf", "\n[archlinuxfr]\nServer = http://repo.archlinux.fr/$arch", use_sudo=True)
     run("pacman -Syy")
     run("pacman --noconfirm -S yaourt")
 
-    # create a user, named 'aur', to safely install packages under fakeroot
+    # create a user, named 'aur', to safely install AUR packages under fakeroot
     # uid and gid values auto increment from 1000
     # to prevent conficts set the 'aur' user's gid and uid to 902
     run("groupadd -g 902 aur && useradd -u 902 -g 902 -G wheel aur")
     uncomment("/etc/sudoers", "wheel.*NOPASSWD")
+
+    # still dealing with glibc crap
+    run("rm -rf /lib/modules")
+    run("pacman --noconfirm -Rns xe-guest-utilities kernel26-xen")
+    sudo("yaourt --noconfirm -S xe-guest-utilities", user="aur")
+
+    # finally we can upgrade glibc and run a successful full system upgrade
+    run("pacman --noconfirm -Su")
 
     # tweak sshd_config (before reboot so it is restarted!) so fabric can sftp with contrib.files.put, see:
     # http://stackoverflow.com/questions/10221839/cant-use-fabric-put-is-there-any-server-configuration-needed
     sed("/etc/ssh/sshd_config", "Subsystem sftp /usr/lib/openssh/sftp-server", "Subsystem sftp internal-sftp")
     run("rc.d restart sshd", pty=False)
 
+    # force netcfg to automatically connect to eth0 on reboot
+    run("sed -i.bak -r -e 's/NETWORKS=\(last\)/NETWORKS=\(eth0\)/g' /etc/conf.d/netcfg")
+
+    # configure new kernel and reboot
+    sed("/etc/mkinitcpio.conf", "xen-", "xen_")  # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6
+    sed("/etc/mkinitcpio.conf", "usbinput", "usbinput fsck")
+    run("mkinitcpio -p linux")
+    reboot()
+
 
 def install_salt(installer="aur"):
     """
     Install salt from the AUR.
     """
-    # TODO: figure out how to run yaourt under fakeroot
-    # TODO: support installation or freezing at an older version
     if installer == "aur":
         sudo("yaourt --noconfirm -S salt", user="aur")
     elif installer == "aur-git":
