@@ -17,11 +17,6 @@ salt:
         servers: {{ pillar['servers'] }}
         saltmaster_ip: {{ pillar['saltmaster_private_ip'] }}
         hostname: {{ grains["host"] }}
-{% if grains["host"] == pillar['saltmaster_hostname'] %}
-        saltmaster_hostname: localhost
-{% else %}
-        saltmaster_hostname: {{ pillar['saltmaster_hostname'] }}
-{% endif %}
 
 salt-minion-daemon:
   service.running:

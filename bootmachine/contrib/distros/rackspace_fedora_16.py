@@ -28,6 +28,7 @@ def bootstrap():
     run("yum update --assumeyes")
     run("yum groupinstall --assumeyes 'Development Tools'")
     run("yum install --assumeyes {pkgs}".format(pkgs=" ".join(base_packages)))
+    append("/etc/hosts", "{0} saltmaster-private".format(env.master_server.private_ip))
     reboot()
 
 
@@ -52,11 +53,7 @@ def start_salt():
     if env.host == env.master_server.public_ip:
         run("systemctl enable salt-master.service", pty=False)
         run("systemctl start salt-master.service", pty=False)
-        sed("/etc/salt/minion", "\#master\: salt", "master: localhost")
-    else:
-        sed("/etc/salt/minion", "\#master\: salt", "master: {hostname}".format(
-            hostname=env.master_server.name))
-
+    sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
     run("systemctl enable salt-minion.service", pty=False)
     run("systemctl start salt-minion.service", pty=False)
 

@@ -22,6 +22,7 @@ def bootstrap():
         # dist-upgrade without a grub config prompt
         # http://askubuntu.com/questions/146921/how-do-i-apt-get-y-dist-upgrade-without-a-grub-config-prompt
         run('DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade')
+    append("/etc/hosts", "{0} saltmaster-private".format(env.master_server.private_ip))
     reboot()
     run("aptitude install -y build-essential")
 
@@ -58,10 +59,7 @@ def start_salt():
     """
     if env.host == env.master_server.public_ip:
         run("service salt-master restart", pty=False)
-        sed("/etc/salt/minion", "\#master\: salt", "master: localhost")
-    else:
-        sed("/etc/salt/minion", "\#master\: salt", "master: {hostname}".format(
-            hostname=env.master_server.name))
+    sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
     run("service salt-minion restart", pty=False)
 
 

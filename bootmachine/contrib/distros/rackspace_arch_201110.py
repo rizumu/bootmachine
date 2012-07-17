@@ -18,11 +18,13 @@ def bootstrap():
     """
     # manually set hostname so salt finds it via socket.gethostname()
     for server in env.bootmachine_servers:
+        sed("/etc/hosts", "# End of file", "")
+        append("/etc/hosts", "{0} saltmaster-private".format(env.master_server.private_ip))
         if server.public_ip == env.host:
-            sed("/etc/hosts", "# End of file", "")
             append("/etc/hosts", "{0} {1}".format(server.public_ip, server.name))
             append("/etc/hosts", "{0} {1}".format(server.private_ip, server.name))
-            append("/etc/hosts", "\n# End of file")
+            append("/etc/hosts", "{0} {1}".format(server.private_ip, server.name))
+        append("/etc/hosts", "\n# End of file")
 
     # pre upgrade maintenance (updating filesystem and tzdata before pacman)
     run("pacman -Syy")
@@ -67,7 +69,7 @@ def bootstrap():
     run("groupadd -g 902 aur && useradd -u 902 -g 902 -G wheel aur")
     uncomment("/etc/sudoers", "wheel.*NOPASSWD")
 
-    # still dealing with glibc crap
+    # more glibc crap, uninstall non-pacman rackspace installed packages
     run("rm -rf /lib/modules")
     run("pacman --noconfirm -Rns xe-guest-utilities kernel26-xen")
     sudo("yaourt --noconfirm -S xe-guest-utilities", user="aur")
@@ -80,8 +82,8 @@ def bootstrap():
     sed("/etc/ssh/sshd_config", "Subsystem sftp /usr/lib/openssh/sftp-server", "Subsystem sftp internal-sftp")
     run("rc.d restart sshd", pty=False)
 
-    # force netcfg to automatically connect to eth0 on reboot
-    run("sed -i.bak -r -e 's/NETWORKS=\(last\)/NETWORKS=\(eth0\)/g' /etc/conf.d/netcfg")
+    # force netcfg to automatically connect to eth0 and eth1 on reboot
+    sed("/etc/conf.d/netcfg", "NETWORKS=\(last\)", "NETWORKS=(@eth0 @eth1)")
 
     # configure new kernel and reboot
     sed("/etc/mkinitcpio.conf", "xen-", "xen_")  # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6
@@ -115,11 +117,9 @@ def start_salt():
         run("cp /etc/salt/master.template /etc/salt/master")
         sed("/etc/rc.conf", "crond sshd", "crond sshd iptables @salt-master @salt-minion")
         run("rc.d start salt-master", pty=False)
-        sed("/etc/salt/minion", "#master: salt", "master: localhost")
     else:
         sed("/etc/rc.conf", "crond sshd", "crond sshd iptables @salt-minion")
-        sed("/etc/salt/minion", "#master: salt", "master: {hostname}".format(
-            hostname=env.master_server.name))
+    sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
     run("rc.d start salt-minion", pty=False)
 
 

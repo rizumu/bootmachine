@@ -18,6 +18,7 @@ def bootstrap():
     with fabric_settings(warn_only=True):
         run("aptitude update && aptitude -y dist-upgrade")
         run("aptitude install -y build-essential")
+    append("/etc/hosts", "{0} saltmaster-private".format(env.master_server.private_ip))
     reboot()
 
 
@@ -51,10 +52,7 @@ def start_salt():
     #     run("cp /etc/salt/master.template /etc/salt/master")
     #     run("service salt-master restart", pty=False)
     #     time.sleep(3)
-    #     sed("/etc/salt/minion", "#master: salt", "master: localhost")
-    # else:
-    #     sed("/etc/salt/minion", "#master: salt", "master: {hostname}".format(
-    #         hostname=env.master_server.private_ip))
+    # sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
     # run("service salt-minion restart", pty=False)
 
 
