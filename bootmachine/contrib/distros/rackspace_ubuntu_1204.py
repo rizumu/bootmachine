@@ -58,8 +58,10 @@ def start_salt():
     """
     if env.host == env.master_server.public_ip:
         run("service salt-master restart", pty=False)
-
-    sed("/etc/salt/minion", "#master: salt", "master: {0}".format(env.master_server.private_ip))
+        sed("/etc/salt/minion", "\#master\: salt", "master: localhost")
+    else:
+        sed("/etc/salt/minion", "\#master\: salt", "master: {hostname}".format(
+            hostname=env.master_server.name))
     run("service salt-minion restart", pty=False)
 
 
