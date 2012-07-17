@@ -19,11 +19,12 @@ def bootstrap():
     # manually set hostname so salt finds it via socket.gethostname()
     for server in env.bootmachine_servers:
         sed("/etc/hosts", "# End of file", "")
-        append("/etc/hosts", "{0} saltmaster-private".format(env.master_server.private_ip))
         if server.public_ip == env.host:
             append("/etc/hosts", "{0} {1}".format(server.public_ip, server.name))
             append("/etc/hosts", "{0} {1}".format(server.private_ip, server.name))
             append("/etc/hosts", "{0} {1}".format(server.private_ip, server.name))
+        # add the saltmaster-private last
+        append("/etc/hosts", "{0} saltmaster-private".format(env.master_server.private_ip))
         append("/etc/hosts", "\n# End of file")
 
     # pre upgrade maintenance (updating filesystem and tzdata before pacman)
@@ -84,6 +85,7 @@ def bootstrap():
 
     # force netcfg to automatically connect to eth0 and eth1 on reboot
     sed("/etc/conf.d/netcfg", "NETWORKS=\(last\)", "NETWORKS=(@eth0 @eth1)")
+    sed("/etc/rc.conf", "NETWORKS=\(eth1 eth0\)", "")
 
     # configure new kernel and reboot
     sed("/etc/mkinitcpio.conf", "xen-", "xen_")  # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6
