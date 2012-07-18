@@ -41,6 +41,9 @@ aur:
   file.directory:
     - user: {{ user }}
     - group: {{ args['group'] }}
+    - require:
+      - user: {{ user }}
+      - group: {{ args['group'] }}
 
 {% if 'ssh_auth' in args %}
 /home/{{ user }}/.ssh:
@@ -49,8 +52,6 @@ aur:
     - group: {{ args['group'] }}
     - mode: 700
     - require:
-      - user: {{ user }}
-      - group: {{ args['group'] }}
       - file: /home/{{ user }}
 
 /home/{{ user }}/.ssh/authorized_keys:
@@ -59,9 +60,6 @@ aur:
     - group: {{ args['group'] }}
     - mode: 600
     - require:
-      - user: {{ user }}
-      - group: {{ args['group'] }}
-      - file: /home/{{ user }}
       - file: /home/{{ user }}/.ssh
 
 {{ user }}-sshkeys:
@@ -73,10 +71,6 @@ aur:
       - {{ key }}
 {% endfor %}
     - require:
-      - user: {{ user }}
-      - group: {{ args['group'] }}
-      - file: /home/{{ user }}
-      - file: /home/{{ user }}/.ssh
       - file: /home/{{ user }}/.ssh/authorized_keys
 {% endif %}
 {% endfor %}

@@ -17,15 +17,15 @@ def bootstrap():
     Only the bare essentials, the configurator will take care of the rest.
     """
     # manually set hostname so salt finds it via socket.gethostname()
-    for server in env.bootmachine_servers:
-        sed("/etc/hosts", "# End of file", "")
-        if server.public_ip == env.host:
-            append("/etc/hosts", "{0} {1}".format(server.public_ip, server.name))
-            append("/etc/hosts", "{0} {1}".format(server.private_ip, server.name))
-            append("/etc/hosts", "{0} {1}".format(server.private_ip, server.name))
-        # add the saltmaster-private last
-        append("/etc/hosts", "{0} saltmaster-private".format(env.master_server.private_ip))
-        append("/etc/hosts", "\n# End of file")
+    server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
+    sed("/etc/hosts", "# End of file", "")
+    if server.public_ip == env.host:
+        append("/etc/hosts", "{0} {1}".format(server.public_ip, server.name))
+        append("/etc/hosts", "{0} {1}".format(server.private_ip, server.name))
+        append("/etc/hosts", "{0} {1}".format(server.private_ip, server.name))
+    # add the saltmaster-private last
+    append("/etc/hosts", "{0} saltmaster-private".format(env.master_server.private_ip))
+    append("/etc/hosts", "\n# End of file")
 
     # pre upgrade maintenance (updating filesystem and tzdata before pacman)
     run("pacman -Syy")
@@ -33,14 +33,15 @@ def bootstrap():
     run("printf 'n\nY\n' | pacman -S --force filesystem")
     run("printf 'n\nY\n' | pacman -S tzdata")
 
+    # https://www.archlinux.org/news/the-lib-directory-becomes-a-symlink/
+    run("pacman --noconfirm -U http://pkgbuild.com/~allan/glibc-2.16.0-1-x86_64.pkg.tar.xz")
+    run("rm /etc/profile.d/locale.sh")
+
     # haveged generates the entropy necessary for making the pacman gpg key
     run("printf 'n\nY\n' | pacman -S haveged")
     run("rc.d start haveged", pty=False)
 
     # upgrade everything except glibc
-    # https://www.archlinux.org/news/the-lib-directory-becomes-a-symlink/
-    run("pacman --noconfirm -U http://pkgbuild.com/~allan/glibc-2.16.0-1-x86_64.pkg.tar.xz")
-    run("rm /etc/profile.d/locale.sh")
     run("printf 'n\nY\nY\nY\nY\nY\nY\nY\nY\nY\nY\n' | pacman -Su --ignore glibc")
 
     # configure pacman
@@ -96,7 +97,7 @@ def bootstrap():
 
 def install_salt(installer="aur"):
     """
-    Install salt from the AUR.
+    Install salt with the chosen installer.
     """
     if installer == "aur":
         sudo("yaourt --noconfirm -S salt", user="aur")
@@ -106,28 +107,41 @@ def install_salt(installer="aur"):
         raise NotImplementedError()
 
 
-def start_salt():
+def setup_salt():
     """
+    Setup the salt configuration files and enable dameon on a reboot.
     See: http://salt.readthedocs.org/en/latest/topics/installation/arch.html
-
-    Upload the bootmachine's bundled salt-states.
-    Launch the salt-master daemon on the saltmaster server.
-    Launch a salt-minion daemon on all servers, including the saltmaster.
     """
+    server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
+
     run("cp /etc/salt/minion.template /etc/salt/minion")
     if env.host == env.master_server.public_ip:
         run("cp /etc/salt/master.template /etc/salt/master")
         sed("/etc/rc.conf", "crond sshd", "crond sshd iptables @salt-master @salt-minion")
-        run("rc.d start salt-master", pty=False)
     else:
         sed("/etc/rc.conf", "crond sshd", "crond sshd iptables @salt-minion")
+
     sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
-    run("rc.d start salt-minion", pty=False)
+    append("/etc/salt/minion", "grains:\n  roles:")
+    for role in server.roles:
+        append("/etc/salt/minion", "    - {0}".format(role))
+
+
+def start_salt():
+    """
+    Starts salt master and minions.
+    """
+    if env.host == env.master_server.public_ip:
+        sudo("rc.d start salt-master", pty=False)
+        time.sleep(3)
+        sudo("rc.d start salt-minion", pty=False)
+    else:
+        sudo("rc.d start salt-minion", pty=False)
 
 
 def restart_salt():
     """
-    Restarts salt master and/or minions.
+    Restarts salt master and minions.
     """
     with fabric_settings(warn_only=True):
         if env.host == env.master_server.public_ip:

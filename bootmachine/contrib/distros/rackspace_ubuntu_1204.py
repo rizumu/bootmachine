@@ -1,7 +1,7 @@
 import time
 
 from fabric.api import env, run, sudo
-from fabric.contrib.files import sed
+from fabric.contrib.files import append, sed
 from fabric.context_managers import settings as fabric_settings
 from fabric.operations import reboot
 
@@ -36,7 +36,7 @@ def upgrade_ubuntu():
 
 def install_salt(installer="ppa"):
     """
-    Install salt via ppa with aptitude.
+    Install salt with the chosen installer.
     """
     if installer == "ppa":
         run("aptitude install -y python-software-properties")
@@ -51,21 +51,33 @@ def install_salt(installer="ppa"):
         raise NotImplementedError()
 
 
+def setup_salt():
+    """
+    Setup the salt configuration files and enable dameon on a reboot.
+    """
+    server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
+
+    sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
+    append("/etc/salt/minion", "grains:\n  roles:")
+    for role in server.roles:
+        append("/etc/salt/minion", "    - {0}".format(role))
+
+
 def start_salt():
     """
-    Upload the bootmachine's bundled salt-states.
-    Launch the salt-master daemon on the saltmaster server.
-    Launch a salt-minion daemon on all servers, including the saltmaster.
+    Starts salt master and minions.
     """
     if env.host == env.master_server.public_ip:
-        run("service salt-master restart", pty=False)
-    sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
-    run("service salt-minion restart", pty=False)
+        sudo("service salt-master restart", pty=False)
+        time.sleep(3)
+        sudo("service salt-minion restart", pty=False)
+    else:
+        sudo("service salt-minion restart", pty=False)
 
 
 def restart_salt():
     """
-    Restarts salt master and/or minions.
+    Restarts salt master and minions.
     """
     with fabric_settings(warn_only=True):
         if env.host == env.master_server.public_ip:

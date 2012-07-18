@@ -5,11 +5,15 @@ include:
 openssh:
   pkg.installed
 
+net-tools:
+  pkg.installed
+
 rc.d restart sshd:
   cmd:
     - run
     - unless: "P1=$(netstat -ano --tcp --programs | grep LISTEN | grep sshd | grep -o :[0-9]* | grep -o [0-9]* | head -1); P2=$(cat /etc/ssh/sshd_config | grep Port | grep -o [0-9]*); [[ $P1 == $P2 ]]"
     - require:
+      - pkg: net-tools
       - file: /etc/ssh/sshd_config
 
 sshd:

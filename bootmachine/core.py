@@ -114,6 +114,8 @@ def boot():
 def provision():
     """
     Provision all unprovisioned servers.
+    Installs and start the configurator process.
+    Does not run the configurator.
 
     Usage:
         fab all provision
@@ -139,8 +141,9 @@ def provision():
 
     # bootstrap configurator
     configurator.install(distro)
+    configurator.setup(distro)
     configurator.start(distro)
-    run("iptables -F")  # before calling the configurator flush to clear any defaults
+    run("iptables -F")  # flush defaults before configuring
 
 
 @task

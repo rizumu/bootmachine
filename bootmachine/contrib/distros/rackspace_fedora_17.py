@@ -35,7 +35,7 @@ def bootstrap():
 
 def install_salt(installer="rpm"):
     """
-    Install salt via rpm.
+    Install salt with the chosen installer.
     """
     if installer == "rpm-stable":
         run("yum install --assumeyes salt-master salt-minion")
@@ -45,23 +45,37 @@ def install_salt(installer="rpm"):
         raise NotImplementedError()
 
 
-def start_salt():
+def setup_salt():
     """
-    Upload the bootmachine's bundled salt-states.
-    Launch the salt-master daemon on the saltmaster server.
-    Launch a salt-minion daemon on all servers, including the saltmaster.
+    Setup the salt configuration files and enable dameon on a reboot.
     """
+    server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
+
     if env.host == env.master_server.public_ip:
         run("systemctl enable salt-master.service", pty=False)
-        run("systemctl start salt-master.service", pty=False)
-    sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
     run("systemctl enable salt-minion.service", pty=False)
-    run("systemctl start salt-minion.service", pty=False)
+
+    sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
+    append("/etc/salt/minion", "grains:\n  roles:")
+    for role in server.roles:
+        append("/etc/salt/minion", "    - {0}".format(role))
+
+
+def start_salt():
+    """
+    Starts salt master and minions.
+    """
+    if env.host == env.master_server.public_ip:
+        sudo("systemctl restart salt-master.service", pty=False)
+        time.sleep(3)
+        sudo("systemctl restart salt-minion.service", pty=False)
+    else:
+        sudo("systemctl restart salt-minion.service", pty=False)
 
 
 def restart_salt():
     """
-    Restarts salt master and/or minions.
+    Restarts salt master and minions.
     """
     with fabric_settings(warn_only=True):
         if env.host == env.master_server.public_ip:

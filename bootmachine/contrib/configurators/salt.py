@@ -18,17 +18,24 @@ import settings
 
 def install(distro):
     """
-    Simply call the install method for salt using chosen distro and installer.
+    Simply wrap salt's install method for the chosen distro and installer.
     """
     installer = getattr(settings, "SALT_INSTALLER_{0}".format(distro.DISTRO))
     distro.install_salt(installer)
 
 
+def setup(distro):
+    """
+    Simply wrap salt's setup method for the chosen distro.
+    """
+    distro.setup_salt()
+
+
 def start(distro):
     """
-    Simply call the start method for salt for the chosen distro.
+    Simply wrap salt's start method for the chosen distro.
     """
-    distro.start_salt()
+    distro.setup_salt()
 
 
 @task
@@ -37,11 +44,10 @@ def restart():
     """
     Call the restart method for all salt masters and minions.
     """
-    for server in env.bootmachine_servers:
-        if env.host == server.public_ip:
-            env.servername = server.name
-            env.port = server.port
-            env.user = server.user
+    server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
+    env.servername = server.name
+    env.port = server.port
+    env.user = server.user
 
     for server in settings.SERVERS:
         if env.servername == server["servername"]:

@@ -31,9 +31,7 @@ def upgrade():
 
 def install_salt(installer="pip"):
     """
-    Upload the bootmachine's bundled salt-states.
-    Launch the salt-master daemon on the saltmaster server.
-    Launch a salt-minion daemon on all servers, including the saltmaster.
+    Install salt with the chosen installer.
     """
     if installer == "pip":
         run('echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >/etc/apt/sources.list.d/backports.list')
@@ -45,19 +43,22 @@ def install_salt(installer="pip"):
         raise NotImplementedError()
 
 
-def start_salt():
+def setup_salt():
+    """
+    Setup the salt configuration files and enable dameon on a reboot.
+    """
     raise NotImplementedError()
-    # run("cp /etc/salt/minion.template /etc/salt/minion")
-    # if env.host == env.master_server.public_ip:
-    #     run("cp /etc/salt/master.template /etc/salt/master")
-    #     run("service salt-master restart", pty=False)
-    #     time.sleep(3)
-    # sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
-    # run("service salt-minion restart", pty=False)
+
+
+def start_salt():
+    """
+    Restarts salt master and minions.
+    """
+    raise NotImplementedError()
 
 
 def restart_salt():
     """
-    Restarts salt master and/or minions.
+    Restarts salt master and minions.
     """
     raise NotImplementedError()
