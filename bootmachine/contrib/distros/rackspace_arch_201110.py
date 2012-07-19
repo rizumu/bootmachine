@@ -45,7 +45,6 @@ def bootstrap():
     run("printf 'n\nY\nY\nY\nY\nY\nY\nY\nY\nY\nY\n' | pacman -Su --ignore glibc")
 
     # configure pacman
-    run("rc.d restart haveged")
     run("pacman-key --init")
     run("rc.d stop haveged", pty=False)
     run("pacman --noconfirm -Rns haveged")

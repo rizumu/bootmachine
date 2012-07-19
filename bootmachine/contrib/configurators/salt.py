@@ -16,78 +16,6 @@ from bootmachine import known_hosts
 import settings
 
 
-def install(distro):
-    """
-    Simply wrap salt's install method for the chosen distro and installer.
-    """
-    installer = getattr(settings, "SALT_INSTALLER_{0}".format(distro.DISTRO))
-    distro.install_salt(installer)
-
-
-def setup(distro):
-    """
-    Simply wrap salt's setup method for the chosen distro.
-    """
-    distro.setup_salt()
-
-
-def start(distro):
-    """
-    Simply wrap salt's start method for the chosen distro.
-    """
-    distro.setup_salt()
-
-
-@task
-@parallel
-def restart():
-    """
-    Call the restart method for all salt masters and minions.
-    """
-    server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
-    env.servername = server.name
-    env.port = server.port
-    env.user = server.user
-
-    for server in settings.SERVERS:
-        if env.servername == server["servername"]:
-            distro_module = server["distro_module"]
-
-    try:
-        __import__(distro_module)
-        distro = sys.modules[distro_module]
-    except ImportError:
-        abort("Unable to import the module: {0}".format(distro_module))
-
-    distro.restart_salt()
-
-
-@task
-def launch():
-    """
-    After salt is installed, accept the minions, upload states,
-    and call highstate.
-    """
-    if env.host != env.master_server.public_ip:
-        abort("tried to launch on a non-master server")
-
-    upload_saltstates()
-
-    time.sleep(10)  # sleep a little to give minions a chance to become visible
-    accept_minions()
-    pillar_update()
-
-    # TODO: salt-state bug, highstate should do everying on first pass
-    # highstate must be called twice, otherwise authorized_keys aren't added
-    highstate()
-    highstate()
-    if contains("/etc/issue", "Fedora release 16"):
-        # TODO: salt-state bug, Fedora isn't properly restarting ssh
-        # call highstate 2x more as a workaround
-        highstate()
-        highstate()
-
-
 @task
 def highstate(match="'*'"):
     """
@@ -167,6 +95,52 @@ def pillar_update():
 
 
 @task
+def update_master_iptables():
+    """
+    Update iptables rules for salt, on the salt master,
+    to accept newley booted minions.
+
+    Usage:
+        fab master configurator.update_master_iptables
+    """
+    configurator_ports = ["4505", "4506"]  # get from settings.py?
+
+    # Get the line in the iptables chain for inserting the new minon's
+    with fabric_settings(warn_only=True):
+        insert_line = sudo("iptables -L --line-numbers | grep {0}".format(configurator_ports[0]))
+
+    if not insert_line:
+        print(yellow("iptables are wide open during first boot of a master"))
+        return
+
+    for port in configurator_ports:
+        match = sudo("iptables -nvL | grep {0}".format(port))
+        for server in env.bootmachine_servers:
+            if server.private_ip not in match:
+                sudo("iptables -I INPUT {0} -s {1} -m state --state new -m tcp -p tcp --dport {2} -j ACCEPT".format(
+                    insert_line[0], server.private_ip, port))
+
+
+@task
+def launch():
+    """
+    After salt is installed, accept the new minions, upload states,
+    and call highstate.
+    """
+    if env.host != env.master_server.public_ip:
+        abort("tried to launch on a non-master server")
+
+    local("fab master configurator.update_master_iptables")
+    upload_saltstates()
+
+    time.sleep(10)  # sleep a little to give minions a chance to become visible
+    accept_minions()
+    pillar_update()
+
+    highstate()
+
+
+@task
 def accept_minions():
     """
     Accept salt-key's for all minions.
@@ -214,3 +188,53 @@ def list_minions():
 def change_master_ip(ip_address):
     "TODO: allowing changing of the master ip, say on a master only rebuild."
     raise NotImplementedError()
+
+
+@task
+@parallel
+def restart():
+    """
+    Restart all salt masters and minion daemons.
+    Simply wrap salt's reestart method cor the chose distro.
+    """
+    server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
+    env.servername = server.name
+    env.port = server.port
+    env.user = server.user
+
+    for server in settings.SERVERS:
+        if env.servername == server["servername"]:
+            distro_module = server["distro_module"]
+
+    try:
+        __import__(distro_module)
+        distro = sys.modules[distro_module]
+    except ImportError:
+        abort("Unable to import the module: {0}".format(distro_module))
+
+    distro.restart_salt()
+
+
+def install(distro):
+    """
+    Install salt.
+    Simply wrap salt's install method for the chosen distro and installer.
+    """
+    installer = getattr(settings, "SALT_INSTALLER_{0}".format(distro.DISTRO))
+    distro.install_salt(installer)
+
+
+def setup(distro):
+    """
+    Setup salt's configuration files and ensure it is enabled at reboot.
+    Simply wrap salt's setup method for the chosen distro.
+    """
+    distro.setup_salt()
+
+
+def start(distro):
+    """
+    Start the salt master and minion daemons.
+    Simply wrap salt's start method for the chosen distro.
+    """
+    distro.setup_salt()

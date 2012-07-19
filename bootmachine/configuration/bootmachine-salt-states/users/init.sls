@@ -1,7 +1,3 @@
-include:
-  - iptables
-  - groups
-
 {% if grains['os'] == 'Arch' %}
 aur:
   user.present:
@@ -17,7 +13,6 @@ aur:
 {{ user }}:
   user.present:
     - fullname: {{ args['fullname'] }}
-    - home: /home/{{ user }}
     - shell: /bin/bash
     - uid: {{ args['uid'] }}
     - gid: {{ args['gid'] }}
@@ -37,31 +32,7 @@ aur:
     - password: '!'
 {% endif %}
 
-/home/{{ user }}:
-  file.directory:
-    - user: {{ user }}
-    - group: {{ args['group'] }}
-    - require:
-      - user: {{ user }}
-      - group: {{ args['group'] }}
-
 {% if 'ssh_auth' in args %}
-/home/{{ user }}/.ssh:
-  file.directory:
-    - user: {{ user }}
-    - group: {{ args['group'] }}
-    - mode: 700
-    - require:
-      - file: /home/{{ user }}
-
-/home/{{ user }}/.ssh/authorized_keys:
-  file.managed:
-    - user: {{ user }}
-    - group: {{ args['group'] }}
-    - mode: 600
-    - require:
-      - file: /home/{{ user }}/.ssh
-
 {{ user }}-sshkeys:
   ssh_auth:
     - present
@@ -71,6 +42,6 @@ aur:
       - {{ key }}
 {% endfor %}
     - require:
-      - file: /home/{{ user }}/.ssh/authorized_keys
+      - user: {{ user }}
 {% endif %}
 {% endfor %}

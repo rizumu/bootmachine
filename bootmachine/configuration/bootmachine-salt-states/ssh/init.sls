@@ -1,6 +1,3 @@
-include:
-  - users
-
 {% if grains['os'] == 'Arch' %}
 openssh:
   pkg.installed
@@ -76,3 +73,7 @@ ssh:
     - context:
         ssh_port: {{ pillar['ssh_port'] }}
         ssh_users: {{ pillar['users'] }}
+    - require:
+{% for user in pillar['users'] %}
+      - ssh_auth: {{ user }}-sshkeys
+{% endfor %}

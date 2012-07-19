@@ -1,14 +1,9 @@
-include:
-  - ssh
-
 iptables-rules:
   file.managed:
 {% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
     - name: /etc/iptables.up.rules
 {% elif grains['os'] == 'Arch' or grains['os'] == 'Fedora' %}
     - name: /etc/iptables/iptables.rules
-    - require:
-      - pkg: iptables
 {% endif %}
     - user: root
     - group: root
@@ -21,6 +16,13 @@ iptables-rules:
     - context:
         ssh_port: {{ pillar['ssh_port'] }}
         saltminion_private_ips: {{ pillar['saltminion_private_ips'] }}
+    - require:
+{% for user in pillar['users'] %}
+      - ssh_auth: {{ user }}-sshkeys
+{% endfor %}
+{% if grains['os'] == 'Arch' or grains['os'] == 'Fedora' %}
+      - pkg: iptables
+{% endif %}
 
 {% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
 /etc/network/if-pre-up.d/iptables:
@@ -44,6 +46,7 @@ iptables:
     - enabled: True
     - require:
       - pkg: iptables
+      - file: /etc/iptables/iptables.rules
 
 iptables-restore < /etc/iptables/iptables.rules:
   cmd.wait:

@@ -1,0 +1,32 @@
+#
+# /etc/rc.conf - Main Configuration for Arch Linux
+#
+# See 'man 5 rc.conf' for more details
+#
+
+# LOCALIZATION
+# ------------
+HARDWARECLOCK="xen"
+TIMEZONE="{{ timezone }}"
+KEYMAP="us"
+CONSOLEFONT=
+CONSOLEMAP=
+LOCALE="{{ locale }}"
+DAEMON_LOCALE="yes"
+USECOLOR="yes"
+
+# HARDWARE
+# --------
+MODULES=()
+USEDMRAID="no"
+USEBTRFS="no"
+USELVM="no"
+
+# NETWORKING
+# ----------
+HOSTNAME="{{ grains['host'] }}"
+
+# DAEMONS
+# -------
+#
+DAEMONS=({{ daemons|join(" ") }})

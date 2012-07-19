@@ -2,9 +2,19 @@
 
 base:
   '*':
-    - core
-    - users
+    - edit.vim
+    - edit.emacs-nox
+    - edit.zile
     - groups
+    - hosts
+    - iptables
+    - salt
+    - ssh
+    - sudo
+    - swap
+    - tags
+    - users
+    - xcbc
   '^{{ pillar['saltmaster_hostname'] }}':
     - match: pcre
     - salt.master
@@ -15,3 +25,4 @@ base:
     - kernel.xen
     - pacman
     - pacman.usa
+    - rc
