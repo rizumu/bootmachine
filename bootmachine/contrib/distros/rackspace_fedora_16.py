@@ -51,8 +51,8 @@ def setup_salt():
     server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
 
     if env.host == env.master_server.public_ip:
-        run("systemctl enable salt-master.service", pty=False)
-    run("systemctl enable salt-minion.service", pty=False)
+        run("systemctl enable salt-master.service")
+    run("systemctl enable salt-minion.service")
 
     sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
     append("/etc/salt/minion", "grains:\n  roles:")
@@ -65,11 +65,11 @@ def start_salt():
     Starts salt master and minions.
     """
     if env.host == env.master_server.public_ip:
-        sudo("systemctl restart salt-master.service", pty=False)
+        sudo("systemctl restart salt-master.service")
         time.sleep(3)
-        sudo("systemctl restart salt-minion.service", pty=False)
+        sudo("systemctl restart salt-minion.service")
     else:
-        sudo("systemctl restart salt-minion.service", pty=False)
+        sudo("systemctl restart salt-minion.service")
 
 
 def restart_salt():
@@ -78,8 +78,8 @@ def restart_salt():
     """
     with fabric_settings(warn_only=True):
         if env.host == env.master_server.public_ip:
-            sudo("systemctl restart salt-master.service", pty=False)
+            sudo("systemctl restart salt-master.service")
             time.sleep(3)
-            sudo("systemctl restart salt-minion.service", pty=False)
+            sudo("systemctl restart salt-minion.service")
         else:
-            sudo("systemctl restart salt-minion.service", pty=False)
+            sudo("systemctl restart salt-minion.service")
