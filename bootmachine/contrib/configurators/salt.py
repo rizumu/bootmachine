@@ -103,6 +103,9 @@ def update_master_iptables():
     Usage:
         fab master configurator.update_master_iptables
     """
+    if env.host != env.master_server.public_ip:
+        abort("tried to update_master_iptables on a non-master server")
+
     configurator_ports = ["4505", "4506"]  # get from settings.py?
 
     # Get the line in the iptables chain for inserting the new minon's

@@ -5,14 +5,8 @@ from bootmachine.settings_tests import *
 
 CONFIGURATOR_MODULE = "bootmachine.contrib.configurators.salt"
 MASTER = "rackspacev1-salt-fedora17-a"
-SALTSTATES_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                              "configuration", "bootmachine-salt-states/")
-PILLAR_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                          "configuration", "bootmachine-pillar/")
 
 PROVIDER_MODULE = "bootmachine.contrib.providers.rackspace_openstack_v1"
-OPENSTACK_USERNAME = os.environ.get("OPENSTACK_COMPUTE_USERNAME")
-OPENSTACK_APIKEY = os.environ.get("OPENSTACK_COMPUTE_APIKEY")
 SERVERS = [
     {"servername": "rackspacev1-salt-fedora17-a",
      "roles": ["loadbalancer"],

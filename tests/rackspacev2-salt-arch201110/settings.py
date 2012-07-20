@@ -5,14 +5,8 @@ from bootmachine.settings_tests import *
 
 CONFIGURATOR_MODULE = "bootmachine.contrib.configurators.salt"
 MASTER = "rackspacev2-salt-arch201110-a"
-SALTSTATES_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                              "configuration", "bootmachine-salt-states/")
-PILLAR_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                          "configuration", "bootmachine-pillar/")
 
 PROVIDER_MODULE = "bootmachine.contrib.providers.rackspace_openstack_v2"
-OPENSTACK_USERNAME = os.environ.get("OPENSTACK_COMPUTE_USERNAME")
-OPENSTACK_APIKEY = os.environ.get("OPENSTACK_COMPUTE_APIKEY")
 SERVERS = [
     {"servername": "rackspacev2-salt-arch201110-a",
      "roles": ["loadbalancer"],
