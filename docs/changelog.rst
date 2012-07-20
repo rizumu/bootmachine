@@ -1,4 +1,33 @@
-Bootmachine 0.5.0 release notes
+Bootmachine
+===========
+
+0.5.1 release notes
+-------------------
+NEW FEATURES:
+* add a test runner that runs all builds, logs output and scans for
+  failures
+* add a requirements.txt, so installing in a new virtualenv is simpler
+  when working on the bootmachine
+* friendlier time counter while waiting for servers to boot
+
+SALT:
+* add a bootmachine-pillar/deploymachine.sls as an example of where
+  post bootmachine pillar data can be stored. Bootmachine boots your
+  servers, deploymachine is the states for your custom stack.
+* fix require relationship between users/ssh/iptables states
+* fix iptables issues and simplify the salt-state
+
+ARCH LINUX:
+* upgrade salt-state for grub to install and use grub2
+* fix the recent glibc update that broke the build
+* add a salt-state for the rc.conf
+* add a way for the saltmaster to open a port for newly booted minions
+* use hostname instead of ip in the salt-minion config
+* follow netcfg best practice, by removing networking settings from rc.conf
+
+
+0.5.0 release notes
+-------------------
 
 The bootmachine grew out of the desire to automate the launching,
 configuration, and scaling of a stack of servers in the cloud.
