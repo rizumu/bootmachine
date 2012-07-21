@@ -218,6 +218,13 @@ def restart():
     distro.restart_salt()
 
 
+def revoke(servername):
+    """
+    Simply revoke a minion's key by servername
+    """
+    sudo("salt-key --quiet --delete={0}".format(servername))
+
+
 def install(distro):
     """
     Install salt.

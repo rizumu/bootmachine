@@ -7,6 +7,7 @@ import novaclient.v1_1
 from fabric.api import env, local
 from fabric.decorators import task
 from fabric.colors import blue, cyan, green, magenta, red, white, yellow
+from fabric.operations import prompt
 from fabric.utils import abort
 
 import settings
@@ -177,15 +178,25 @@ def bootem(servers=None):
 
 
 @task
-def destroy(servername, sleep=True):
+def destroy(servername, destroy_all=False):
     """
     Kill a server, destroying its data. Achtung!
     Usage:
         fab provider.destroy:servername
     """
+    if not destroy_all:
+        reply = prompt("Permanently destroying '{0}'. Are you sure? y/N".format(servername))
+        if reply not in "yY":
+            abort("Did not destroy {0}".format(servername))
+
+    from bootmachine.core import configurator, master
+    if not destroy_all:
+        master()
+    configurator.revoke(servername)
+
     local("nova delete {name} || true".format(name=servername))
     env.bootmachine_servers = list_servers(as_list=True)
-    if sleep:
+    if not destroy_all:
         time.sleep(5)
 
 
@@ -196,8 +207,12 @@ def destroyem():
     Usage:
         fab provider.destroyem
     """
+    reply = prompt("Permanently destroying *EVERY* server. Are you sure? y/N")
+    if reply.lower() == "y":
+        abort("Did not destroy *ANY* servers")
+
     for server in settings.SERVERS:
-        destroy(server["servername"], sleep=False)
+        destroy(server["servername"], destroy_all=True)
     time.sleep(5)
 
 
