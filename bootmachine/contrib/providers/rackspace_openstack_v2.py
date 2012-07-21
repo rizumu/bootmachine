@@ -178,15 +178,15 @@ def bootem(servers=None):
 
 
 @task
-def destroy(servername, destroy_all=False):
+def destroy(servername, destroy_all=False, force=False):
     """
     Kill a server, destroying its data. Achtung!
     Usage:
         fab provider.destroy:servername
     """
-    if not destroy_all:
+    if not destroy_all and not force:
         reply = prompt("Permanently destroying '{0}'. Are you sure? y/N".format(servername))
-        if reply not in "yY":
+        if reply == "y":
             abort("Did not destroy {0}".format(servername))
 
     from bootmachine.core import configurator, master
@@ -201,15 +201,16 @@ def destroy(servername, destroy_all=False):
 
 
 @task
-def destroyem():
+def destroyem(force=False):
     """
     Kill all servers and destroy the data. Achtung!
     Usage:
         fab provider.destroyem
     """
-    reply = prompt("Permanently destroying *EVERY* server. Are you sure? y/N")
-    if reply.lower() == "y":
-        abort("Did not destroy *ANY* servers")
+    if not force:
+        reply = prompt("Permanently destroying *EVERY* server. Are you sure? y/N")
+        if reply == "y":
+            abort("Did not destroy *ANY* servers")
 
     for server in settings.SERVERS:
         destroy(server["servername"], destroy_all=True)
