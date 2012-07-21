@@ -87,6 +87,14 @@ def bootstrap():
     sed("/etc/conf.d/netcfg", "NETWORKS=\(last\)", "NETWORKS=(@eth0 @eth1)")
     sed("/etc/rc.conf", "NETWORKS=\(eth1 eth0\)", "")
 
+    # upgrade grub
+    run("mv /boot/grub /boot/grub-legacy")
+    run("printf 'y\nY\nY\nY\nY\n' | pacman -S grub2-bios")
+    with fabric_settings(warn_only=True):
+        run("modprobe dm_mod")
+    run("grub-install --directory=/usr/lib/grub/i386-pc --target=i386-pc --boot-directory=/boot --recheck --debug /dev/xvda")
+    run("grub-mkconfig -o /boot/grub/grub.cfg")
+
     # configure new kernel and reboot
     sed("/etc/mkinitcpio.conf", "xen-", "xen_")  # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6
     sed("/etc/mkinitcpio.conf", "usbinput", "usbinput fsck")
