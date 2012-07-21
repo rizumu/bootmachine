@@ -1,9 +1,11 @@
 #!/bin/bash
 # estimated time to complete the tests is 30 minutes
 
-source ~/.virtualenvs/bootmachine/bin/activate
 cmd='fab bootmachine'
 dirs=`ls -d */ | sed "s/logs\///g"`
+
+# activate the bootmachine testing virtualenv
+source ~/.virtualenvs/bootmachine/bin/activate
 
 # run `fab bootmachine` in parallel for each and save the output in a log file
 # sleep in between each call to avoid api abuse
