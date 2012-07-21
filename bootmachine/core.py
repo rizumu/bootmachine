@@ -4,7 +4,6 @@ BOOTMACHINE: A-Z transmutation of aluminium into rhodium.
 import copy
 import sys
 import telnetlib
-import time
 
 from fabric.api import env, local, task, run, sudo
 from fabric.decorators import parallel, task
@@ -84,8 +83,12 @@ def bootmachine():
             master()
             if launch_attempts == 5:
                 abort("CONFIGURATOR FAIL!")
-    local("fab all reboot_servers")  # to catch cases when configurator changes the kernel
+        # in case configurator requires reboot, ex. changes the kernel
+        reboot_server(server)
     local("fab all ssh_test")
+
+    # change the following output with caution
+    # runtests.sh depends on exactly the following successful output
     print(green("all servers are booted, provisioned, and configured."))
 
 
@@ -120,22 +123,19 @@ def provision():
     Usage:
         fab all provision
     """
-    server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
-
     if int(settings.SSH_PORT) == 22:
         abort("provision(): Security Error! Change ``settings.SSH_PORT`` to something other than ``22``")
 
-    try:
-        telnetlib.Telnet(server.public_ip, 22)
-        env.user = "root"
-    except IOError:
-        telnetlib.Telnet(server.public_ip, int(settings.SSH_PORT))
-        print(green("{ip_addr} is already provisioned, skipping.".format(ip_addr=server.public_ip)))
+    set_ssh_vars(env)
+
+    if env.port == settings.SSH_PORT:
+        print(green("{ip_addr} is already provisioned, skipping.".format(ip_addr=env.public_ip)))
         return
 
-    print(cyan("... {ip_addr} has started provisioning.".format(ip_addr=server.public_ip)))
+    print(cyan("... {ip_addr} has started provisioning.".format(ip_addr=env.public_ip)))
 
     # upgrade distro
+    server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
     distro = import_module(server.distro_module)
     distro.bootstrap()
 
@@ -147,24 +147,35 @@ def provision():
 
 
 @task
-@parallel
-def reboot_servers():
+def reboot_server(name):
     """
-    Simply reboot the servers
+    Simply reboot a server by name.
+    The trick here is to change the env vars to that of the server
+    to be rebooted. Perform the reboot and change env vars back
+    to their original value.
 
     Usage:
-        fab all reboot_servers
+        fab reboot_server:name
     """
+    __shared_setup()
+    server = [s for s in env.bootmachine_servers if s.name == name][0]
+    original_user = env.user
+    original_host_string = env.host_string
+
     try:
-        telnetlib.Telnet(env.host, 22)
+        env.port = 22
+        telnetlib.Telnet(server.public_ip, env.port)
         env.user = "root"
     except IOError:
-        telnetlib.Telnet(env.host, int(settings.SSH_PORT))
         env.port = int(settings.SSH_PORT)
-    try:
-        reboot()
-    except:
-        time.sleep(20)
+        telnetlib.Telnet(server.public_ip, env.port)
+    env.host_string = "{0}:{1}".format(server.public_ip, env.port)
+
+    env.keepalive = 30  # keep the ssh key active, see fabric issue #402
+    reboot()
+
+    env.user = original_user
+    env.host_string = original_host_string
 
 
 @task
@@ -172,8 +183,11 @@ def reboot_servers():
 def ssh_test():
     """
     Prove that ssh is open on `settings.SSH_PORT`.
+
+    Usage:
+        fab all ssh_test
     """
-    env.port = int(settings.SSH_PORT)
+    set_ssh_vars(env)
     try:
         run("echo 'CONFIGURATOR SUCCESS!'")
         sudo("echo 'CONFIGURATOR SUCCESS!'")
@@ -222,16 +236,9 @@ def __shared_setup():
     for server in env.bootmachine_servers:
         if server.name == settings.MASTER:
             env.master_server = server
-        try:
-            telnetlib.Telnet(server.public_ip, 22)
-            server.provisioned = False
-            server.user = "root"
-            server.port = 22
-        except IOError:
-            telnetlib.Telnet(server.public_ip, int(settings.SSH_PORT))
-            server.provisioned = True
-            server.user = env.user
-            server.port = int(settings.SSH_PORT)
+
+        server = set_ssh_vars(server)
+
         # prevent prompts and warnings related to ssh keys:
         # a) skips false man-in-the-middle warnings
         # b) adds a missing key to ~/.ssh/known_hosts
@@ -239,3 +246,31 @@ def __shared_setup():
             connect(server.user, server.public_ip, server.port)
         except NetworkError:
             known_hosts.add(server.public_ip)
+
+
+def set_ssh_vars(valid_object):
+    """
+    This method takes a valid_object, either the env or a server,
+    and based on the results of telnet, it sets port, user,
+    host_string varibles for ssh. It also sets a configured
+    variable if the SSH_PORT matches that in the settings. This
+    would only match if the server is properly configured.
+    """
+    try:
+        port = 22
+        telnetlib.Telnet(valid_object.public_ip, port)
+    except IOError:
+        port = int(settings.SSH_PORT)
+        telnetlib.Telnet(valid_object.public_ip, port)
+
+    valid_object.port = port
+
+    if valid_object.port == 22:
+        valid_object.configured = False
+        valid_object.user = "root"
+    else:
+        valid_object.configured = True
+        valid_object.user = env.user
+
+    valid_object.host_string = "{0}:{1}".format(valid_object.public_ip, port)
+    return valid_object
