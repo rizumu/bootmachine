@@ -172,7 +172,7 @@ def destroy(servername, destroy_all=False, force=False):
     """
     if not destroy_all and not force:
         reply = prompt("Permanently destroying '{0}'. Are you sure? y/N".format(servername))
-        if reply == "y":
+        if reply is not "y":
             abort("Did not destroy {0}".format(servername))
 
     from bootmachine.core import configurator, master
@@ -191,8 +191,9 @@ def destroyem(force=False):
         fab provider.destroyem
     """
     if not force:
-        reply = prompt("Permanently destroying *EVERY* server. Are you sure? y/N")
-        if reply == "y":
+        servers = ", ".join([s["servername"] for s in settings.SERVERS])
+        reply = prompt("Permanently destroying *EVERY* server:\n{0}\n\nAre you sure? y/N".format(servers))
+        if reply is not "y":
             abort("Did not destroy *ANY* servers")
 
     for server in settings.SERVERS:
