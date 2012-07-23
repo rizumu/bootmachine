@@ -8,6 +8,7 @@ import telnetlib
 from fabric.api import env, local, task, run, sudo
 from fabric.decorators import parallel, task
 from fabric.colors import blue, cyan, green, magenta, red, white, yellow
+from fabric.contrib.files import exists
 from fabric.exceptions import NetworkError
 from fabric.network import connect
 from fabric.operations import reboot
@@ -139,11 +140,11 @@ def provision():
     if int(settings.SSH_PORT) == 22:
         abort("provision(): Security Error! Change ``settings.SSH_PORT`` to something other than ``22``")
 
-    __set_ssh_vars(env)
-
-    if env.port == int(settings.SSH_PORT):
+    if exists("/root/.bootmachine_provisioned", use_sudo=True):
         print(green("{ip_addr} is already provisioned, skipping.".format(ip_addr=env.host)))
         return
+
+    __set_ssh_vars(env)
 
     print(cyan("... {ip_addr} has started provisioning.".format(ip_addr=env.host)))
 
@@ -157,6 +158,7 @@ def provision():
     configurator.setup(distro)
     configurator.start(distro)
     run("iptables -F")  # flush defaults before configuring
+    run("touch /root/.bootmachine_provisioned")
 
 
 @task
