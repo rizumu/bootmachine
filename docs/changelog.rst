@@ -9,6 +9,12 @@ NEW FEATURES:
 * add a requirements.txt, so installing in a new virtualenv is simpler
   when working on the bootmachine
 * friendlier time counter while waiting for servers to boot
+* add a warning prompt to require confirmation before deleting
+  servers, with an option to force.
+* changed fab all reboot_servers() to fab reboot_server(servername)
+* added an internal __set_ssh_vars(valid_object) method. After
+  performing a few sanity tests this method adds reliable ssh
+  variables to the passed in object (env or server).
 
 SALT:
 * add a bootmachine-pillar/deploymachine.sls as an example of where
@@ -24,7 +30,6 @@ ARCH LINUX:
 * add a way for the saltmaster to open a port for newly booted minions
 * use hostname instead of ip in the salt-minion config
 * follow netcfg best practice, by removing networking settings from rc.conf
-
 
 0.5.0 release notes
 -------------------
