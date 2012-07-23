@@ -42,7 +42,7 @@ def bootstrap():
     run("rc.d start haveged", pty=False)
 
     # upgrade everything except glibc
-    run("printf 'n\nY\nY\nY\nY\nY\nY\nY\nY\nY\nY\n' | pacman -Su --ignore glibc")
+    run("printf 'n\nY\nY\nY\nY\nY\nY\nY\nY\nY\nY\nY\nY\nY\n' | pacman -Su --ignore glibc")
 
     # configure pacman
     run("pacman-key --init")
@@ -89,7 +89,7 @@ def bootstrap():
 
     # upgrade grub
     run("mv /boot/grub /boot/grub-legacy")
-    run("printf 'y\nY\nY\nY\nY\n' | pacman -S grub2-bios")
+    run("printf 'y\nY\nY\nY\nY\nY\nY\nY\nY\nY\n' | pacman -S grub2-bios")
     with fabric_settings(warn_only=True):
         run("modprobe dm_mod")
     run("grub-install --directory=/usr/lib/grub/i386-pc --target=i386-pc --boot-directory=/boot --recheck --debug /dev/xvda")
