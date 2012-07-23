@@ -4,6 +4,7 @@ Bootmachine Changelog
 0.5.1 (23.07.2012)
 ------------------
 NEW FEATURES:
+
 * add a test runner that runs all builds, logs output and scans for
   failures
 * add a requirements.txt, so installing in a new virtualenv is simpler
@@ -17,6 +18,7 @@ NEW FEATURES:
   variables to the passed in object (env or server).
 
 SALT:
+
 * add a bootmachine-pillar/deploymachine.sls as an example of where
   post bootmachine pillar data can be stored. Bootmachine boots your
   servers, deploymachine is the states for your custom stack.
@@ -24,6 +26,7 @@ SALT:
 * fix iptables issues and simplify the salt-state
 
 ARCH LINUX:
+
 * upgrade salt-state for grub to install and use grub2
 * fix the recent glibc update that broke the build
 * add a salt-state for the rc.conf
