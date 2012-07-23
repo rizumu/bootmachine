@@ -58,6 +58,10 @@ def bootmachine():
     # boot new servers in serial to avoid api overlimit
     boot()
     print(green("all servers are booted."))
+    output = local("fab all ssh_test", capture=True)
+    if "CONFIGURATOR FAIL!" not in output:
+        print(green("all servers are booted, provisioned, and configured."))
+        return
 
     # provision all servers in parallel for speed
     local("fab all provision")
@@ -75,21 +79,30 @@ def bootmachine():
     # ensure that the servers have been properly configured
     env.user = local_user
     master()
+    configured_servers = []
     for server in env.bootmachine_servers:
         while server.port != int(settings.SSH_PORT):
             configurator.restart()
             configurator.launch()
+            if server not in configured_servers:
+                configured_servers.append(server)
             launch_attempts += 1
             master()
             if launch_attempts == 5:
                 abort("CONFIGURATOR FAIL!")
-        # in case configurator requires reboot, ex. changes the kernel
-        reboot_server(server)
-    local("fab all ssh_test")
 
-    # change the following output with caution
-    # runtests.sh depends on exactly the following successful output
-    print(green("all servers are booted, provisioned, and configured."))
+    # in case a configurator change requires reboot, e.g. custom kernel
+    for server in configured_servers:
+        reboot_server(server)
+
+    # lastly, confirm that every server's SSH port matches settings.SSH_PORT
+    output = local("fab all ssh_test", capture=True)
+    if "CONFIGURATOR FAIL!" in output:
+        print(red("configurator failure."))
+    else:
+        # change the following output with caution
+        # runtests.sh depends on exactly the following successful output
+        print(green("all servers are booted, provisioned, and configured."))
 
 
 @task
@@ -128,11 +141,11 @@ def provision():
 
     set_ssh_vars(env)
 
-    if env.port == settings.SSH_PORT:
-        print(green("{ip_addr} is already provisioned, skipping.".format(ip_addr=env.public_ip)))
+    if env.port == int(settings.SSH_PORT):
+        print(green("{ip_addr} is already provisioned, skipping.".format(ip_addr=env.host)))
         return
 
-    print(cyan("... {ip_addr} has started provisioning.".format(ip_addr=env.public_ip)))
+    print(cyan("... {ip_addr} has started provisioning.".format(ip_addr=env.host)))
 
     # upgrade distro
     server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
@@ -188,11 +201,14 @@ def ssh_test():
         fab all ssh_test
     """
     set_ssh_vars(env)
+    if ":{0}".format(settings.SSH_PORT) not in env.host_string:
+        local("echo 'CONFIGURATOR FAIL!'")
+        return
     try:
         run("echo 'CONFIGURATOR SUCCESS!'")
         sudo("echo 'CONFIGURATOR SUCCESS!'")
     except:
-        abort("CONFIGURATOR FAIL!")
+        local("echo 'CONFIGURATOR FAIL!'")
 
 
 @task
@@ -236,7 +252,6 @@ def __shared_setup():
     for server in env.bootmachine_servers:
         if server.name == settings.MASTER:
             env.master_server = server
-
         server = set_ssh_vars(server)
 
         # prevent prompts and warnings related to ssh keys:
@@ -256,12 +271,17 @@ def set_ssh_vars(valid_object):
     variable if the SSH_PORT matches that in the settings. This
     would only match if the server is properly configured.
     """
+    if valid_object == env:
+        public_ip = env.host
+    else:
+        public_ip = valid_object.public_ip
+
     try:
         port = 22
-        telnetlib.Telnet(valid_object.public_ip, port)
+        telnetlib.Telnet(public_ip, port)
     except IOError:
         port = int(settings.SSH_PORT)
-        telnetlib.Telnet(valid_object.public_ip, port)
+        telnetlib.Telnet(public_ip, port)
 
     valid_object.port = port
 
@@ -272,5 +292,5 @@ def set_ssh_vars(valid_object):
         valid_object.configured = True
         valid_object.user = env.user
 
-    valid_object.host_string = "{0}:{1}".format(valid_object.public_ip, port)
+    valid_object.host_string = "{0}:{1}".format(public_ip, port)
     return valid_object
