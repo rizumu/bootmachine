@@ -15,6 +15,7 @@ Contents:
    background
    install
    usage
+   troubleshooting tips
 
 
 Indices and tables
