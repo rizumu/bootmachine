@@ -139,7 +139,7 @@ def provision():
     if int(settings.SSH_PORT) == 22:
         abort("provision(): Security Error! Change ``settings.SSH_PORT`` to something other than ``22``")
 
-    set_ssh_vars(env)
+    __set_ssh_vars(env)
 
     if env.port == int(settings.SSH_PORT):
         print(green("{ip_addr} is already provisioned, skipping.".format(ip_addr=env.host)))
@@ -200,7 +200,8 @@ def ssh_test():
     Usage:
         fab all ssh_test
     """
-    set_ssh_vars(env)
+    __set_ssh_vars(env)
+
     if ":{0}".format(settings.SSH_PORT) not in env.host_string:
         local("echo 'CONFIGURATOR FAIL!'")
         return
@@ -252,7 +253,7 @@ def __shared_setup():
     for server in env.bootmachine_servers:
         if server.name == settings.MASTER:
             env.master_server = server
-        server = set_ssh_vars(server)
+        server = __set_ssh_vars(server)
 
         # prevent prompts and warnings related to ssh keys:
         # a) skips false man-in-the-middle warnings
@@ -263,7 +264,7 @@ def __shared_setup():
             known_hosts.add(server.public_ip)
 
 
-def set_ssh_vars(valid_object):
+def __set_ssh_vars(valid_object):
     """
     This method takes a valid_object, either the env or a server,
     and based on the results of telnet, it sets port, user,
