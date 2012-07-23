@@ -140,11 +140,11 @@ def provision():
     if int(settings.SSH_PORT) == 22:
         abort("provision(): Security Error! Change ``settings.SSH_PORT`` to something other than ``22``")
 
+    __set_ssh_vars(env)
+
     if exists("/root/.bootmachine_provisioned", use_sudo=True):
         print(green("{ip_addr} is already provisioned, skipping.".format(ip_addr=env.host)))
         return
-
-    __set_ssh_vars(env)
 
     print(cyan("... {ip_addr} has started provisioning.".format(ip_addr=env.host)))
 
