@@ -16,6 +16,7 @@ Contents:
    install
    usage
    troubleshooting tips
+   changelog
 
 
 Indices and tables
