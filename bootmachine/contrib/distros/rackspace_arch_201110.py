@@ -1,7 +1,7 @@
 import time
 
 from fabric.api import env, run, sudo
-from fabric.context_managers import settings as fabric_settings
+from fabric.context_managers import cd, settings as fabric_settings
 from fabric.contrib.files import append, sed, uncomment
 from fabric.operations import reboot
 
@@ -73,7 +73,8 @@ def bootstrap():
     # more glibc crap, uninstall non-pacman rackspace installed packages
     run("rm -rf /lib/modules")
     run("pacman --noconfirm -Rns xe-guest-utilities kernel26-xen")
-    sudo("yaourt --noconfirm -S xe-guest-utilities", user="aur")
+    with cd("/tmp/"):
+        sudo("yaourt --noconfirm -S xe-guest-utilities", user="aur")
 
     # finally we can upgrade glibc and run a successful full system upgrade
     run("pacman --noconfirm -Su")
@@ -106,12 +107,13 @@ def install_salt(installer="aur"):
     """
     Install salt with the chosen installer.
     """
-    if installer == "aur":
-        sudo("yaourt --noconfirm -S salt", user="aur")
-    elif installer == "aur-git":
-        sudo("yaourt --noconfirm -S salt-git", user="aur")
-    else:
-        raise NotImplementedError()
+    with cd("/tmp/"):
+        if installer == "aur":
+            sudo("yaourt --noconfirm -S salt", user="aur")
+        elif installer == "aur-git":
+            sudo("yaourt --noconfirm -S salt-git", user="aur")
+        else:
+            raise NotImplementedError()
 
 
 def setup_salt():
