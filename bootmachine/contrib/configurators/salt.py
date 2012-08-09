@@ -133,12 +133,14 @@ def launch():
     if env.host != env.master_server.public_ip:
         abort("tried to launch on a non-master server")
 
-    local("fab master configurator.update_master_iptables")
     upload_saltstates()
+
+    # add ipaddresses from the newly booted servers to the pillar and update
+    local("fab master configurator.update_master_iptables")
+    pillar_update()
 
     time.sleep(10)  # sleep a little to give minions a chance to become visible
     accept_minions()
-    pillar_update()
 
     highstate()
 
