@@ -249,4 +249,4 @@ def start(distro):
     Start the salt master and minion daemons.
     Simply wrap salt's start method for the chosen distro.
     """
-    distro.setup_salt()
+    distro.start_salt()
