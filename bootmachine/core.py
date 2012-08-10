@@ -75,7 +75,6 @@ def bootmachine():
             configurator.launch()
             launch_attempts = 1
             break
-    print(green("the configurator has been run for all servers."))
 
     # ensure that the servers have been properly configured
     env.user = local_user
@@ -96,8 +95,11 @@ def bootmachine():
     for server in configured_servers:
         reboot_server(server)
 
+    print(green("the configurator has been run for all servers."))
+
     # lastly, confirm that every server's SSH port matches settings.SSH_PORT
     output = local("fab all ssh_test", capture=True)
+
     if "CONFIGURATOR FAIL!" in output:
         print(red("configurator failure."))
     else:
