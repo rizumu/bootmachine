@@ -140,11 +140,12 @@ def start_salt():
     """
     Starts salt master and minions.
     """
-    if env.host == env.master_server.public_ip:
-        sudo("rc.d start salt-master", pty=False)
-        time.sleep(3)
-        sudo("rc.d start salt-minion", pty=False)
-    else:
+    # use warn_only to catch already running errors
+    # probably should use pgrep instead
+    with fabric_settings(warn_only=True):
+        if env.host == env.master_server.public_ip:
+            sudo("rc.d start salt-master", pty=False)
+            time.sleep(3)
         sudo("rc.d start salt-minion", pty=False)
 
 
@@ -152,10 +153,10 @@ def restart_salt():
     """
     Restarts salt master and minions.
     """
+    # use warn_only to catch already running errors
+    # probably should use pgrep instead
     with fabric_settings(warn_only=True):
         if env.host == env.master_server.public_ip:
             sudo("rc.d restart salt-master", pty=False)
             time.sleep(3)
-            sudo("rc.d restart salt-minion", pty=False)
-        else:
-            sudo("rc.d restart salt-minion", pty=False)
+        sudo("rc.d restart salt-minion", pty=False)

@@ -53,7 +53,7 @@ def install_salt(installer="ppa"):
 
 def setup_salt():
     """
-    Setup the salt configuration files and enable dameon on a reboot.
+    Setup the salt configuration files.
     """
     server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
 
@@ -67,22 +67,23 @@ def start_salt():
     """
     Starts salt master and minions.
     """
-    if env.host == env.master_server.public_ip:
-        sudo("service salt-master restart", pty=False)
-        time.sleep(3)
-        sudo("service salt-minion restart", pty=False)
-    else:
-        sudo("service salt-minion restart", pty=False)
+    # use warn_only to catch already running errors
+    # probably should use pgrep instead
+    with fabric_settings(warn_only=True):
+        if env.host == env.master_server.public_ip:
+            sudo("service salt-master start", pty=False)
+            time.sleep(3)
+        sudo("service salt-minion start", pty=False)
 
 
 def restart_salt():
     """
     Restarts salt master and minions.
     """
+    # use warn_only to catch already running errors
+    # probably should use pgrep instead
     with fabric_settings(warn_only=True):
         if env.host == env.master_server.public_ip:
             sudo("service salt-master restart", pty=False)
             time.sleep(3)
-            sudo("service salt-minion restart", pty=False)
-        else:
-            sudo("service salt-minion restart", pty=False)
+        sudo("service salt-minion restart", pty=False)
