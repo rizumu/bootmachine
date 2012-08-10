@@ -1,4 +1,4 @@
-grub2-bios:
+grub-bios:
   pkg.installed:
     - require:
       - cmd: mkinitcpio
