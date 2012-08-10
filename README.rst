@@ -6,23 +6,37 @@ virtual servers up until the point where customized configuration
 management begins.
 
 The bootmachine's goal is to allow getting started with, maintenance
-of, and exploring new stack options through a simple and highly
+of, and exploring new stack options through a simple, pluggable and highly
 customizable interface.
+
+Configuration Management Tools
+------------------------------
+
+Currently supported:
+
+    * Salt http://saltstack.org
+    * Write your own
+
+Next in the queue:
+
+    * Chef http://www.opscode.com/chef/
+    * Puppet http://puppetlabs.com/
+    * Write your own
 
 Providers
 ---------
 
 Currently supported:
 
-    * Rackspace Openstack Compute API v1 via openstack.compute
+    * Rackspace Openstack Compute API v1 via openstack.compute http://www.rackspace.com/cloud/
     * Rackspace Openstack Compute API v2 via python-novaclient
     * Non-rackspace Openstack Compute via python-novaclient
     * Write your own
 
 Next in the queue:
 
-    * Amazon EC2 via boto
-    * Virtualbox / Vagrant
+    * Amazon EC2 via boto https://aws.amazon.com/ec2/
+    * Virtualbox / Vagrant http://vagrantup.com/
     * Write your own
 
 Distros
@@ -30,10 +44,10 @@ Distros
 
 Currently supported:
 
-    * Arch Linux
+    * Arch Linux (as of Aug 10 2012, see https://github.com/rizumu/bootmachine/issues/8)
     * Ubuntu
     * Fedora
-    * Debian (ready, but waiting for salt to land in the repos or a workaround)
+    * Debian
     * Write your own
 
 Next in the queue:
@@ -44,22 +58,8 @@ Next in the queue:
     * RHEL
     * Write your own
 
-Configuration Management Tools
-------------------------------
-
-Currently supported:
-
-    * Salt
-    * Write your own
-
-Next in the queue:
-
-    * Chef
-    * Puppet
-    * Write your own
-
 Documentation about the usage and installation of the bootmachine
-can be found at http://bootmachine.readthedocs.org
+can be found at: http://bootmachine.readthedocs.org
 
-The source code and issue tracker can be found on GitHub.
+The source code and issue tracker can be found on GitHub:
 https://github.com/rizumu/bootmachine

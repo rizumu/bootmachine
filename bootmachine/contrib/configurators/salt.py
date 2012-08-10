@@ -91,7 +91,7 @@ def pillar_update():
         known_hosts.update(env.host)
         local("scp -P {0} {1}bootmachine.sls {2}@{3}:/tmp/bootmachine.sls".format(env.port, pillar_dir, env.user, env.host))
     sudo("mv /tmp/bootmachine.sls /srv/pillar/bootmachine.sls")
-    sudo("salt '*' saltutil.refresh_pillar")
+    sudo("salt '*' saltutil.refresh_pillar &")  # background because it hangs on debian 6
 
 
 @task

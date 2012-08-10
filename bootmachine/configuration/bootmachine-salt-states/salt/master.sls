@@ -3,7 +3,7 @@
 include:
   - salt
 
-{% if grains['os'] == 'Ubuntu' %}
+{% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
 salt-master:
   pkg.installed
 {% endif %}
@@ -13,7 +13,7 @@ salt-master:
     - mode: 640
     - source: salt://salt/master.config
     - require:
-{% if grains['os'] == 'Ubuntu' %}
+{% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
       - pkg: salt-master
 {% else %}
       - pkg: salt
@@ -23,17 +23,19 @@ salt-master-daemon:
   service.running:
     - name: salt-master
     - enabled: True
+{% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
     - watch:
       - file: /etc/salt/master
-{% if grains['os'] == 'Ubuntu' %}
       - pkg: salt-master
-{% else %}
-      - pkg: salt
-{% endif %}
     - require:
       - file: /etc/salt/master
-{% if grains['os'] == 'Ubuntu' %}
       - pkg: salt-master
 {% else %}
+    - watch:
+      - file: /etc/salt/master
+      - pkg: salt
+    - require:
+      - file: /etc/salt/master
       - pkg: salt
 {% endif %}
+

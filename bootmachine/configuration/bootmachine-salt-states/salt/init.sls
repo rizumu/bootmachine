@@ -1,6 +1,6 @@
 # Ensure that the salt minion is running and on
 
-{% if grains['os'] == 'Ubuntu' %}
+{% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
 salt-minion:
   pkg.installed
 {% else %}
@@ -26,11 +26,23 @@ salt-minion-daemon:
       - file: /etc/salt/minion
     - require:
       - file: /etc/salt/minion
-{% if grains['os'] == 'Ubuntu' %}
+{% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
+    - watch:
+      - file: /etc/salt/minion
+      - pkg: salt-minion
+    - require:
+      - file: /etc/salt/minion
       - pkg: salt-minion
 {% else %}
+    - watch:
+      - file: /etc/salt/minion
+      - pkg: salt
+    - require:
+      - file: /etc/salt/minion
       - pkg: salt
 {% endif %}
+
+
 
 salt-config-templates:
   file.absent:

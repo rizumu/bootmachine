@@ -27,7 +27,7 @@ Distros:
     * Arch Linux
     * Fedora 16+17
     * Ubuntu 12.04 LTS
-    * Debian 6 (forthcoming)
+    * Debian 6
     * Gentoo 11.0 (forthcoming)
     * OpenSUSE 12 (forthcoming)
     * CentOS 6.2 (forthcoming)
