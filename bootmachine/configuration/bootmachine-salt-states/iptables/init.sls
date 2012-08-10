@@ -18,7 +18,7 @@ iptables-rules:
         saltminion_private_ips: {{ pillar['saltminion_private_ips'] }}
     - require:
 {% for user in pillar['users'] %}
-      - ssh_auth: {{ user }}-sshkeys
+      - user: {{ user }}-sshkeys
 {% endfor %}
 {% if grains['os'] == 'Arch' or grains['os'] == 'Fedora' %}
       - pkg: iptables
