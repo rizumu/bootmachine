@@ -19,18 +19,20 @@ non-booted server, it will boot it in parallel. In the meantime
 ``provider.bootem`` queries the provider to ensure that all servers are
 ``ACTIVE`` before continuing.
 
-Second, after all servers are found to be active, the ``provision``
+Second, after all servers are found to be active, the ``bootstrap``
 method is called to check if there are any servers which have not yet
-been provisioned. These servers are then provisions in parallel.
+been bootstrapped. These servers are then bootstrapped in parallel.
 
 .. note::
 
     These commands can also be run separately::
 
-        $ fab provider.bootem
-        $ fab all provision
+        $ fab boot
+        $ fab all bootstrap
+        $ fab master configure
 
-After provisioning is complete you can manually login to the machine
+After provisioning is complete you can manually login, with the user
+credentials and port as defined in your settings.py, to the machine
 using the following format::
 
     $ ssh -p {port} {username}@{ip}

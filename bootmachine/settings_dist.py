@@ -135,7 +135,7 @@ SECURITY
 SSH_PORT = "30000"
 
 # The local path to your public ssh key.
-# This key is used to ssh as root during the provision stage.
+# This key is used to ssh as root during the bootstrap() stage.
 # NOTE: Elliptic curve cryptography support has been excluded from Fedora
 # presumably due to patent concerns.
 # http://comments.gmane.org/gmane.linux.redhat.fedora.legal/1576

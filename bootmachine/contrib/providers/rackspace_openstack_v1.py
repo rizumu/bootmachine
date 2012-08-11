@@ -132,7 +132,8 @@ def bootem(servers=None):
     Boot all `openstack` servers as per the config.
 
     Usage:
-        fab provider.bootem && fab all provision
+        fab boot
+        fab provider.bootem
     """
     if servers is None:
         servers = settings.SERVERS

@@ -55,7 +55,7 @@ Booting
 =======
 
 Bootmachine simplifies the initial boot phase of creating new servers,
-by reading configuration from ``settings.SERVERS``. Select from the
+by reading configuration from ``settings.SERVERS``. Choose from the
 built-in cloud providers, or write a custom ``settings.PROVIDER_MODULE``.
 
 .. note::
@@ -71,7 +71,7 @@ Provisioning with Configuration Management Tools
 
 The bootmachine reads the settings file and checks for servers that are
 not yet booted. It will then boot each new server, with its defined
-distro and size, and next install the configuration management tool
+distro and size, and next bootstrap the configuration management tool
 of your choice.
 
 .. note::

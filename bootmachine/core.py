@@ -46,66 +46,38 @@ configurator = import_module(settings.CONFIGURATOR_MODULE)
 @task(default=True)
 def bootmachine():
     """
-    Boot & provision all servers as per the config.
+    Boot, bootstrap and configure all servers as per the settings.
 
     Usage:
         fab bootmachine
     """
-    local_user = env.user
+    env.local_user = env.user
     # set environment variables
     master()
     env.new_server_booted = False
 
     # boot new servers in serial to avoid api overlimit
     boot()
-    print(green("all servers are booted."))
+
     output = local("fab all ssh_test", capture=True)
     if "CONFIGURATOR FAIL!" not in output:
-        print(green("all servers are booted, provisioned, and configured."))
+        print(green("all servers are fully provisioned."))
         return
 
-    # provision all servers in parallel for speed
-    local("fab all provision")
-    print(green("all servers are provisioned."))
+    # bootstrap all servers in parallel for speed
+    local("fab all bootstrap")
 
     # run the configurator in serial on the master to configure the new servers
-    master()
-    for server in env.bootmachine_servers:
-        if server.port != int(settings.SSH_PORT):
-            configurator.launch()
-            launch_attempts = 1
-            break
-
-    # ensure that the servers have been properly configured
-    env.user = local_user
-    master()
-    configured_servers = []
-    for server in env.bootmachine_servers:
-        while server.port != int(settings.SSH_PORT):
-            configurator.restart()
-            configurator.launch()
-            if server not in configured_servers:
-                configured_servers.append(server)
-            launch_attempts += 1
-            master()
-            if launch_attempts == 5:
-                abort("CONFIGURATOR FAIL!")
-
-    # in case a configurator change requires reboot, e.g. custom kernel
-    for server in configured_servers:
-        reboot_server(server)
-
-    print(green("the configurator has been run for all servers."))
+    configure()
 
     # lastly, confirm that every server's SSH port matches settings.SSH_PORT
     output = local("fab all ssh_test", capture=True)
-
     if "CONFIGURATOR FAIL!" in output:
         print(red("configurator failure."))
     else:
         # change the following output with caution
         # runtests.sh depends on exactly the following successful output
-        print(green("all servers are booted, provisioned, and configured."))
+        print(green("all servers are fully provisioned."))
 
 
 @task
@@ -124,31 +96,33 @@ def boot():
         server = servers.pop(0)
         if not server["servername"] in [server.name for server in env.bootmachine_servers]:
             provider.bootem(settings.SERVERS)
+            print(green("new server(s) have been booted."))
             env.new_server_booted = True
             return
+    print(green("all servers are booted."))
 
 
 @task
 @parallel
-def provision():
+def bootstrap():
     """
-    Provision all unprovisioned servers.
+    Bootstraps the configurator on all newly booted servers.
     Installs and start the configurator process.
     Does not run the configurator.
 
     Usage:
-        fab all provision
+        fab all bootstrap
     """
     if int(settings.SSH_PORT) == 22:
-        abort("provision(): Security Error! Change ``settings.SSH_PORT`` to something other than ``22``")
+        abort("bootstrap(): Security Error! Change ``settings.SSH_PORT`` to something other than ``22``")
 
     __set_ssh_vars(env)
 
-    if exists("/root/.bootmachine_provisioned", use_sudo=True):
-        print(green("{ip_addr} is already provisioned, skipping.".format(ip_addr=env.host)))
+    if exists("/root/.bootmachine_bootstrapped", use_sudo=True):
+        print(green("{ip_addr} is already bootstrapped, skipping.".format(ip_addr=env.host)))
         return
 
-    print(cyan("... {ip_addr} has started provisioning.".format(ip_addr=env.host)))
+    print(cyan("... {ip_addr} has begun bootstrapping .".format(ip_addr=env.host)))
 
     # upgrade distro
     server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
@@ -160,7 +134,50 @@ def provision():
     configurator.setup(distro)
     configurator.start(distro)
     run("iptables -F")  # flush defaults before configuring
-    run("touch /root/.bootmachine_provisioned")
+    run("touch /root/.bootmachine_bootstrapped")
+
+    print(green("all servers are bootstrapped."))
+
+
+@task
+def configure():
+    """
+    Configure all unconfigured servers.
+
+    Usage:
+        fab master configure
+    """
+    if not hasattr(env, "local_user"):
+        env.local_user = env.user
+    if not hasattr(env, "bootmachine_servers"):
+        master()
+
+    for server in env.bootmachine_servers:
+        if server.port != int(settings.SSH_PORT):
+            configurator.launch()
+            launch_attempts = 1
+            break
+
+    # ensure that the servers have been properly configured
+    env.user = env.local_user
+    master()
+    configured_servers = []
+    for server in env.bootmachine_servers:
+        while server.port != int(settings.SSH_PORT):
+            configurator.restart()
+            configurator.launch()
+            if server not in configured_servers:
+                configured_servers.append(server)
+            launch_attempts += 1
+            master()
+            if launch_attempts == 5:
+                abort("CONFIGURATOR FAIL!")
+
+    # in case a configurator change requires reboot, e.g. custom kernel
+    for server in configured_servers:
+        reboot_server(server)
+
+    print(green("the configurator has been run for all servers."))
 
 
 @task

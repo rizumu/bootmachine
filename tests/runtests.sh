@@ -16,7 +16,7 @@ done
 
 # add the build names that didn't finish to fail log
 # by finding the most recent build outputs that do not contain the success text
-match='all servers are booted, provisioned, and configured.'
+match='all servers are fully provisioned.'
 for dir in $dirs; do
   lastlogfile=$(find ./logs/$dir -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" ")
   if [ ! -z "(grep '$match' $lastlogfile -q)" ]; then
