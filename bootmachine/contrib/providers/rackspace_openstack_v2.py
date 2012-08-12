@@ -5,6 +5,7 @@ from telnetlib import Telnet
 import novaclient.v1_1
 
 from fabric.api import env, local
+from fabric.contrib import console
 from fabric.decorators import task
 from fabric.colors import blue, cyan, green, magenta, red, white, yellow
 from fabric.operations import prompt
@@ -219,18 +220,16 @@ def destroyem(force=False):
     time.sleep(5)
 
 
-def get_ips(roles=None, ip_type="public", append_port=True):
+def set_bootmachine_servers(roles=None, ip_type="public", append_port=True):
     """
-    Internal bootmachine method to get an ip list (public or private) of all servers for the
-    given role(s) or all servers if no roles were provided. Optionally disable appending of
-    the port number.
+    Internal bootmachine method to set the Fabric env.bootmachine_servers variable.
     """
     env.bootmachine_servers = list_servers(as_list=True)
     ips = []
 
     for server in env.bootmachine_servers:
         if server.status != "ACTIVE":
-            abort("get_ips(): Timeout, the server `{0}` is not `ACTIVE` and is in the `{1}` phase.".format(server.name, server.status))
+            console.confirm("The server `{0}` is not `ACTIVE` and is in the `{1}` phase. Continue?".format(server.name, server.status))
 
     for server in env.bootmachine_servers:
         # Verify (by name) that the live server was defined in the settings.
