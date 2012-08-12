@@ -1,6 +1,22 @@
 Bootmachine Changelog
 =====================
 
+0.5.2 (23.07.2012)
+------------------
+NEW FEATURES:
+
+* debian 6 is now supported on rackspace with salt
+
+CHANGES:
+* the `fab all` task has been renamed to `fab each`, mostly to
+  avoid the name clash with the Python's global all() method.
+* the `fab provision` task has been renamed to `fab bootstrap` and
+  a new `fab configure` task has been added to better clarify
+  intent. Additionaly a thorough refactoring of core.py has taken
+  place.
+* instead of aborting, a y/n continue prompt has been added
+  when a rackspace server found to be not `ACTIVE`.
+
 0.5.1 (23.07.2012)
 ------------------
 NEW FEATURES:

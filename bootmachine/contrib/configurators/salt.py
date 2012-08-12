@@ -113,7 +113,7 @@ def update_master_iptables():
         insert_line = sudo("iptables -L --line-numbers | grep {0}".format(configurator_ports[0]))
 
     if not insert_line:
-        print(yellow("iptables are wide open during first boot of a master"))
+        print(yellow("NOTE: iptables are wide open during first boot of a master"))
         return
 
     for port in configurator_ports:
@@ -127,8 +127,8 @@ def update_master_iptables():
 @task
 def launch():
     """
-    After salt is installed, accept the new minions, upload states,
-    and call highstate.
+    After the salt packages are installed, accept the new minions,
+    upload states, and call highstate.
     """
     if env.host != env.master_server.public_ip:
         abort("tried to launch on a non-master server")
@@ -166,7 +166,7 @@ def accept_minions():
                 sudo("salt-key --quiet --accept={0}".format(server))
         accepted = filter(None, sudo("salt-key --raw-out --list acc").translate(None, "'[]\ ").split(","))
         if len(accepted) != len(settings.SERVERS):
-            local("fab all configurator.restart")
+            local("fab each configurator.restart")
             time.sleep(5)
             slept += 5
             print(yellow("there are still unaccpeted keys, trying again."))

@@ -28,7 +28,7 @@ been bootstrapped. These servers are then bootstrapped in parallel.
     These commands can also be run separately::
 
         $ fab boot
-        $ fab all bootstrap
+        $ fab each bootstrap
         $ fab master configure
 
 After provisioning is complete you can manually login, with the user

@@ -2,6 +2,8 @@
 BOOTMACHINE: A-Z transmutation of aluminium into rhodium.
 """
 import copy
+import getpass
+import logging
 import sys
 import telnetlib
 
@@ -51,7 +53,6 @@ def bootmachine():
     Usage:
         fab bootmachine
     """
-    env.local_user = env.user
     # set environment variables
     master()
     env.new_server_booted = False
@@ -59,19 +60,24 @@ def bootmachine():
     # boot new servers in serial to avoid api overlimit
     boot()
 
-    output = local("fab all ssh_test", capture=True)
+    output = local("fab each ssh_test", capture=True)
     if "CONFIGURATOR FAIL!" not in output:
         print(green("all servers are fully provisioned."))
         return
 
     # bootstrap all servers in parallel for speed
-    local("fab all bootstrap")
+    local("fab each bootstrap")
+    print(green("all servers are bootstrapped."))
 
-    # run the configurator in serial on the master to configure the new servers
-    configure()
+    # run the configurator from the the master server, maximum of 5x
+    master()
+    __set_unconfigured_servers()
+    while env.unconfigured_servers and env.configure_attempts != 5:
+        print(env.unconfigured_servers, env.configure_attempts)
+        configure()
 
-    # lastly, confirm that every server's SSH port matches settings.SSH_PORT
-    output = local("fab all ssh_test", capture=True)
+    # lastly, double check that the SSH settings for each server are correct
+    output = local("fab each ssh_test", capture=True)
     if "CONFIGURATOR FAIL!" in output:
         print(red("configurator failure."))
     else:
@@ -98,6 +104,7 @@ def boot():
             provider.bootem(settings.SERVERS)
             print(green("new server(s) have been booted."))
             env.new_server_booted = True
+            print(green("all servers are booted."))
             return
     print(green("all servers are booted."))
 
@@ -107,11 +114,11 @@ def boot():
 def bootstrap():
     """
     Bootstraps the configurator on all newly booted servers.
-    Installs and start the configurator process.
+    Installs the configurator and starts its processes.
     Does not run the configurator.
 
     Usage:
-        fab all bootstrap
+        fab each bootstrap
     """
     if int(settings.SSH_PORT) == 22:
         abort("bootstrap(): Security Error! Change ``settings.SSH_PORT`` to something other than ``22``")
@@ -136,7 +143,7 @@ def bootstrap():
     run("iptables -F")  # flush defaults before configuring
     run("touch /root/.bootmachine_bootstrapped")
 
-    print(green("all servers are bootstrapped."))
+    print(green("{0} is bootstrapped.".format(server.name)))
 
 
 @task
@@ -145,39 +152,29 @@ def configure():
     Configure all unconfigured servers.
 
     Usage:
-        fab master configure
+        fab configure
     """
-    if not hasattr(env, "local_user"):
-        env.local_user = env.user
-    if not hasattr(env, "bootmachine_servers"):
-        master()
-
-    for server in env.bootmachine_servers:
-        if server.port != int(settings.SSH_PORT):
-            configurator.launch()
-            launch_attempts = 1
-            break
-
-    # ensure that the servers have been properly configured
-    env.user = env.local_user
     master()
-    configured_servers = []
-    for server in env.bootmachine_servers:
-        while server.port != int(settings.SSH_PORT):
-            configurator.restart()
-            configurator.launch()
-            if server not in configured_servers:
-                configured_servers.append(server)
-            launch_attempts += 1
-            master()
-            if launch_attempts == 5:
-                abort("CONFIGURATOR FAIL!")
+    __set_unconfigured_servers()
 
-    # in case a configurator change requires reboot, e.g. custom kernel
-    for server in configured_servers:
-        reboot_server(server)
+    # run the configurator and refresh the env variables by calling master()
+    if env.unconfigured_servers:
+        configurator.launch()
+        env.configure_attempts += 1
+        master()
+        # determine if configuration was a success and reboot just in case.
+        # for example, a reboot is required when rebuilding a custom kernel
+        for server in env.unconfigured_servers:
+            server = __set_ssh_vars(server)
+            if server.port == int(settings.SSH_PORT):
+                reboot_server(server.name)
+            else:
+                print(red("after {0} attempt, server {1} is still unconfigured".format(env.configure_attempts, server.name)))
 
-    print(green("the configurator has been run for all servers."))
+    __set_unconfigured_servers()
+    __set_ssh_vars(env)
+    if not env.unconfigured_servers:
+        print(green("all servers are configured."))
 
 
 @task
@@ -202,6 +199,7 @@ def reboot_server(name):
         env.user = "root"
     except IOError:
         env.port = int(settings.SSH_PORT)
+        env.user = getpass.getuser()
         telnetlib.Telnet(server.public_ip, env.port)
     env.host_string = "{0}:{1}".format(server.public_ip, env.port)
 
@@ -219,7 +217,7 @@ def ssh_test():
     Prove that ssh is open on `settings.SSH_PORT`.
 
     Usage:
-        fab all ssh_test
+        fab each ssh_test
     """
     __set_ssh_vars(env)
 
@@ -234,7 +232,7 @@ def ssh_test():
 
 
 @task
-def all():
+def each():
     """
     Set the env variables for a command to be run on all servers.
 
@@ -243,7 +241,6 @@ def all():
         currently does not support a multi-master configuration.
     """
     __shared_setup()
-
     for server in env.bootmachine_servers:
         if server.public_ip not in env.hosts:
             env.hosts.append(server.public_ip)
@@ -268,9 +265,10 @@ def master():
 
 def __shared_setup():
     """
-    Set the env variables common to both master() and all().
+    Set the env variables common to both master() and each().
     """
-    provider.get_ips()
+    provider.set_bootmachine_servers()
+
     for server in env.bootmachine_servers:
         if server.name == settings.MASTER:
             env.master_server = server
@@ -312,7 +310,22 @@ def __set_ssh_vars(valid_object):
         valid_object.user = "root"
     else:
         valid_object.configured = True
-        valid_object.user = env.user
+        valid_object.user = getpass.getuser()
 
     valid_object.host_string = "{0}:{1}".format(public_ip, port)
     return valid_object
+
+
+def __set_unconfigured_servers():
+    if not hasattr(env, "configure_attempts"):
+        env.configure_attempts = 0
+
+    env.unconfigured_servers = []
+    for server in env.bootmachine_servers:
+        if server.port != int(settings.SSH_PORT):
+            env.unconfigured_servers.append(server)
+
+
+# Resolve issue with paramiko which occasionaly causes bootmachine to hang
+# http://forum.magiksys.net/viewtopic.php?f=5&t=82
+logging.getLogger("paramiko").setLevel(logging.DEBUG)
