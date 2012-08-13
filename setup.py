@@ -117,10 +117,10 @@ setup(
         # skip novaclient because of prettytable version conflict with openstack
         # see https://github.com/jacobian/openstack.compute/pull/14
         #"python-novaclient>=2.6.10",
-        "boto==2.5.2",
-        "Fabric==1.4.2",
-        "Jinja2==2.6",
         "prettytable==0.5",
+        "boto==2.5.2",
+        "Fabric==1.4.3",
+        "Jinja2==2.6",
     ],
     zip_safe=False,
     entry_points={
