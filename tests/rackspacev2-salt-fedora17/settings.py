@@ -11,12 +11,12 @@ SERVERS = [
     {"servername": "rackspacev2-salt-fedora17-a",
      "roles": ["loadbalancer"],
      "flavor": "2",
-     "image": "Fedora 17",
+     "image": "Fedora 17 (Beefy Miracle)",
      "distro_module": "bootmachine.contrib.distros.rackspace_fedora_17"},
     {"servername": "rackspacev2-salt-fedora17-b",
      "roles": ["application"],
      "flavor": "2",
-     "image": "Fedora 17",
+     "image": "Fedora 17 (Beefy Miracle)",
      "distro_module": "bootmachine.contrib.distros.rackspace_fedora_17"},
 ]
 

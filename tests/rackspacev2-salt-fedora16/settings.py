@@ -11,12 +11,12 @@ SERVERS = [
     {"servername": "rackspacev2-salt-fedora16-a",
      "roles": ["loadbalancer"],
      "flavor": "2",
-     "image": "Fedora 16",
+     "image": "Fedora 16 (Verne)",
      "distro_module": "bootmachine.contrib.distros.rackspace_fedora_16"},
     {"servername": "rackspacev2-salt-fedora16-b",
      "roles": ["application"],
      "flavor": "2",
-     "image": "Fedora 16",
+     "image": "Fedora 16 (Verne)",
      "distro_module": "bootmachine.contrib.distros.rackspace_fedora_16"},
 ]
 

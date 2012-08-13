@@ -11,12 +11,12 @@ SERVERS = [
     {"servername": "rackspacev2-salt-ubuntu1204-a",
      "roles": ["loadbalancer"],
      "flavor": "2",
-     "image": "Ubuntu 12.04 LTS",
+     "image": "Ubuntu 12.04 LTS (Precise Pangolin)",
      "distro_module": "bootmachine.contrib.distros.rackspace_ubuntu_1204"},
     {"servername": "rackspacev2-salt-ubuntu1204-b",
      "roles": ["application"],
      "flavor": "2",
-     "image": "Ubuntu 12.04 LTS",
+     "image": "Ubuntu 12.04 LTS (Precise Pangolin)",
      "distro_module": "bootmachine.contrib.distros.rackspace_ubuntu_1204"},
 ]
 
