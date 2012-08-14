@@ -19,6 +19,7 @@ def validate_settings(settings):
     required_settings = [
         "MASTER",
         "SERVERS",
+        "SSH_KEYPAIR_NAME",
         "SSH_PUBLIC_KEY",
         "SSH_PORT",
         "SSH_USERS",
@@ -28,7 +29,7 @@ def validate_settings(settings):
         required_settings.extend(["SALTSTATES_DIR", "PILLAR_DIR"])
 
     if settings.PROVIDER_MODULE == "bootmachine.contrib.providers.rackspace_openstack_v1":
-        required_settings.extend(["OPENSTACK_USERNAME", "OPENSTACK_APIKEY"])
+        required_settings.extend(["RACKSPACE_USER", "RACKSPACE_KEY"])
 
     if settings.PROVIDER_MODULE == "bootmachine.contrib.providers.rackspace_openstack_v2":
         required_settings.extend([

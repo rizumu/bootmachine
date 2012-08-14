@@ -20,7 +20,8 @@ SERVERS = [
      "distro_module": "bootmachine.contrib.distros.rackspace_ubuntu_1204"},
 ]
 
-SSH_PUBLIC_KEY = os.path.join(os.environ["HOME"], ".ssh", "id_rsa.pub")
+SSH_KEYPAIR_NAME = "id_rsa"
+SSH_PUBLIC_KEY = os.path.join(os.environ["HOME"], ".ssh", "{0}.pub".format(SSH_KEYPAIR_NAME))
 enc, keyhash = open(SSH_PUBLIC_KEY).read().split(" ")[:2]
 if "==" in keyhash:
     keyhash = keyhash.split("==")[0]

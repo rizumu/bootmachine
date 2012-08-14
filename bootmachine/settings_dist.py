@@ -39,8 +39,8 @@ PROVIDERS AND SERVER STACK
 PROVIDER_MODULE = "bootmachine.contrib.providers.rackspace_openstack_v1"
 
 # Rackspace authentication via openstack-compute
-OPENSTACK_USERNAME = os.environ.get("OPENSTACK_COMPUTE_USERNAME")
-OPENSTACK_APIKEY = os.environ.get("OPENSTACK_COMPUTE_APIKEY")
+RACKSPACE_USER = os.environ.get("OPENSTACK_COMPUTE_USERNAME")
+RACKSPACE_KEY = os.environ.get("OPENSTACK_COMPUTE_APIKEY")
 
 # Rackspace authentication via python-novaclient api v2
 OS_USERNAME = os.environ.get("OS_USERNAME")
@@ -51,8 +51,8 @@ OS_REGION_NAME = os.environ.get("OS_REGION_NAME")
 OS_COMPUTE_API_VERSION = os.environ.get("OS_COMPUTE_API_VERSION")
 
 # Amazon authentication via boto
-AWS_ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY_ID")
-AWS_SECRET_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+EC2_ACCESS_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+EC2_SECRET_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 
 # Your stack: providers and their servers.
 # Each server must have a unique servername.
@@ -139,7 +139,8 @@ SSH_PORT = "30000"
 # NOTE: Elliptic curve cryptography support has been excluded from Fedora
 # presumably due to patent concerns.
 # http://comments.gmane.org/gmane.linux.redhat.fedora.legal/1576
-SSH_PUBLIC_KEY = os.path.join(os.environ["HOME"], ".ssh", "id_ecdsa.pub")
+SSH_KEYPAIR_NAME = "id_ecdsa"
+SSH_PUBLIC_KEY = os.path.join(os.environ["HOME"], ".ssh", "{0}.pub".format(SSH_KEYPAIR_NAME))
 
 # Public key info for users to be granted direct SSH logins.
 # Users may have multiple keys.

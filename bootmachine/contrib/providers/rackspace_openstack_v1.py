@@ -1,8 +1,18 @@
+"""
+To view info on existing machines:
+    openstack-compute list (or) fab provider
+
+For more info on the OpenStack Compute Client:
+    http://github.com/jacobian/openstack.compute
+"""
+
 import time
 
 from telnetlib import Telnet
 
-import openstack.compute
+from libcloud.compute.types import Provider
+from libcloud.compute.providers import get_driver
+from libcloud.compute.types import NodeState
 
 from fabric.api import env, local
 from fabric.contrib import console
@@ -13,16 +23,8 @@ from fabric.utils import abort
 
 import settings
 
-"""
-To view info on existing machines:
-    openstack-compute list (or) fab provider
-
-For more info on the OpenStack Compute Client:
-    http://github.com/jacobian/openstack.compute
-"""
-
-COMPUTE_CONN = openstack.compute.Compute(username=settings.OPENSTACK_USERNAME,
-                                         apikey=settings.OPENSTACK_APIKEY)
+DRIVER = get_driver(Provider.RACKSPACE)
+LIBCLOUD_CONN = DRIVER(settings.RACKSPACE_USER, settings.RACKSPACE_KEY)
 
 
 @task(default=True)
@@ -42,7 +44,7 @@ def list_servers(as_list=False):
     bootmachine_servers = []
 
     # only return servers that are explicitly defined in the settings
-    for booted in COMPUTE_CONN.servers.list():
+    for booted in LIBCLOUD_CONN.list_nodes():
         for defined in settings.SERVERS:
             if booted.name == defined["servername"]:
                 booted.roles = defined["roles"]
@@ -61,7 +63,7 @@ def list_images(as_list=False):
     """
     print(cyan("... querying rackspace for available images."))
     if as_list:
-        return COMPUTE_CONN.servers.api.images.list()
+        return LIBCLOUD_CONN.list_images()
     print(local("openstack-compute image-list"))
 
 
@@ -89,7 +91,7 @@ def list_flavors(as_list=False):
     """
     print(cyan("... querying rackspace for available flavors."))
     if as_list:
-        return COMPUTE_CONN.servers.api.flavors.list()
+        return LIBCLOUD_CONN.list_sizes()
     print(local("openstack-compute flavor-list"))
 
 
@@ -113,17 +115,19 @@ def boot(servername, image, flavor=1, servers=None):
         print(blue("{name} is already booted, skipping.".format(name=servername)))
         return
     try:
-        image_id = int(image)
+        image = [img for img in LIBCLOUD_CONN.list_images() if int(img.id)==int(image)][0]
     except ValueError:
-        for i in list_images(as_list=True):
-            if i.name == image:
-                image_id = i.id
-                break
-        else:
-            abort("Image not found. Run ``openstack image-list`` to view options.")
+        image = [img for img in LIBCLOUD_CONN.list_images() if img.name==image][0]
+    except IndexError:
+        abort("Image not found. Run ``openstack image-list`` to view options.")
+    try:
+        size = [size for size in LIBCLOUD_CONN.list_sizes() if int(size.id)==int(flavor)][0]
+    except IndexError:
+        abort("Flavor not found. Run ``openstack flavor-list`` to view options.")
+
     print(green("... sending boot request to rackspace for ``{name}``".format(name=servername)))
-    local("openstack-compute boot --key {key} --image={image_id} --flavor={flavor} {name}".format(
-           key=settings.SSH_PUBLIC_KEY, image_id=image_id, flavor=flavor, name=servername))
+    LIBCLOUD_CONN.create_node(name=servername, image=image, size=size,
+                              ex_keyname=settings.SSH_KEYPAIR_NAME)
     env.new_server_booted = True
 
 
@@ -142,18 +146,18 @@ def bootem(servers=None):
     for server in servers:
         boot(server["servername"], server["image"], server["flavor"], env.bootmachine_servers)
 
-    print(yellow("... verifying that all servers are ``ACTIVE``."))
+    print(yellow("... verifying that all servers are ``RUNNING``."))
 
     env.bootmachine_servers = list_servers(as_list=True)
 
     slept = 0
     sleep_interval = 10
-    status = None
-    while status is None:
-        statuses = [n.status for n in env.bootmachine_servers]
-        if ("BUILD" or "UNKNOWN") not in statuses:
-            status = "ACTIVE"
-            print(green("all servers are currently ``ACTIVE``!"))
+    state = None
+    while state is None:
+        states = [n.state for n in env.bootmachine_servers]
+        if (NodeState.PENDING or NodeState.REBOOTING or NodeState.TERMINATED or NodeState.UNKNOWN) not in states:
+            state = NodeState.RUNNING
+            print(green("all servers are currently ``RUNNING``!"))
         else:
             time.sleep(sleep_interval)
             slept += sleep_interval
@@ -172,17 +176,26 @@ def destroy(servername, destroy_all=False, force=False):
     Usage:
         fab provider.destroy:servername
     """
+    if not hasattr(env, "bootmachine_servers"):
+        env.bootmachine_servers = list_servers(as_list=True)
+
+    try:
+        server = [s for s in env.bootmachine_servers if s.name == servername][0]
+    except IndexError:
+        print(red("The server with the name '{0}' does not exist. Skipping.".format(servername)))
+        return
+
     if not destroy_all and not force:
-        reply = prompt("Permanently destroying '{0}'. Are you sure? y/N".format(servername))
+        reply = prompt("Permanently destroying '{0}'. Are you sure? y/N".format(server.name))
         if reply is not "y":
-            abort("Did not destroy {0}".format(servername))
+            abort("Did not destroy {0}".format(server.name))
 
     from bootmachine.core import configurator, master
     if not destroy_all:
         master()
-        configurator.revoke(servername)
+        configurator.revoke(server.name)
 
-    local("openstack-compute delete {name} || true".format(name=servername))
+    LIBCLOUD_CONN.destroy_node(server)
 
 
 @task
@@ -192,6 +205,7 @@ def destroyem(force=False):
     Usage:
         fab provider.destroyem
     """
+    env.bootmachine_servers = list_servers(as_list=True)
     if not force:
         servers = ", ".join([s["servername"] for s in settings.SERVERS])
         reply = prompt("Permanently destroying *EVERY* server:\n{0}\n\nAre you sure? y/N".format(servers))
@@ -210,8 +224,9 @@ def set_bootmachine_servers(roles=None, ip_type="public", append_port=True):
     ips = []
 
     for server in env.bootmachine_servers:
-        if server.status != "ACTIVE":
-            console.confirm("The server `{0}` is not `ACTIVE` and is in the `{1}` phase. Continue?".format(server.name, server.status))
+        if server.state != NodeState.RUNNING:
+            console.confirm("The server `{0}` is not `RUNNING` and is in the `{1}` phase. Continue?".format(
+                server.name, [state for state, id in LIBCLOUD_CONN.NODE_STATE_MAP.items() if id == server.state]))
 
     for server in env.bootmachine_servers:
         # Verify (by name) that the live server was defined in the settings.
@@ -219,6 +234,11 @@ def set_bootmachine_servers(roles=None, ip_type="public", append_port=True):
             instance = [n for n in settings.SERVERS if n["servername"] == server.name][0]
         except IndexError:
             continue
+
+        # lib cloud returns public_ip as a list, for now use a string of the first item instead
+        server.public_ip = server.public_ip[0]
+        server.private_ip = server.private_ip[0]
+
         # If a ``roles`` list was passed in, verify it identically matches the server's roles.
         if roles and sorted(roles) != sorted(server["roles"]):
             continue
@@ -232,6 +252,9 @@ def set_bootmachine_servers(roles=None, ip_type="public", append_port=True):
                 server.port = int(settings.SSH_PORT)
                 ips.append(server.public_ip + ":" + str(settings.SSH_PORT))
         else:
-            ips.append(server.addresses[ip_type][0])
+            if ip_type == "public":
+                ips.append(server.public_ip)
+            elif ip_type == "private":
+                ips.append(server.private_ip)
         server.distro_module = [n["distro_module"] for n in settings.SERVERS if n["servername"] == server.name][0]
     return ips

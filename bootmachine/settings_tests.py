@@ -27,8 +27,8 @@ CHEF_RECIPIES_DIR = NotImplementedError()
 PROVIDERS AND SERVER STACK
 """
 # Rackspace authentication via openstack-compute
-OPENSTACK_USERNAME = os.environ.get("OPENSTACK_COMPUTE_USERNAME")
-OPENSTACK_APIKEY = os.environ.get("OPENSTACK_COMPUTE_APIKEY")
+RACKSPACE_USER = os.environ.get("OPENSTACK_COMPUTE_USERNAME")
+RACKSPACE_KEY = os.environ.get("OPENSTACK_COMPUTE_APIKEY")
 
 # Rackspace authentication via python-novaclient api v2
 OS_USERNAME = os.environ.get("OS_USERNAME")
@@ -39,8 +39,8 @@ OS_REGION_NAME = os.environ.get("OS_REGION_NAME")
 OS_COMPUTE_API_VERSION = os.environ.get("OS_COMPUTE_API_VERSION")
 
 # Amazon authentication via boto
-AWS_ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY_ID")
-AWS_SECRET_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+EC2_ACCESS_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+EC2_SECRET_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 
 """
 SECURITY
