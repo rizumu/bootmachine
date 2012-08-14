@@ -109,18 +109,14 @@ setup(
     long_description=open("README.rst").read(),
     dependency_links=["http://github.com/rizumu/openstack.compute/tarball/master#egg=openstack.compute-2.0a1"],
     author="Thomas Schreiber",
-    author_email="tom@insatsu.us",
+    author_email="tom@rizu.mu",
     packages=find_packages(),
     package_data=find_package_data("bootmachine", only_in_packages=False),
     install_requires=[
-        "openstack.compute>=2.0a1",
-        # skip novaclient because of prettytable version conflict with openstack
-        # see https://github.com/jacobian/openstack.compute/pull/14
-        #"python-novaclient>=2.6.10",
-        "prettytable==0.5",
-        "boto==2.5.2",
+        "apache-libcloud==0.11.1"
         "Fabric==1.4.3",
         "Jinja2==2.6",
+        "PrettyTable==0.6.1",
     ],
     zip_safe=False,
     entry_points={

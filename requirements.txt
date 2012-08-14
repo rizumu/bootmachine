@@ -1,8 +1,4 @@
-# skip novaclient because of prettytable version conflict with openstack
-# see https://github.com/jacobian/openstack.compute/pull/14
-#python-novaclient>=2.6.10
-git+git://github.com/rizumu/openstack.compute.git#egg=openstack.compute-2.0a1
-prettytable==0.5
-boto==2.5.2
+apache-libcloud==0.11.1
 Fabric==1.4.2
 Jinja2==2.6
+PrettyTable==0.6.1
