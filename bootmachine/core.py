@@ -1,3 +1,4 @@
+
 """
 BOOTMACHINE: A-Z transmutation of aluminium into rhodium.
 """
@@ -120,6 +121,9 @@ def bootstrap():
     Usage:
         fab each bootstrap
     """
+    if not hasattr(env, "bootmachine_servers"):
+        abort("bootstrap(): Try `fab each bootstrap`")
+
     if int(settings.SSH_PORT) == 22:
         abort("bootstrap(): Security Error! Change ``settings.SSH_PORT`` to something other than ``22``")
 
@@ -281,7 +285,6 @@ def __shared_setup():
             connect(server.user, server.public_ip, server.port)
         except NetworkError:
             known_hosts.add(server.public_ip)
-
 
 def __set_ssh_vars(valid_object):
     """
