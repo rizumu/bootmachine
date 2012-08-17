@@ -194,12 +194,14 @@ def destroy(servername, destroy_all=False, force=False):
     from bootmachine.core import configurator, master
     if not destroy_all:
         master()
-    configurator.revoke(servername)
+        configurator.revoke(servername)
 
     local("nova delete {name} || true".format(name=servername))
-    env.bootmachine_servers = list_servers(as_list=True)
+
+    # calling list_servers immediately after deleting returns the deleted servers
     if not destroy_all:
         time.sleep(5)
+        env.bootmachine_servers = list_servers(as_list=True)
 
 
 @task
