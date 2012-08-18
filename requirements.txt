@@ -4,5 +4,5 @@
 git+git://github.com/rizumu/openstack.compute.git#egg=openstack.compute-2.0a1
 prettytable==0.5
 boto==2.5.2
-Fabric==1.4.2
+Fabric==1.4.3
 Jinja2==2.6
