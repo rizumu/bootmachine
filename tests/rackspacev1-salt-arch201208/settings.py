@@ -4,20 +4,20 @@ from bootmachine.settings_tests import *
 
 
 CONFIGURATOR_MODULE = "bootmachine.contrib.configurators.salt"
-MASTER = "rackspacev1-salt-arch201110-a"
+MASTER = "rackspacev1-salt-arch201208-a"
 
 PROVIDER_MODULE = "bootmachine.contrib.providers.rackspace_openstack_v1"
 SERVERS = [
-    {"servername": "rackspacev1-salt-arch201110-a",
+    {"servername": "rackspacev1-salt-arch201208-a",
      "roles": ["loadbalancer"],
      "flavor": "1",
-     "image": "Arch 2011.10",
-     "distro_module": "bootmachine.contrib.distros.rackspace_arch_201110"},
-    {"servername": "rackspacev1-salt-arch201110-b",
+     "image": "Arch 2012.08",
+     "distro_module": "bootmachine.contrib.distros.rackspace_arch_201208"},
+    {"servername": "rackspacev1-salt-arch201208-b",
      "roles": ["application"],
      "flavor": "1",
-     "image": "Arch 2011.10",
-     "distro_module": "bootmachine.contrib.distros.rackspace_arch_201110"},
+     "image": "Arch 2012.08",
+     "distro_module": "bootmachine.contrib.distros.rackspace_arch_201208"},
 ]
 
 SSH_PUBLIC_KEY = os.path.join(os.environ["HOME"], ".ssh", "id_rsa.pub")
