@@ -5,6 +5,7 @@ aur:
     - gid: 902
     - groups:
       - aur
+      - wheel
     - require:
       - group: aur
 {% endif %}

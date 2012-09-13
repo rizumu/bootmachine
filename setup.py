@@ -1,9 +1,23 @@
 import os
+import re
 import sys
 from fnmatch import fnmatchcase
 from distutils.util import convert_path
 from distutils.core import setup
 from setuptools import find_packages
+
+
+def read(*parts):
+    return open(os.path.join(os.path.dirname(__file__), *parts)).read()
+
+
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
 
 
 # Provided as an attribute, so you can append to these instead
@@ -98,20 +112,18 @@ leading ``./``), and all searching is case-insensitive.
     return out
 
 
-VERSION = __import__("bootmachine").__version__
-
 setup(
     name="bootmachine",
-    version=VERSION,
-    url="https://github.com/rizumu/bootmachine",
+    version=find_version("bootmachine", "__init__.py"),
+    url="http://bootmachine.readthedocs.org/",
     license="BSD",
     description="A fabric library to bootstrap servers and configuration management software.",
-    long_description=open("README.rst").read(),
+    long_description=read("README.rst"),
     dependency_links=["http://github.com/rizumu/openstack.compute/tarball/master#egg=openstack.compute-2.0a1"],
     author="Thomas Schreiber",
     author_email="tom@insatsu.us",
     packages=find_packages(),
-    package_data=find_package_data("bootmachine", only_in_packages=False),
+    package_data=find_package_data(),
     install_requires=[
         "openstack.compute>=2.0a1",
         # skip novaclient because of prettytable version conflict with openstack
@@ -128,7 +140,6 @@ setup(
             "bootmachine-admin = bootmachine.management:execute_from_command_line",
         ],
     },
-    #scripts = ["bootmachine/bin/bootmachine-admin.py"],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",

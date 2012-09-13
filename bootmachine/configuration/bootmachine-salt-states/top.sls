@@ -12,7 +12,6 @@ base:
     - ssh
     - sudo
     - swap
-    - tags
     - users
     - xcbc
   '^{{ pillar['saltmaster_hostname'] }}':
