@@ -3,8 +3,7 @@ import re
 import sys
 from fnmatch import fnmatchcase
 from distutils.util import convert_path
-from distutils.core import setup
-from setuptools import find_packages
+from setuptools import setup, find_packages
 
 
 def read(*parts):
@@ -31,8 +30,6 @@ standard_exclude_directories = (".*", "CVS", "_darcs", "./build",
 # Note: you may want to copy this into your setup.py file verbatim, as
 # you can't import this from another package, when you don't know if
 # that package is installed yet.
-
-
 def find_package_data(
     where=".", package="",
     exclude=standard_exclude,
@@ -110,7 +107,6 @@ leading ``./``), and all searching is case-insensitive.
                     continue
                 out.setdefault(package, []).append(prefix + name)
     return out
-
 
 setup(
     name="bootmachine",
