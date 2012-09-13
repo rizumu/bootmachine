@@ -130,12 +130,6 @@ setup(
         "Fabric==1.4.3",
         "Jinja2==2.6",
     ],
-    package_data = {
-        "bootmachine": [
-            "configuration/",
-            "templates/",
-        ]
-    },
     zip_safe=False,
     entry_points={
         "console_scripts": [
