@@ -119,7 +119,6 @@ setup(
     author="Thomas Schreiber",
     author_email="tom@insatsu.us",
     packages=find_packages(),
-    package_data=find_package_data(),
     install_requires=[
         "openstack.compute>=2.0a1",
         # skip novaclient because of prettytable version conflict with openstack
@@ -130,6 +129,12 @@ setup(
         "Fabric==1.4.3",
         "Jinja2==2.6",
     ],
+    package_data = {
+        "bootmachine": [
+            "configuration/*",
+            "templates/*",
+        ]
+    },
     zip_safe=False,
     entry_points={
         "console_scripts": [
