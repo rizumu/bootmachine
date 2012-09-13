@@ -1,10 +1,10 @@
 Bootmachine Changelog
 =====================
 
-0.5.4, 0.5.5 (13.09.2012)
+0.5.4, 0.5.5, 0.5.6, 0.5.7 (13.09.2012)
 ------------------
 CHANGES:
-* fixing setup.py
+* fixing setup.py to include configuration files
 
 0.5.3 (13.09.2012)
 ------------------
