@@ -132,8 +132,8 @@ setup(
     ],
     package_data = {
         "bootmachine": [
-            "configuration",
-            "templates",
+            "configuration/",
+            "templates/",
         ]
     },
     zip_safe=False,
