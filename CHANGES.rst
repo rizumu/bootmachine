@@ -1,7 +1,7 @@
 Bootmachine Changelog
 =====================
 
-0.5.4 (13.09.2012)
+0.5.4, 0.5.5 (13.09.2012)
 ------------------
 CHANGES:
 * fixing setup.py
@@ -11,7 +11,6 @@ CHANGES:
 NEW FEATURES:
 
 CHANGES:
-* updated the setup.py
 * some fixes to the provided salt-states
 
 0.5.2 (13.08.2012)

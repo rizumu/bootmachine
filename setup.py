@@ -119,6 +119,7 @@ setup(
     author="Thomas Schreiber",
     author_email="tom@insatsu.us",
     packages=find_packages(),
+    include_package_data=True,
     install_requires=[
         "openstack.compute>=2.0a1",
         # skip novaclient because of prettytable version conflict with openstack
