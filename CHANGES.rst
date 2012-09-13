@@ -1,6 +1,11 @@
 Bootmachine Changelog
 =====================
 
+0.5.4 (13.09.2012)
+------------------
+CHANGES:
+* fixing setup.py
+
 0.5.3 (13.09.2012)
 ------------------
 NEW FEATURES:
