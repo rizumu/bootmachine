@@ -79,7 +79,7 @@ Puppet, and other distros.
 Any contributions to the core or submissions of new modules for the
 contrib will be much appreciated. I'd like to see this project allow
 developers to switch between providers with ease, simplify the process
-nof configuring a cloud stack, and encourage experimentation with new
+of configuring a cloud stack, and encourage experimentation with new
 distros.
 
 This is not a 1.0 yet, but please give it a try. It has been working
