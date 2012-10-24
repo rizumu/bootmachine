@@ -1,6 +1,11 @@
 Bootmachine Changelog
 =====================
 
+0.5.9
+-----
+CHANGES:
+* deprecate explicit support for rackspace api v1
+
 0.5.4, 0.5.5, 0.5.6, 0.5.7, 0.5.8 (13.09.2012)
 ------------------
 CHANGES:

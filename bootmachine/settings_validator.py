@@ -1,6 +1,7 @@
 import collections
 
 from fabric.utils import abort
+from fabric.colors import red
 
 
 def validate_settings(settings):
@@ -28,6 +29,7 @@ def validate_settings(settings):
         required_settings.extend(["SALTSTATES_DIR", "PILLAR_DIR"])
 
     if settings.PROVIDER_MODULE == "bootmachine.contrib.providers.rackspace_openstack_v1":
+        print(red("Rackspace Openstack API v1 is deprecated. Upgrade to v2."))
         required_settings.extend(["OPENSTACK_USERNAME", "OPENSTACK_APIKEY"])
 
     if settings.PROVIDER_MODULE == "bootmachine.contrib.providers.rackspace_openstack_v2":

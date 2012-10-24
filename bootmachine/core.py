@@ -30,9 +30,9 @@ def import_module(module):
     or distro.
 
     Import the provider, configurator, or distro module via a string.
-        ex. ``bootmachine.contrib.providers.rackspace_openstack_v1``
+        ex. ``bootmachine.contrib.providers.rackspace_openstack_v2``
         ex. ``bootmachine.contrib.configurators.salt``
-        ex. ``bootmachine.contrib.distros.arch_201110``
+        ex. ``bootmachine.contrib.distros.arch_201208``
     """
     try:
         __import__(module)

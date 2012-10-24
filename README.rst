@@ -28,9 +28,9 @@ Providers
 
 Currently supported:
 
-    * Rackspace Openstack Compute API v1 via openstack.compute http://www.rackspace.com/cloud/
     * Rackspace Openstack Compute API v2 via python-novaclient
     * Non-rackspace Openstack Compute via python-novaclient
+    * Rackspace Openstack Compute API v1 via openstack.compute (deprecated) http://www.rackspace.com/cloud/
     * Write your own
 
 Next in the queue:
