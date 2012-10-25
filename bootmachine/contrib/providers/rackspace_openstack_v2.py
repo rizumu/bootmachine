@@ -136,7 +136,9 @@ def boot(servername, image, flavor=2, servers=None):
             abort("Image not found. Run ``openstack image-list`` to view options.")
 
     print(green("... sending boot request to rackspace for ``{name}``".format(name=servername)))
-    local("nova boot --image={image_id} --flavor={flavor} {name} --file /root/.ssh/authorized_keys={key}".format(
+    local("nova boot --image={image_id} --flavor={flavor} --file /root/.ssh/authorized_keys={key} \
+           --nic net-id=00000000-0000-0000-0000-000000000000 \
+           --nic net-id=11111111-1111-1111-1111-111111111111 {name}".format(
            image_id=image_id, flavor=flavor, name=servername, key=settings.SSH_PUBLIC_KEY))
     env.new_server_booted = True
 
@@ -156,11 +158,13 @@ def bootem(servers=None):
     for server in servers:
         boot(server["servername"], server["image"], server["flavor"], env.bootmachine_servers)
 
+    long_initial_sleep = 75
+    print(yellow("... waiting {0}s for new servers to be assigned IP adddress.".format(long_initial_sleep)))
+    time.sleep(long_initial_sleep)
     print(yellow("... verifying that all servers are ``ACTIVE``."))
-
     env.bootmachine_servers = list_servers(as_list=True)
 
-    slept = 0
+    slept = long_initial_sleep
     sleep_interval = 10
     status = None
     while status is None:
