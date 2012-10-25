@@ -1,8 +1,8 @@
 Bootmachine Changelog
 =====================
 
-0.5.9
------
+0.5.9 (25.10.2012)
+------------------
 CHANGES:
 
 * resolve issue #8 by using pgrep to check if
@@ -11,7 +11,7 @@ CHANGES:
 * deprecate explicit support for rackspace api v1
 
 0.5.4, 0.5.5, 0.5.6, 0.5.7, 0.5.8 (13.09.2012)
-------------------
+----------------------------------------------
 CHANGES:
 
 * fix setup.py and use a MANIFEST.in to include configuration files
