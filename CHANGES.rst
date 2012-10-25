@@ -4,18 +4,22 @@ Bootmachine Changelog
 0.5.9
 -----
 CHANGES:
+
+* resolve issue #8 by using pgrep to check if
+  salt-master/minion daemons instead of relying
+  on Fabric.
 * deprecate explicit support for rackspace api v1
 
 0.5.4, 0.5.5, 0.5.6, 0.5.7, 0.5.8 (13.09.2012)
 ------------------
 CHANGES:
+
 * fix setup.py and use a MANIFEST.in to include configuration files
 
 0.5.3 (13.09.2012)
 ------------------
-NEW FEATURES:
-
 CHANGES:
+
 * some fixes to the provided salt-states
 
 0.5.2 (13.08.2012)
