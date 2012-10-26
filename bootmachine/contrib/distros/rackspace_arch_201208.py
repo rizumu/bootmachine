@@ -50,7 +50,7 @@ def bootstrap():
     # tweak sshd_config (before reboot so it is restarted!) so fabric can sftp with contrib.files.put, see:
     # http://stackoverflow.com/questions/10221839/cant-use-fabric-put-is-there-any-server-configuration-needed
     sed("/etc/ssh/sshd_config", "Subsystem sftp /usr/lib/openssh/sftp-server", "Subsystem sftp internal-sftp")
-    run("rc.d restart sshd", pty=False)
+    run("rc.d restart sshd")
 
     # upgrade grub
     run("mv /boot/grub /boot/grub-legacy")
@@ -126,7 +126,7 @@ def restart_salt():
             sudo("rc.d restart salt-master")
         else:
             sudo("rc.d start salt-master")
-        time.sleep(3)
+            time.sleep(3)
     if minion_running:
         sudo("rc.d restart salt-minion")
     else:

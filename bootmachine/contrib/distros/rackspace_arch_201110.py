@@ -39,14 +39,14 @@ def bootstrap():
 
     # haveged generates the entropy necessary for making the pacman gpg key
     run("printf 'n\nY\n' | pacman -S haveged")
-    run("rc.d start haveged", pty=False)
+    run("rc.d start haveged")
 
     # upgrade everything except glibc
     run("printf 'n\nY\nY\nY\nY\nY\nY\nY\nY\nY\nY\nY\nY\nY\n' | pacman -Su --ignore glibc")
 
     # configure pacman
     run("pacman-key --init")
-    run("rc.d stop haveged", pty=False)
+    run("rc.d stop haveged")
     run("pacman --noconfirm -Rns haveged")
     # sign the master pacman keys https://wiki.archlinux.org/index.php/Pacman-key#Master_keys
     # Note: Level 3 'marginal trust' is suggested, but had to trust level of 4 because of an unknown error.
@@ -82,7 +82,7 @@ def bootstrap():
     # tweak sshd_config (before reboot so it is restarted!) so fabric can sftp with contrib.files.put, see:
     # http://stackoverflow.com/questions/10221839/cant-use-fabric-put-is-there-any-server-configuration-needed
     sed("/etc/ssh/sshd_config", "Subsystem sftp /usr/lib/openssh/sftp-server", "Subsystem sftp internal-sftp")
-    run("rc.d restart sshd", pty=False)
+    run("rc.d restart sshd")
 
     # force netcfg to automatically connect to eth0 and eth1 on reboot
     sed("/etc/conf.d/netcfg", "NETWORKS=\(last\)", "NETWORKS=(@eth0 @eth1)")
@@ -144,9 +144,9 @@ def start_salt():
     # probably should use pgrep instead
     with fabric_settings(warn_only=True):
         if env.host == env.master_server.public_ip:
-            sudo("rc.d start salt-master", pty=False)
+            sudo("rc.d start salt-master")
             time.sleep(3)
-        sudo("rc.d start salt-minion", pty=False)
+        sudo("rc.d start salt-minion")
 
 
 def restart_salt():
@@ -157,6 +157,6 @@ def restart_salt():
     # probably should use pgrep instead
     with fabric_settings(warn_only=True):
         if env.host == env.master_server.public_ip:
-            sudo("rc.d restart salt-master", pty=False)
+            sudo("rc.d restart salt-master")
             time.sleep(3)
-        sudo("rc.d restart salt-minion", pty=False)
+        sudo("rc.d restart salt-minion")
