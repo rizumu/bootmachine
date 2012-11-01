@@ -87,9 +87,8 @@ def setup_salt():
     run("cp /etc/salt/minion.template /etc/salt/minion")
     if env.host == env.master_server.public_ip:
         run("cp /etc/salt/master.template /etc/salt/master")
-        sed("/etc/rc.conf", "crond sshd", "crond sshd iptables @salt-master @salt-minion")
-    else:
-        sed("/etc/rc.conf", "crond sshd", "crond sshd iptables @salt-minion")
+        run("systemctl enable salt-master.service")
+    run("systemctl enable salt-minion.service")
 
     sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
     append("/etc/salt/minion", "grains:\n  roles:")
@@ -105,10 +104,10 @@ def start_salt():
         master_running = run("pgrep salt-master")
         minion_running = run("pgrep salt-minion")
     if not master_running and env.host == env.master_server.public_ip:
-        sudo("rc.d start salt-master")
+        sudo("systemctl start salt-master.service")
         time.sleep(3)
     if not minion_running:
-        sudo("rc.d start salt-minion")
+        sudo("systemctl start salt-minion.service")
 
 
 def restart_salt():
@@ -120,11 +119,11 @@ def restart_salt():
         minion_running = run("pgrep salt-minion")
     if env.host == env.master_server.public_ip:
         if master_running:
-            sudo("rc.d restart salt-master")
+            sudo("systemctl restart salt-master.service")
         else:
-            sudo("rc.d start salt-master")
+            sudo("systemctl restart salt-master.service")
             time.sleep(3)
     if minion_running:
-        sudo("rc.d restart salt-minion")
+        sudo("systemctl restart salt-minion.service")
     else:
-        sudo("rc.d start salt-minion")
+        sudo("systemctl start salt-minion.service")
