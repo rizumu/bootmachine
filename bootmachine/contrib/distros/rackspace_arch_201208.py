@@ -16,17 +16,6 @@ def bootstrap():
 
     Only the bare essentials, the configurator will take care of the rest.
     """
-    # manually set hostname so salt finds it via socket.gethostname()
-    server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
-    sed("/etc/hosts", "# End of file", "")
-    if server.public_ip == env.host:
-        append("/etc/hosts", "{0} {1}".format(server.public_ip, server.name))
-        append("/etc/hosts", "{0} {1}".format(server.private_ip, server.name))
-        append("/etc/hosts", "{0} {1}".format(server.private_ip, server.name))
-    # add the saltmaster-private last
-    append("/etc/hosts", "{0} saltmaster-private".format(env.master_server.private_ip))
-    append("/etc/hosts", "\n# End of file")
-
     # pre upgrade maintenance (updating filesystem and tzdata before pacman)
     run("pacman --noconfirm -Syyu")
 
@@ -47,11 +36,6 @@ def bootstrap():
     with cd("/tmp/"):
         sudo("yaourt --noconfirm -S xe-guest-utilities", user="aur")
 
-    # tweak sshd_config (before reboot so it is restarted!) so fabric can sftp with contrib.files.put, see:
-    # http://stackoverflow.com/questions/10221839/cant-use-fabric-put-is-there-any-server-configuration-needed
-    sed("/etc/ssh/sshd_config", "Subsystem sftp /usr/lib/openssh/sftp-server", "Subsystem sftp internal-sftp")
-    run("rc.d restart sshd")
-
     # upgrade grub
     run("mv /boot/grub /boot/grub-legacy")
     run("printf 'y\nY\nY\nY\nY\nY\nY\nY\nY\nY\n' | pacman -S grub-bios")
@@ -60,11 +44,24 @@ def bootstrap():
     run("grub-install --directory=/usr/lib/grub/i386-pc --target=i386-pc --boot-directory=/boot --recheck --debug /dev/xvda")
     run("grub-mkconfig -o /boot/grub/grub.cfg")
 
-    # configure new kernel and reboot
+    # tweak sshd_config (before reboot so it is restarted!) so fabric can sftp with contrib.files.put, see:
+    # http://stackoverflow.com/questions/10221839/cant-use-fabric-put-is-there-any-server-configuration-needed
+    sed("/etc/ssh/sshd_config", "Subsystem sftp /usr/lib/openssh/sftp-server", "Subsystem sftp internal-sftp")
+
+    # configure new kernel before reboot
     sed("/etc/mkinitcpio.conf", "xen-", "xen_")  # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6
     sed("/etc/mkinitcpio.conf", "usbinput", "usbinput fsck")
     run("mkinitcpio -p linux")
+
+    # a pure systemd installation
+    server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
+    append("/etc/hostname", server.name)
+    append("/etc/locale.conf", "LANG=en_US.UTF-8\nLC_COLLATE=C")
+    run("printf 'y\nY\n' | pacman -S systemd-sysvcompat")
     reboot()
+    run("pacman --noconfirm -Rns initscripts")
+    for daemon in ["netcfg", "sshd", "syslog-ng"]:
+        run("systemctl enable {0}.service".format(daemon))
 
 
 def install_salt(installer="aur"):
