@@ -164,6 +164,7 @@ def configure():
     # run the configurator and refresh the env variables by calling master()
     if env.unconfigured_servers:
         configurator.launch()
+        configurator.configure()
         env.configure_attempts += 1
         master()
         # determine if configuration was a success and reboot just in case.

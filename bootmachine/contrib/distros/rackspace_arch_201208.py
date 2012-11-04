@@ -68,6 +68,9 @@ def install_salt(installer="aur"):
     """
     Install salt with the chosen installer.
     """
+    append("/etc/hosts",
+           "{0} saltmaster-private".format(env.master_server.private_ip))
+
     with cd("/tmp/"):
         if installer == "aur":
             sudo("yaourt --noconfirm -S salt", user="aur")
@@ -90,7 +93,8 @@ def setup_salt():
         run("systemctl enable salt-master.service")
     run("systemctl enable salt-minion.service")
 
-    sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
+    sed("/etc/salt/minion", "#master: salt", "master: {0}".format(env.master_server.private_ip))
+    sed("/etc/salt/minion", "#id:", "id: {0}".format(server.name))
     append("/etc/salt/minion", "grains:\n  roles:")
     for role in server.roles:
         append("/etc/salt/minion", "    - {0}".format(role))

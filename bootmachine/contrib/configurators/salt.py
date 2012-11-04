@@ -18,6 +18,16 @@ import settings
 
 
 @task
+def configure(match="'*'"):
+    """
+    Run salt state.highstate on hosts that match.
+    Usage:
+        fab master configurator.configure
+    """
+    highstate(match)
+
+
+@task
 def highstate(match="'*'"):
     """
     Run salt state.highstate on hosts that match.
