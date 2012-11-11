@@ -44,7 +44,7 @@ Distros
 
 Currently supported:
 
-    * Arch Linux (as of Aug 10 2012, see https://github.com/rizumu/bootmachine/issues/8)
+    * Arch Linux
     * Ubuntu
     * Fedora
     * Debian
