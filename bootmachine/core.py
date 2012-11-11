@@ -1,3 +1,4 @@
+
 """
 BOOTMACHINE: A-Z transmutation of aluminium into rhodium.
 """
@@ -29,9 +30,9 @@ def import_module(module):
     or distro.
 
     Import the provider, configurator, or distro module via a string.
-        ex. ``bootmachine.contrib.providers.rackspace_openstack_v1``
+        ex. ``bootmachine.contrib.providers.rackspace_openstack_v2``
         ex. ``bootmachine.contrib.configurators.salt``
-        ex. ``bootmachine.contrib.distros.arch_201110``
+        ex. ``bootmachine.contrib.distros.arch_201208``
     """
     try:
         __import__(module)
@@ -120,6 +121,9 @@ def bootstrap():
     Usage:
         fab each bootstrap
     """
+    if not hasattr(env, "bootmachine_servers"):
+        abort("bootstrap(): Try `fab each bootstrap`")
+
     if int(settings.SSH_PORT) == 22:
         abort("bootstrap(): Security Error! Change ``settings.SSH_PORT`` to something other than ``22``")
 
@@ -160,6 +164,7 @@ def configure():
     # run the configurator and refresh the env variables by calling master()
     if env.unconfigured_servers:
         configurator.launch()
+        configurator.configure()
         env.configure_attempts += 1
         master()
         # determine if configuration was a success and reboot just in case.
@@ -281,7 +286,6 @@ def __shared_setup():
             connect(server.user, server.public_ip, server.port)
         except NetworkError:
             known_hosts.add(server.public_ip)
-
 
 def __set_ssh_vars(valid_object):
     """

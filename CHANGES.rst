@@ -1,6 +1,27 @@
 Bootmachine Changelog
 =====================
 
+0.5.9 (25.10.2012)
+------------------
+CHANGES:
+
+* resolve issue #8 by using pgrep to check if
+  salt-master/minion daemons instead of relying
+  on Fabric.
+* deprecate explicit support for rackspace api v1
+
+0.5.4, 0.5.5, 0.5.6, 0.5.7, 0.5.8 (13.09.2012)
+----------------------------------------------
+CHANGES:
+
+* fix setup.py and use a MANIFEST.in to include configuration files
+
+0.5.3 (13.09.2012)
+------------------
+CHANGES:
+
+* some fixes to the provided salt-states
+
 0.5.2 (13.08.2012)
 ------------------
 NEW FEATURES:
@@ -67,7 +88,7 @@ Puppet, and other distros.
 Any contributions to the core or submissions of new modules for the
 contrib will be much appreciated. I'd like to see this project allow
 developers to switch between providers with ease, simplify the process
-nof configuring a cloud stack, and encourage experimentation with new
+of configuring a cloud stack, and encourage experimentation with new
 distros.
 
 This is not a 1.0 yet, but please give it a try. It has been working

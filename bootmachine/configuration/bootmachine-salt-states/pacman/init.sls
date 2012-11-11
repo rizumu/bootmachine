@@ -1,5 +1,6 @@
 /etc/pacman.conf:
   file.managed:
+    - mode: 644
     - source: salt://pacman/pacman.conf.j2
     - order: 1
     - template: jinja

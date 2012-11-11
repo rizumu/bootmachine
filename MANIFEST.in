@@ -1,0 +1,6 @@
+include README.rst
+include MANIFEST.in
+include requirements.txt
+recursive-include docs *
+recursive-include bootmachine/configuration *
+recursive-include bootmachine/templates *

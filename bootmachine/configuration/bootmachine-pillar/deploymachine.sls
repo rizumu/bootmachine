@@ -1,3 +1,5 @@
+# Permission of 600 recommended for this file
+
 # put some custom salt data here
 
 # RC (rackspace)

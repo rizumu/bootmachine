@@ -1,3 +1,4 @@
+import os
 import sys
 import time
 
@@ -14,6 +15,16 @@ from jinja2 import Template
 from bootmachine import known_hosts
 
 import settings
+
+
+@task
+def configure(match="'*'"):
+    """
+    Run salt state.highstate on hosts that match.
+    Usage:
+        fab master configurator.configure
+    """
+    highstate(match)
 
 
 @task
@@ -41,7 +52,14 @@ def upload_saltstates():
     if env.host != env.master_server.public_ip:
         abort("tried to upload salttates on a non-master server")
 
+    # catch rsync issue with emacs autosave files
+    for path in (settings.SALTSTATES_DIR, settings.PILLAR_DIR):
+        for match in ("#*#", ".#*"):
+            if local('find {0} -name "{1}"'.format(path, match), capture=True):
+                abort("A temp file matching '{0}' exists in the {1} directory.".format(match, path))
+
     # rsync pillar and salt files to the fabric users local directory
+
     rsync_project(local_dir=settings.SALTSTATES_DIR, remote_dir="./salt/", delete=True,
                   extra_opts="--compress --copy-links", ssh_opts="-o StrictHostKeyChecking=no")
     rsync_project(local_dir=settings.PILLAR_DIR, remote_dir="./pillar/", delete=True,

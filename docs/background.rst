@@ -11,13 +11,14 @@ basic, simply a specialized Fabric libary.
 
 Providers:
 
-    * Rackspace Openstack API v1+v2
+    * Rackspace Openstack API v2
+    * Rackspace Openstack API v1 (deprecated)
     * Amazon EC2 (forthcoming)
     * Write your own..
 
 Configurators:
 
-    * Salt 0.10.1 http://saltstack.org/
+    * Salt http://saltstack.org/
     * Chef (forthcoming)
     * Puppet (forthcoming)
     * Write your own...

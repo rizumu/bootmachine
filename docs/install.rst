@@ -44,20 +44,22 @@ Some info on choosing the type of encryption for your ssh key::
    presumably due to patent concerns. Check Fedora 18 once released.
    http://comments.gmane.org/gmane.linux.redhat.fedora.legal/1576
 
-To use Rackspace's openstack api v1 you must also set some environment
+To use Rackspace's openstack api v2 you must also set some environment
 variables for your interactive shell. The recommended installation is
 to add the following to your ``~/.bashrc``::
 
-    export OPENSTACK_COMPUTE_USERNAME=""  # your rackspace username
-    export OPENSTACK_COMPUTE_APIKEY=""  # your rackspace apikey
-
-For Rackspace api v2 ::
     export OS_USERNAME=""  # your rackspace username
     export OS_PASSWORD=""  # your rackspace password
     export OS_TENANT_NAME=""  # your rackspace accountid
     export OS_AUTH_URL="https://identity.api.rackspacecloud.com/v2.0/"
     export OS_REGION_NAME="DFW"
     export OS_COMPUTE_API_VERSION="2"
+
+For Rackspace api v1 (deprecated)::
+
+    export OPENSTACK_COMPUTE_USERNAME=""  # your rackspace username
+    export OPENSTACK_COMPUTE_APIKEY=""  # your rackspace apikey
+
 
 The same is true for the Amazon boto api::
 

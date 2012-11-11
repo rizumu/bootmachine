@@ -4,24 +4,23 @@ from bootmachine.settings_tests import *
 
 
 CONFIGURATOR_MODULE = "bootmachine.contrib.configurators.salt"
-MASTER = "rackspacev1-salt-ubuntu1204-a"
+MASTER = "rackspacev2-salt-arch201208-a"
 
-PROVIDER_MODULE = "bootmachine.contrib.providers.rackspace_openstack_v1"
+PROVIDER_MODULE = "bootmachine.contrib.providers.rackspace_openstack_v2"
 SERVERS = [
-    {"servername": "rackspacev1-salt-ubuntu1204-a",
+    {"servername": "rackspacev2-salt-arch201208-a",
      "roles": ["loadbalancer"],
-     "flavor": "1",
-     "image": "Ubuntu 12.04 LTS",
-     "distro_module": "bootmachine.contrib.distros.rackspace_ubuntu_1204"},
-    {"servername": "rackspacev1-salt-ubuntu1204-b",
+     "flavor": "2",
+     "image": "Arch 2012.08",
+     "distro_module": "bootmachine.contrib.distros.rackspace_arch_201208"},
+    {"servername": "rackspacev2-salt-arch201208-b",
      "roles": ["application"],
-     "flavor": "1",
-     "image": "Ubuntu 12.04 LTS",
-     "distro_module": "bootmachine.contrib.distros.rackspace_ubuntu_1204"},
+     "flavor": "2",
+     "image": "Arch 2012.08",
+     "distro_module": "bootmachine.contrib.distros.rackspace_arch_201208"},
 ]
 
-SSH_KEYPAIR_NAME = "id_rsa"
-SSH_PUBLIC_KEY = os.path.join(os.environ["HOME"], ".ssh", "{0}.pub".format(SSH_KEYPAIR_NAME))
+SSH_PUBLIC_KEY = os.path.join(os.environ["HOME"], ".ssh", "id_ecdsa.pub")
 enc, keyhash = open(SSH_PUBLIC_KEY).read().split(" ")[:2]
 if "==" in keyhash:
     keyhash = keyhash.split("==")[0]

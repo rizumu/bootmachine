@@ -1,14 +1,14 @@
 include:
   - groups
 
-/srv/salt:
+/srv/salt/:
   file.directory:
     - user: root
     - group: ops
     - mode: 770
     - makedirs: True
 
-/srv/pillar:
+/srv/pillar/:
   file.directory:
     - user: root
     - group: ops
