@@ -5,10 +5,12 @@ import os
 CONFIGURATION MANAGEMENT
 """
 # salt
-SALTSTATES_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                              "configuration", "bootmachine-salt-states/")
-PILLAR_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                          "configuration", "bootmachine-pillar/")
+LOCAL_SALTSTATES_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                    "configuration", "states/")
+LOCAL_PILLARS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                 "configuration", "pillars/")
+REMOTE_STATES_DIR = "/srv/salt/states/"
+REMOTE_PILLARS_DIR = "/srv/salt/pillars/"
 SALT_INSTALLER_ARCH_201208 = "aur"
 SALT_INSTALLER_DEBIAN_6 = "backports"
 SALT_INSTALLER_FEDORA_16 = "rpm-stable"

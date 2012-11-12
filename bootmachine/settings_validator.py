@@ -26,7 +26,7 @@ def validate_settings(settings):
     ]
 
     if settings.CONFIGURATOR_MODULE == "bootmachine.contrib.configurators.salt":
-        required_settings.extend(["SALTSTATES_DIR", "PILLAR_DIR"])
+        required_settings.extend(["LOCAL_STATES_DIR", "LOCAL_PILLARS_DIR"])
 
     if settings.PROVIDER_MODULE == "bootmachine.contrib.providers.rackspace_openstack_v1":
         print(red("Rackspace Openstack API v1 is deprecated. Upgrade to v2."))

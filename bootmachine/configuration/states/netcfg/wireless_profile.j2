@@ -1,0 +1,18 @@
+CONNECTION='wireless'
+DESCRIPTION='Wireless connection for {{ name }}'
+INTERFACE='wlan0'
+SECURITY='{{ security }}'
+IP='dhcp'
+
+{% if key %}
+ESSID='{{ essid }}'
+KEY='{{ key }}'
+{% else %}
+CONFIGSECTION='
+    ssid="{{ essid }}"
+    key_mgmt={{ key_mgmt }}
+    eap={{ eap }}
+    anonymous_identity="{{ identity }}"
+    identity="{{ identity }}"
+    password="{{ password }}"'
+{% endif %}

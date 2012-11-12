@@ -1,0 +1,20 @@
+CONNECTION="ethernet"
+DESCRIPTION='Wired connection for {{ name }}'
+INTERFACE={{ interface }}
+IP="{{ ip_type }}"
+ADDR="{{ addr }}"
+NETMASK="{{ netmask }}"
+{% if gateway %}
+GATEWAY="{{ gateway }}"
+{% endif %}
+IP6="{{ ip6_type }}"
+{% if addr6 %}
+ADDR6="{{ addr6 }}"
+{% endif %}
+{% if gateway6 %}
+GATEWAY6="{{ gateway6 }}"
+{% endif %}
+{% if routes %}
+ROUTES="({% for route in routes %}"{{ route }}" {% endfor %})"
+{% endif %}
+DNS=({{ dns }})

@@ -51,34 +51,29 @@ def upload_saltstates():
     """
     if env.host != env.master_server.public_ip:
         abort("tried to upload salttates on a non-master server")
+    local_states_dir = settings.LOCAL_STATES_DIR
+    local_pillars_dir = settings.LOCAL_PILLARS_DIR
+    remote_states_dir = settings.REMOTE_STATES_DIR
+    remote_pillars_dir = settings.REMOTE_PILLARS_DIR
+    if not exists(remote_states_dir, use_sudo=True):
+        sudo("mkdir --parents {0}".format(remote_states_dir))
 
     # catch rsync issue with emacs autosave files
-    for path in (settings.SALTSTATES_DIR, settings.PILLAR_DIR):
+    for path in (local_states_dir, local_pillars_dir):
         for match in ("#*#", ".#*"):
             if local('find {0} -name "{1}"'.format(path, match), capture=True):
                 abort("A temp file matching '{0}' exists in the {1} directory.".format(match, path))
 
     # rsync pillar and salt files to the fabric users local directory
-
-    rsync_project(local_dir=settings.SALTSTATES_DIR, remote_dir="./salt/", delete=True,
+    rsync_project(local_dir=local_states_dir, remote_dir="./states/", delete=True,
                   extra_opts="--compress --copy-links", ssh_opts="-o StrictHostKeyChecking=no")
-    rsync_project(local_dir=settings.PILLAR_DIR, remote_dir="./pillar/", delete=True,
+    rsync_project(local_dir=local_pillars_dir, remote_dir="./pillars/", delete=True,
                   extra_opts="--compress --copy-links", ssh_opts="-o StrictHostKeyChecking=no")
 
-    # backup the jinja2 created pillar files
-    if exists("/srv/pillar/salt.sls"):
-        sudo("mv /srv/pillar/salt.sls /srv/salt.sls")
-    if exists("/srv/pillar/users.sls"):
-        sudo("mv /srv/pillar/users.sls /srv/users.sls")
     # delete the pillar and state files
-    sudo("rm -rf /srv/salt && rm -rf /srv/pillar")
+    sudo("rm -rf {0} && rm -rf {1}".format(remote_states_dir, remote_pillars_dir))
     # copy the rsynced versions over as root
-    sudo("cp -r ./salt /srv/salt && cp -r ./pillar /srv/pillar")
-    # put the jinja2 created pillar files back in place
-    if exists("/srv/salt.sls"):
-        sudo("mv /srv/salt.sls /srv/pillar/salt.sls")
-    if exists("/srv/users.sls"):
-        sudo("mv /srv/users.sls /srv/pillar/users.sls")
+    sudo("cp -r ./states {0} && cp -r ./pillars {1}".format(remote_states_dir, remote_pillars_dir))
 
 
 @task
@@ -91,24 +86,34 @@ def pillar_update():
     if env.host != env.master_server.public_ip:
         abort("tried to pillar_update on a non-master server")
 
-    pillar_dir = settings.PILLAR_DIR
-    bootmachine_sls_j2 = Template(open("{0}bootmachine.sls.j2".format(pillar_dir), "r", 0).read())
-    bootmachine_sls = open("{0}bootmachine.sls".format(pillar_dir), "w", 0)
+    local_pillars_dir = settings.LOCAL_PILLARS_DIR
+    remote_pillars_dir = settings.REMOTE_PILLARS_DIR
+    if not exists(remote_pillars_dir, use_sudo=True):
+        sudo("mkdir --parents {0}".format(remote_pillars_dir))
+
+    bootmachine_sls_j2 = Template(open("{0}bootmachine.sls.j2".format(local_pillars_dir), "r", 0).read())
+    bootmachine_sls = open("{0}bootmachine.sls".format(local_pillars_dir), "w", 0)
     bootmachine_sls.write(bootmachine_sls_j2.render(
         bootmachine_servers=env.bootmachine_servers,
+        salt_remote_states_dir=settings.REMOTE_STATES_DIR,
+        salt_remote_pillars_dir=remote_pillars_dir,
         saltmaster_hostname=settings.MASTER,
         saltmaster_public_ip=env.master_server.public_ip,
         saltmaster_private_ip=env.master_server.private_ip,
-        ssh_port = settings.SSH_PORT,
-        ssh_users = settings.SSH_USERS,
+        ssh_port=settings.SSH_PORT,
+        ssh_users=settings.SSH_USERS,
     ))
+
     # TODO: only upload and refresh when file has changes
+    homedir = local("eval echo ~${0}".format(env.user), capture=True)
     try:
-        local("scp -P {0} {1}bootmachine.sls {2}@{3}:/tmp/bootmachine.sls".format(env.port, pillar_dir, env.user, env.host))
+        local("scp -P {0} {1}bootmachine.sls {2}@{3}:{4}/bootmachine.sls".format(
+            env.port, local_pillars_dir, env.user, env.host, homedir))
     except:
         known_hosts.update(env.host)
-        local("scp -P {0} {1}bootmachine.sls {2}@{3}:/tmp/bootmachine.sls".format(env.port, pillar_dir, env.user, env.host))
-    sudo("mv /tmp/bootmachine.sls /srv/pillar/bootmachine.sls")
+        local("scp -P {0} {1}bootmachine.sls {2}@{3}:$(eval echo ~${4})/bootmachine.sls".format(
+            env.port, local_pillars_dir, env.user, env.host, homedir))
+    sudo("mv {0}/bootmachine.sls {1}bootmachine.sls".format(homedir, remote_pillars_dir))
     sudo("salt '*' saltutil.refresh_pillar &")  # background because it hangs on debian 6
 
 
