@@ -5,7 +5,7 @@ import os
 CONFIGURATION MANAGEMENT
 """
 # salt
-LOCAL_SALTSTATES_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+LOCAL_STATES_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
                                     "configuration", "states/")
 LOCAL_PILLARS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
                                  "configuration", "pillars/")
