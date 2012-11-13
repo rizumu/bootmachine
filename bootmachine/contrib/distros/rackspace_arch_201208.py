@@ -5,6 +5,8 @@ from fabric.context_managers import cd, settings as fabric_settings
 from fabric.contrib.files import append, sed, uncomment
 from fabric.operations import reboot
 
+import settings
+
 
 DISTRO = "ARCH_201208"
 SALT_INSTALLERS = ["aur", "aur-git"]
@@ -90,6 +92,10 @@ def setup_salt():
     run("cp /etc/salt/minion.template /etc/salt/minion")
     if env.host == env.master_server.public_ip:
         run("cp /etc/salt/master.template /etc/salt/master")
+        append("/etc/salt/master", "file_roots:\n  base:\n    - {0}".format(
+               settings.REMOTE_STATES_DIR))
+        append("/etc/salt/master", "pillar_roots:\n  base:\n    - {0}".format(
+               settings.REMOTE_PILLARS_DIR))
         run("systemctl enable salt-master.service")
     run("systemctl enable salt-minion.service")
 

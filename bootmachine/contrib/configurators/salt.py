@@ -90,7 +90,6 @@ def pillar_update():
     remote_pillars_dir = settings.REMOTE_PILLARS_DIR
     if not exists(remote_pillars_dir, use_sudo=True):
         sudo("mkdir --parents {0}".format(remote_pillars_dir))
-
     bootmachine_sls_j2 = Template(open("{0}bootmachine.sls.j2".format(local_pillars_dir), "r", 0).read())
     bootmachine_sls = open("{0}bootmachine.sls".format(local_pillars_dir), "w", 0)
     bootmachine_sls.write(bootmachine_sls_j2.render(
@@ -105,15 +104,19 @@ def pillar_update():
     ))
 
     # TODO: only upload and refresh when file has changes
-    homedir = local("eval echo ~${0}".format(env.user), capture=True)
+    home_dir = local("eval echo ~${0}".format(env.user), capture=True)
+    if exists(home_dir, use_sudo=True):
+        scp_dir = home_dir
+    else:
+        scp_dir = "/tmp/"
     try:
         local("scp -P {0} {1}bootmachine.sls {2}@{3}:{4}/bootmachine.sls".format(
-            env.port, local_pillars_dir, env.user, env.host, homedir))
+              env.port, local_pillars_dir, env.user, env.host, scp_dir))
     except:
         known_hosts.update(env.host)
         local("scp -P {0} {1}bootmachine.sls {2}@{3}:$(eval echo ~${4})/bootmachine.sls".format(
-            env.port, local_pillars_dir, env.user, env.host, homedir))
-    sudo("mv {0}/bootmachine.sls {1}bootmachine.sls".format(homedir, remote_pillars_dir))
+              env.port, local_pillars_dir, env.user, env.host, scp_dir))
+    sudo("mv {0}/bootmachine.sls {1}bootmachine.sls".format(scp_dir, remote_pillars_dir))
     sudo("salt '*' saltutil.refresh_pillar &")  # background because it hangs on debian 6
 
 

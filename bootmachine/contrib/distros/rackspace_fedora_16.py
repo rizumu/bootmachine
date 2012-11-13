@@ -5,6 +5,8 @@ from fabric.context_managers import settings as fabric_settings
 from fabric.contrib.files import append, sed
 from fabric.operations import reboot
 
+import settings
+
 
 DISTRO = "FEDORA_16"
 SALT_INSTALLERS = ["rpm-stable", "rpm-epel-testing"]
@@ -51,10 +53,15 @@ def setup_salt():
     server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
 
     if env.host == env.master_server.public_ip:
+        append("/etc/salt/master", "file_roots:\n  base:\n    - {0}".format(
+               settings.REMOTE_STATES_DIR))
+        append("/etc/salt/master", "pillar_roots:\n  base:\n    - {0}".format(
+               settings.REMOTE_PILLARS_DIR))
         run("systemctl enable salt-master.service")
     run("systemctl enable salt-minion.service")
 
-    sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
+    sed("/etc/salt/minion", "#master: salt", "master: {0}".format(env.master_server.private_ip))
+    sed("/etc/salt/minion", "#id:", "id: {0}".format(server.name))
     append("/etc/salt/minion", "grains:\n  roles:")
     for role in server.roles:
         append("/etc/salt/minion", "    - {0}".format(role))

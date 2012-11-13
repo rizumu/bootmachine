@@ -5,6 +5,8 @@ from fabric.context_managers import cd, settings as fabric_settings
 from fabric.contrib.files import append, sed, uncomment
 from fabric.operations import reboot
 
+import settings
+
 
 DISTRO = "ARCH_201110"
 SALT_INSTALLERS = ["aur", "aur-git"]
@@ -126,11 +128,16 @@ def setup_salt():
     run("cp /etc/salt/minion.template /etc/salt/minion")
     if env.host == env.master_server.public_ip:
         run("cp /etc/salt/master.template /etc/salt/master")
+        append("/etc/salt/master", "file_roots:\n  base:\n    - {0}".format(
+               settings.REMOTE_STATES_DIR))
+        append("/etc/salt/master", "pillar_roots:\n  base:\n    - {0}".format(
+               settings.REMOTE_PILLARS_DIR))
         sed("/etc/rc.conf", "crond sshd", "crond sshd iptables @salt-master @salt-minion")
     else:
         sed("/etc/rc.conf", "crond sshd", "crond sshd iptables @salt-minion")
 
-    sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
+    sed("/etc/salt/minion", "#master: salt", "master: {0}".format(env.master_server.private_ip))
+    sed("/etc/salt/minion", "#id:", "id: {0}".format(server.name))
     append("/etc/salt/minion", "grains:\n  roles:")
     for role in server.roles:
         append("/etc/salt/minion", "    - {0}".format(role))
