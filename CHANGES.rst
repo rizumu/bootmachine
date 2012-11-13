@@ -1,6 +1,17 @@
 Bootmachine Changelog
 =====================
 
+0.5.10 (dev)
+------------
+
+* add the missing salt-version to the pillar data
+* switch Arch 2012.08 to a pure systemd installation
+* nova client now requires specifying pub and priv networks
+  during a build. sleep longer during boot stage to prevent
+  extra api calls to rackspace.
+* refactor salt states and move them to a new folder.
+* add support for changing the remote directory of states and pillars.
+
 0.5.9 (25.10.2012)
 ------------------
 CHANGES:
