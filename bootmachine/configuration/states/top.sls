@@ -22,7 +22,5 @@ base:
     - pacman
     - pacman.usa
     - ntp
-    - netcfg
-    - netcfg.wired
     - systemd
     - xen

@@ -1,5 +1,0 @@
-.include /usr/lib/systemd/system/netcfg.service
-
-[Unit]
-After={{ pillar.netcfg_device }}.device
-BindTo={{ pillar.netcfg_device }}.device
