@@ -6,9 +6,9 @@ CONFIGURATION MANAGEMENT
 """
 # salt
 LOCAL_STATES_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                                "configuration", "states/")
+                                "configuration", "salt", "states/")
 LOCAL_PILLARS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                                 "configuration", "pillars/")
+                                 "configuration", "salt", "pillars/")
 REMOTE_STATES_DIR = "/srv/salt/states/"
 REMOTE_PILLARS_DIR = "/srv/salt/pillars/"
 SALT_INSTALLER_ARCH_201208 = "aur"

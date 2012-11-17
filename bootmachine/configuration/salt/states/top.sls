@@ -21,6 +21,7 @@ base:
     - kernel.xen
     - pacman
     - pacman.usa
+    - netcfg
     - ntp
     - systemd
     - xen
