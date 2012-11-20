@@ -31,11 +31,11 @@ def bootstrap():
     # create a user, named 'aur', to safely install AUR packages under fakeroot
     # uid and gid values auto increment from 1000
     # to prevent conficts set the 'aur' user's gid and uid to 902
-    run("groupadd -g 902 aur && useradd -u 902 -g 902 -G wheel aur")
+    run("groupadd -g 902 aur && useradd -m -u 902 -g 902 -G wheel aur")
     uncomment("/etc/sudoers", "wheel.*NOPASSWD")
 
     # upgrade non-pacman rackspace installed packages
-    with cd("/tmp/"):
+    with cd("/home/aur/"):
         sudo("yaourt --noconfirm -S xe-guest-utilities", user="aur")
 
     # upgrade grub

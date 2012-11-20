@@ -5,7 +5,7 @@ su - aur -c 'yaourt --noconfirm -S salt':
   cmd.run:
     - user: root
     - unless: yaourt -Q salt | grep '{{ pillar['salt_version'] }}'
-    - cwd: /tmp/
+    - cwd: /home/aur/
     - require:
       - user: aur
 {% elif grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
