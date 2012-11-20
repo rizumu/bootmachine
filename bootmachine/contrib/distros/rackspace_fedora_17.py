@@ -59,13 +59,12 @@ def setup_salt():
         append("/etc/salt/master", "pillar_roots:\n  base:\n    - {0}".format(
                settings.REMOTE_PILLARS_DIR))
         run("systemctl enable salt-master.service")
-    run("systemctl enable salt-minion.service")
-
     sed("/etc/salt/minion", "#master: salt", "master: {0}".format(env.master_server.private_ip))
     sed("/etc/salt/minion", "#id:", "id: {0}".format(server.name))
     append("/etc/salt/minion", "grains:\n  roles:")
     for role in server.roles:
         append("/etc/salt/minion", "    - {0}".format(role))
+    run("systemctl enable salt-minion.service")
 
 
 def start_salt():

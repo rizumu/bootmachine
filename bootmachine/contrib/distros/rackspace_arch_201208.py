@@ -89,21 +89,20 @@ def setup_salt():
     """
     server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
 
-    run("cp /etc/salt/minion.template /etc/salt/minion")
     if env.host == env.master_server.public_ip:
-        run("cp /etc/salt/master.template /etc/salt/master")
+        run("touch /etc/salt/master")
         append("/etc/salt/master", "file_roots:\n  base:\n    - {0}".format(
                settings.REMOTE_STATES_DIR))
         append("/etc/salt/master", "pillar_roots:\n  base:\n    - {0}".format(
                settings.REMOTE_PILLARS_DIR))
         run("systemctl enable salt-master.service")
-    run("systemctl enable salt-minion.service")
-
-    sed("/etc/salt/minion", "#master: salt", "master: {0}".format(env.master_server.private_ip))
-    sed("/etc/salt/minion", "#id:", "id: {0}".format(server.name))
+    run("touch /etc/salt/minion")
+    append("/etc/salt/minion", "master: {0}".format(env.master_server.private_ip))
+    append("/etc/salt/minion", "id: {0}".format(server.name))
     append("/etc/salt/minion", "grains:\n  roles:")
     for role in server.roles:
         append("/etc/salt/minion", "    - {0}".format(role))
+    run("systemctl enable salt-minion.service")
 
 
 def start_salt():
