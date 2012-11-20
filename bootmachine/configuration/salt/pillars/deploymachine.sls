@@ -1,5 +1,5 @@
 # Permission of 600 recommended for this file
-salt_version: 0.10.4-1
+salt_version: 0.10.5-4
 
 # put some custom salt data here
 
