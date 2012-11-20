@@ -72,8 +72,7 @@ def install_salt(installer="aur"):
     """
     append("/etc/hosts",
            "{0} saltmaster-private".format(env.master_server.private_ip))
-
-    with cd("/tmp/"):
+    with cd("/home/aur/"):
         if installer == "aur":
             sudo("yaourt --noconfirm -S salt", user="aur")
         elif installer == "aur-git":
