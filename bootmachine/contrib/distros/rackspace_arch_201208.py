@@ -18,7 +18,11 @@ def bootstrap():
 
     Only the bare essentials, the configurator will take care of the rest.
     """
-    # pre upgrade maintenance (updating filesystem and tzdata before pacman)
+    # configure kernel
+    sed("/etc/mkinitcpio.conf", "xen-", "xen_")  # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6
+    sed("/etc/mkinitcpio.conf", "usbinput", "usbinput fsck")
+
+    # pre upgrade maintenance
     run("pacman --noconfirm -Syyu")
 
     # install essential packages
@@ -50,20 +54,18 @@ def bootstrap():
     # http://stackoverflow.com/questions/10221839/cant-use-fabric-put-is-there-any-server-configuration-needed
     sed("/etc/ssh/sshd_config", "Subsystem sftp /usr/lib/openssh/sftp-server", "Subsystem sftp internal-sftp")
 
-    # configure new kernel before reboot
-    sed("/etc/mkinitcpio.conf", "xen-", "xen_")  # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6
-    sed("/etc/mkinitcpio.conf", "usbinput", "usbinput fsck")
-    run("mkinitcpio -p linux")
-
     # a pure systemd installation
     server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
     append("/etc/hostname", server.name)
     append("/etc/locale.conf", "LANG=en_US.UTF-8\nLC_COLLATE=C")
-    run("printf 'y\nY\n' | pacman -S systemd-sysvcompat")
-    reboot()
     run("pacman --noconfirm -Rns initscripts")
+    run("printf 'y\ny\ny\nY\n' | pacman -S systemd-sysvcompat")
     for daemon in ["netcfg", "sshd", "syslog-ng"]:
         run("systemctl enable {0}.service".format(daemon))
+
+    # double check that system is up to date
+    run("pacman --noconfirm -Syyu")
+    reboot()
 
 
 def install_salt(installer="aur"):
