@@ -28,7 +28,8 @@ been bootstrapped. These servers are then bootstrapped in parallel.
     These commands can also be run separately::
 
         $ fab boot
-        $ fab each bootstrap
+        $ fab each bootstrap_distro
+        $ fab each bootstrap_configurator
         $ fab master configure
 
 After provisioning is complete you can manually login, with the user

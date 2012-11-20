@@ -46,6 +46,9 @@ def validate_settings(settings):
         if not hasattr(settings, setting):
             abort("The `{0}` setting was not found in your settings.py".format(setting))
 
+    if int(settings.SSH_PORT) == 22:
+        abort("bootstrap(): Security Error! Change ``settings.SSH_PORT`` to something other than ``22``")
+
     servernames = [server["servername"] for server in settings.SERVERS]
 
     if not settings.MASTER in servernames:

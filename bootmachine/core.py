@@ -66,9 +66,11 @@ def bootmachine():
         print(green("all servers are fully provisioned."))
         return
 
-    # bootstrap all servers in parallel for speed
-    local("fab each bootstrap")
-    print(green("all servers are bootstrapped."))
+    local("fab each bootstrap_distro")
+    print(green("the distro is bootstrapped on all servers."))
+
+    local("fab each bootstrap_configurator")
+    print(green("the configurator is bootstrapped on all servers."))
 
     # run the configurator from the the master server, maximum of 5x
     master()
@@ -112,41 +114,69 @@ def boot():
 
 @task
 @parallel
-def bootstrap():
+def bootstrap_distro():
     """
-    Bootstraps the configurator on all newly booted servers.
-    Installs the configurator and starts its processes.
-    Does not run the configurator.
+    Bootstraps the distro.
+
+    In parallel for speed.
 
     Usage:
-        fab each bootstrap
+        fab each bootstrap_distro
     """
     if not hasattr(env, "bootmachine_servers"):
-        abort("bootstrap(): Try `fab each bootstrap`")
-
-    if int(settings.SSH_PORT) == 22:
-        abort("bootstrap(): Security Error! Change ``settings.SSH_PORT`` to something other than ``22``")
+        abort("bootstrap_distro(): Try `fab each bootstrap_distro`")
 
     __set_ssh_vars(env)
 
-    if exists("/root/.bootmachine_bootstrapped", use_sudo=True):
-        print(green("{ip_addr} is already bootstrapped, skipping.".format(ip_addr=env.host)))
+    if exists("/root/.bootmachine_distro_bootstrapped", use_sudo=True):
+        print(green("{ip_addr} distro is already bootstrapped, skipping.".format(ip_addr=env.host)))
         return
 
-    print(cyan("... {ip_addr} has begun bootstrapping .".format(ip_addr=env.host)))
+    print(cyan("... {ip_addr} distro has begun bootstrapping .".format(ip_addr=env.host)))
 
     # upgrade distro
     server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
     distro = import_module(server.distro_module)
     distro.bootstrap()
 
+    sudo("touch /root/.bootmachine_distro_bootstrapped")
+    print(green("{0} is bootstrapped.".format(server.name)))
+
+
+@task
+@parallel
+def bootstrap_configurator():
+    """
+    Bootstraps the configurator.
+    Installs the configurator and starts its processes.
+    Does not run the configurator.
+
+    Assumes the distro has been bootstrapped on all servers.
+
+    In parallel for speed.
+
+    Usage:
+        fab each bootstrap_distro
+    """
+    if not hasattr(env, "bootmachine_servers"):
+        abort("bootstrap_configurator(): Try `fab each bootstrap_configurator`")
+
+    __set_ssh_vars(env)
+
+    if exists("/root/.bootmachine_configurator_bootstrapped", use_sudo=True):
+        print(green("{ip_addr} configurator is already bootstrapped, skipping.".format(ip_addr=env.host)))
+        return
+
+    print(cyan("... {ip_addr} configurator has begun bootstrapping .".format(ip_addr=env.host)))
+
     # bootstrap configurator
+    server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
+    distro = import_module(server.distro_module)
     configurator.install(distro)
     configurator.setup(distro)
     configurator.start(distro)
-    run("iptables -F")  # flush defaults before configuring
-    run("touch /root/.bootmachine_bootstrapped")
 
+    sudo("touch /root/.bootmachine_configurator_bootstrapped")
     print(green("{0} is bootstrapped.".format(server.name)))
 
 
@@ -154,6 +184,9 @@ def bootstrap():
 def configure():
     """
     Configure all unconfigured servers.
+
+    Assumes the distro and configurator have been bootstrapped on all
+    servers.
 
     Usage:
         fab configure
@@ -164,6 +197,7 @@ def configure():
     # run the configurator and refresh the env variables by calling master()
     if env.unconfigured_servers:
         configurator.launch()
+        sudo("iptables -F")  # flush defaults before configuring
         configurator.configure()
         env.configure_attempts += 1
         master()
