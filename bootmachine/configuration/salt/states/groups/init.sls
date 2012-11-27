@@ -1,4 +1,4 @@
-{% if grains['os'] == 'Ubuntu' or grains['os'] == 'Debian' %}
+{% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
 wheel:
   group.present:
     - gid: 902

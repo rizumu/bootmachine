@@ -6,6 +6,9 @@ include:
 {% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
 salt-master:
   pkg.installed
+{% elif grains['os'] == 'Fedora' %}
+salt:
+  pkg.installed
 {% endif %}
 
 /etc/salt/master:
@@ -32,6 +35,11 @@ salt-master-daemon:
     - require:
       - file: /etc/salt/master
       - pkg: salt-master
+{% elif grains['os'] == 'Arch' %}
+    - watch:
+      - file: /etc/salt/master
+    - require:
+      - file: /etc/salt/master
 {% elif grains['os'] == 'Fedora' %}
     - watch:
       - file: /etc/salt/master
@@ -39,10 +47,4 @@ salt-master-daemon:
     - require:
       - file: /etc/salt/master
       - pkg: salt
-{% elif grains['os'] == 'Arch' %}
-    - provider: systemd
-    - watch:
-      - file: /etc/salt/master
-    - require:
-      - file: /etc/salt/master
 {% endif %}

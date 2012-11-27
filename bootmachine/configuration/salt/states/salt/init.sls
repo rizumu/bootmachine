@@ -1,6 +1,9 @@
 # Ensure that the salt minion is running and on
 
-{% if grains['os'] == 'Arch' %}
+{% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
+salt-minion:
+  pkg.installed
+{% elif grains['os'] == 'Arch' %}
 su - aur -c 'yaourt --noconfirm -S salt':
   cmd.run:
     - user: root
@@ -9,10 +12,7 @@ su - aur -c 'yaourt --noconfirm -S salt':
     - cwd: /home/aur/
     - require:
       - user: aur
-{% elif grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
-salt-minion:
-  pkg.installed
-{% else %}
+{% elif grains['os'] == 'Fedora' %}
 salt:
   pkg.installed
 {% endif %}
@@ -31,23 +31,25 @@ salt-minion-daemon:
   service.running:
     - name: salt-minion
     - enabled: True
-    - provider: systemd
-    - watch:
-      - file: /etc/salt/minion
-    - require:
-      - file: /etc/salt/minion
-{% if grains['os'] == 'Arch' %}
-    - watch:
-      - file: /etc/salt/minion
-    - require:
-      - file: /etc/salt/minion
-{% elif grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
+{% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
     - watch:
       - file: /etc/salt/minion
       - pkg: salt-minion
     - require:
       - file: /etc/salt/minion
       - pkg: salt-minion
+{% elif grains['os'] == 'Arch' %}
+    - watch:
+      - file: /etc/salt/minion
+    - require:
+      - file: /etc/salt/minion
+{% elif grains['os'] == 'Fedora' %}
+    - watch:
+      - file: /etc/salt/minion
+      - pkg: salt
+    - require:
+      - file: /etc/salt/minion
+      - pkg: salt
 {% endif %}
 
 salt-config-templates:

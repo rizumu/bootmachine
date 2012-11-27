@@ -2,7 +2,7 @@
 emacs23-nox:
   pkg:
     - installed
-{% else %}
+{% elif grains['os'] == 'Arch' or grains['os'] == 'Fedora' %}
 emacs-nox:
   pkg:
     - installed
