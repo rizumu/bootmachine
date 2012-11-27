@@ -24,6 +24,10 @@ from bootmachine.settings_validator import validate_settings
 validate_settings(settings)
 
 
+# Incrase reconnection attempts when rebooting
+env.connection_attempts = 12
+
+
 def import_module(module):
     """
     This allows one to write a custom backend for a provider, configurator,
@@ -57,10 +61,8 @@ def bootmachine():
     # set environment variables
     master()
     env.new_server_booted = False
-
     # boot new servers in serial to avoid api overlimit
     boot()
-
     output = local("fab each ssh_test", capture=True)
     if "CONFIGURATOR FAIL!" not in output:
         print(green("all servers are fully provisioned."))
