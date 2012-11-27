@@ -12,27 +12,6 @@ servers:
 # SSH
 ssh_port: {{ ssh_port }}
 
-# PACMAN
-pacman_extra_repos:
-  archlinuxfr:
-    url: http://repo.archlinux.fr
-
-# SALT
-saltmaster_hostname: {{ saltmaster_hostname }}
-
-saltmaster_private_ip: {{ saltmaster_private_ip }}
-
-saltmaster_public_ip: {{ saltmaster_public_ip }}
-
-saltminion_private_ips:
-{% for server in bootmachine_servers %}
-  - {{ server.private_ip }}
-{% endfor %}
-
-salt_remote_states_dir: {{ salt_remote_states_dir }}
-
-salt_remote_pillars_dir: {{ salt_remote_pillars_dir }}
-
 # USERS
 users:
 {% for user in ssh_users %}
@@ -49,3 +28,21 @@ users:
 {% endfor %}
       ]
 {% endfor %}
+
+# SALT
+saltmaster_hostname: {{ saltmaster_hostname }}
+saltmaster_private_ip: {{ saltmaster_private_ip }}
+saltmaster_public_ip: {{ saltmaster_public_ip }}
+saltminion_private_ips:
+{% for server in bootmachine_servers %}
+  - {{ server.private_ip }}
+{% endfor %}
+salt_remote_states_dir: {{ salt_remote_states_dir }}
+salt_remote_pillars_dir: {{ salt_remote_pillars_dir }}
+
+# ARCH SPECIFIC
+pacman_extra_repos:
+  archlinuxfr:
+    url: http://repo.archlinux.fr
+salt_aur_pkgver: {{ salt_aur_pkgver }}
+salt_aur_pkgrel: {{ salt_aur_pkgrel }}

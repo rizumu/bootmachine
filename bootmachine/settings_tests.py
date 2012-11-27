@@ -12,6 +12,8 @@ LOCAL_PILLARS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
 REMOTE_STATES_DIR = "/srv/salt/states/"
 REMOTE_PILLARS_DIR = "/srv/salt/pillars/"
 SALT_INSTALLER_ARCH_201208 = "aur"
+AUR_PKGVER = "0.10.5"
+AUR_PKGREL = "4"
 SALT_INSTALLER_DEBIAN_6 = "backports"
 SALT_INSTALLER_FEDORA_16 = "rpm-stable"
 SALT_INSTALLER_FEDORA_17 = "rpm-stable"
@@ -24,6 +26,7 @@ PUPPET_RECIPES_DIR = NotImplementedError()
 # chef (not yet implemented)
 CHEF_VERSION = NotImplementedError()
 CHEF_RECIPIES_DIR = NotImplementedError()
+
 
 """
 PROVIDERS AND SERVER STACK
@@ -43,6 +46,7 @@ OS_COMPUTE_API_VERSION = os.environ.get("OS_COMPUTE_API_VERSION")
 # Amazon authentication via boto
 AWS_ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+
 
 """
 SECURITY

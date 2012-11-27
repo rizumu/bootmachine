@@ -5,7 +5,7 @@ import time
 from fabric.api import env, local, sudo
 from fabric.colors import blue, cyan, green, magenta, red, white, yellow
 from fabric.context_managers import settings as fabric_settings
-from fabric.contrib.files import contains, exists
+from fabric.contrib.files import exists
 from fabric.contrib.project import rsync_project
 from fabric.decorators import task, parallel
 from fabric.utils import abort
@@ -101,6 +101,8 @@ def pillar_update():
         saltmaster_private_ip=env.master_server.private_ip,
         ssh_port=settings.SSH_PORT,
         ssh_users=settings.SSH_USERS,
+        salt_aur_pkgver=settings.AUR_PKGVER,
+        salt_aur_pkgrel=settings.AUR_PKGREL,
     ))
 
     # TODO: only upload and refresh when file has changes

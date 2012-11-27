@@ -1,8 +1,11 @@
 import time
+import urllib2
 
 from fabric.api import env, run, sudo
 from fabric.context_managers import cd, settings as fabric_settings
-from fabric.contrib.files import append, sed, uncomment
+from fabric.contrib.files import append, contains, sed, uncomment
+
+from fabric.utils import abort
 
 import settings
 
@@ -11,12 +14,29 @@ DISTRO = "ARCH_201208"
 SALT_INSTALLERS = ["aur", "aur-git"]
 
 
+def validate_configurator_version():
+    """
+    Arch is a rolling release distro, therefore it is important to ensure
+    the configurator version is current.
+    """
+    if settings.CONFIGURATOR_MODULE == "bootmachine.contrib.configurators.salt":
+        pkgver = settings.AUR_PKGVER
+        pkgrel = settings.AUR_PKGREL
+        response = urllib2.urlopen("https://aur.archlinux.org/packages/sa/salt/PKGBUILD")
+        for line in response:
+            if line.startswith("pkgver=") and not pkgver in line:
+                abort("The requested Salt 'pkgrel={0}' in the AUR was updated to '{1}'.".format(pkgver, line.strip()))
+            if line.startswith("pkgrel=") and not pkgrel in line:
+                abort("The requested Salt 'pkgrel={0}' in the AUR was updated to '{1}'.".format(pkgrel, line.strip()))
+
+
 def bootstrap():
     """
     Bootstrap Arch Linux.
 
     Only the bare essentials, the configurator will take care of the rest.
     """
+    validate_configurator_version()
     # configure kernel
     sed("/etc/mkinitcpio.conf", "xen-", "xen_")  # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6
     sed("/etc/mkinitcpio.conf", "usbinput", "usbinput fsck")
@@ -75,6 +95,7 @@ def install_salt(installer="aur"):
            "{0} saltmaster-private".format(env.master_server.private_ip))
     with cd("/home/aur/"):
         if installer == "aur":
+            validate_configurator_version()
             sudo("yaourt --noconfirm -S salt", user="aur")
         elif installer == "aur-git":
             sudo("yaourt --noconfirm -S salt-git", user="aur")

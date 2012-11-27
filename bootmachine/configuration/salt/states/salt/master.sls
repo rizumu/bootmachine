@@ -13,8 +13,6 @@ salt-master:
     - mode: 640
     - source: salt://salt/master.config.j2
     - template: jinja
-    - context:
-        salt_version: {{ pillar['salt_version'] }}
 {% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
     - require:
       - pkg: salt-master
