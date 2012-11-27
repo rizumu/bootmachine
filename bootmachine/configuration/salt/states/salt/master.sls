@@ -16,7 +16,7 @@ salt:
     - mode: 640
     - source: salt://salt/master.config.j2
     - template: jinja
-{% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
+{% if grains['os'] == 'Ubuntu' %}
     - require:
       - pkg: salt-master
 {% elif grains['os'] == 'Fedora' %}
@@ -28,14 +28,14 @@ salt-master-daemon:
   service.running:
     - name: salt-master
     - enabled: True
-{% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
+{% if grains['os'] == 'Ubuntu' %}
     - watch:
       - file: /etc/salt/master
       - pkg: salt-master
     - require:
       - file: /etc/salt/master
       - pkg: salt-master
-{% elif grains['os'] == 'Arch' %}
+{% elif grains['os'] == 'Debian' or grains['os'] == 'Arch' %}
     - watch:
       - file: /etc/salt/master
     - require:
