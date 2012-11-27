@@ -23,10 +23,9 @@ salt:
     - source: salt://salt/minion.config.j2
     - template: jinja
     - context:
-        salt_version: {{ pillar['salt_version'] }}
+        id: {{ grains['id'] }}
         servers: {{ pillar['servers'] }}
         saltmaster_private_ip: {{ pillar['saltmaster_private_ip'] }}
-        nodename: {{ grains['nodename'] }}
 
 salt-minion-daemon:
   service.running:

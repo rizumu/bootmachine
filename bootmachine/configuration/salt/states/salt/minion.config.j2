@@ -1,12 +1,12 @@
 master: {{ saltmaster_private_ip }}
 
-id: {{ nodename }}
+id: {{ id }}
 
 grains:
   roles:
-{% for server, args in servers.iteritems() %}
+{% for servername, args in servers.iteritems() %}
 {% for role in args['roles'] %}
-{% if server == nodename %}
+{% if servername == id %}
     - {{ role }}
 {% endif %}
 {% endfor %}
