@@ -59,10 +59,17 @@ def upload_saltstates():
         sudo("mkdir --parents {0}".format(remote_states_dir))
 
     # catch rsync issue with emacs autosave files
+    temp_files = []
     for path in (local_states_dir, local_pillars_dir):
         for match in ("#*#", ".#*"):
-            if local('find {0} -name "{1}"'.format(path, match), capture=True):
-                abort("A temp file matching '{0}' exists in the {1} directory.".format(match, path))
+            temp_file = local('find {0} -name "{1}"'.format(path, match), capture=True)
+            if temp_file:
+                temp_files.append(temp_file)
+    if temp_files:
+        print(red("Temp files must not exist in the saltstates or pillars dirs."))
+        for temp_file in temp_files:
+            print(yellow("found: {0}".format(temp_file)))
+        abort("Found temp files in the saltstates or pillars dirs.")
 
     # rsync pillar and salt files to the fabric users local directory
     rsync_project(local_dir=local_states_dir, remote_dir="./states/", delete=True,
