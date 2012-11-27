@@ -3,7 +3,6 @@ import time
 from fabric.api import env, run, sudo
 from fabric.context_managers import cd, settings as fabric_settings
 from fabric.contrib.files import append, sed, uncomment
-from fabric.operations import reboot
 
 import settings
 
@@ -65,7 +64,7 @@ def bootstrap():
 
     # double check that system is up to date
     run("pacman --noconfirm -Syyu")
-    reboot()
+    run("reboot")
 
 
 def install_salt(installer="aur"):

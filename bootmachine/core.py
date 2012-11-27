@@ -245,7 +245,7 @@ def reboot_server(name):
     env.host_string = "{0}:{1}".format(server.public_ip, env.port)
 
     env.keepalive = 30  # keep the ssh key active, see fabric issue #402
-    reboot()
+    sudo("reboot")
 
     env.user = original_user
     env.host_string = original_host_string

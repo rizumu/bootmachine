@@ -3,7 +3,6 @@ import time
 from fabric.api import env, run, sudo
 from fabric.context_managers import cd, settings as fabric_settings
 from fabric.contrib.files import append, sed, uncomment
-from fabric.operations import reboot
 
 import settings
 
@@ -102,7 +101,7 @@ def bootstrap():
     sed("/etc/mkinitcpio.conf", "xen-", "xen_")  # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6
     sed("/etc/mkinitcpio.conf", "usbinput", "usbinput fsck")
     run("mkinitcpio -p linux")
-    reboot()
+    run("reboot")
 
 
 def install_salt(installer="aur"):
