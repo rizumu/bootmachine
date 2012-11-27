@@ -20,7 +20,7 @@ SERVERS = [
      "distro_module": "bootmachine.contrib.distros.rackspace_debian_6"},
 ]
 
-SSH_PUBLIC_KEY = os.path.join(os.environ["HOME"], ".ssh", "id_ecdsa.pub")
+SSH_PUBLIC_KEY = os.path.join(os.environ["HOME"], ".ssh", "id_rsa.pub")
 enc, keyhash = open(SSH_PUBLIC_KEY).read().split(" ")[:2]
 if "==" in keyhash:
     keyhash = keyhash.split("==")[0]
