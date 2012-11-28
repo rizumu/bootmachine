@@ -4,7 +4,7 @@ import urllib2
 from fabric.api import env, run, sudo
 from fabric.context_managers import cd, settings as fabric_settings
 from fabric.contrib.files import append, contains, sed, uncomment
-
+from fabric.operations import reboot
 from fabric.utils import abort
 
 import settings
@@ -42,7 +42,7 @@ def bootstrap():
     sed("/etc/mkinitcpio.conf", "usbinput", "usbinput fsck")
 
     # pre upgrade maintenance
-    run("pacman --noconfirm -Syyu")
+    run("pacman --noconfirm -Syu")
 
     # install essential packages
     run("pacman --noconfirm -S base-devel")
@@ -69,22 +69,31 @@ def bootstrap():
     run("grub-install --directory=/usr/lib/grub/i386-pc --target=i386-pc --boot-directory=/boot --recheck --debug /dev/xvda")
     run("grub-mkconfig -o /boot/grub/grub.cfg")
 
-    # tweak sshd_config (before reboot so it is restarted!) so fabric can sftp with contrib.files.put, see:
+    # allow fabric to sftp with contrib.files.put
     # http://stackoverflow.com/questions/10221839/cant-use-fabric-put-is-there-any-server-configuration-needed
+    # change before reboot because then the sshd config will be reloaded
     sed("/etc/ssh/sshd_config", "Subsystem sftp /usr/lib/openssh/sftp-server", "Subsystem sftp internal-sftp")
 
     # a pure systemd installation
+    run("printf 'y\ny\nY\n' | pacman -S systemd ntp")
+    sed("/etc/default/grub", 'GRUB_CMDLINE_LINUX=""', 'GRUB_CMDLINE_LINUX="init=/usr/lib/systemd/systemd"')
+    run("grub-mkconfig -o /boot/grub/grub.cfg")
+    for daemon in ["netcfg", "sshd", "syslog-ng", "ntpd"]:
+        run("systemctl enable {0}.service".format(daemon))
     server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
     append("/etc/hostname", server.name)
     append("/etc/locale.conf", "LANG=en_US.UTF-8\nLC_COLLATE=C")
-    run("pacman --noconfirm -Rns initscripts")
-    run("printf 'y\ny\ny\nY\n' | pacman -S systemd-sysvcompat")
-    for daemon in ["netcfg", "sshd", "syslog-ng"]:
-        run("systemctl enable {0}.service".format(daemon))
+    reboot()
+    if not contains("/proc/1/comm", "systemd"):
+        abort("systemd installation failure")
+    run("timedatectl set-timezone US/Central")
+    sed("/etc/default/grub", 'GRUB_CMDLINE_LINUX="init=/usr/lib/systemd/systemd"', 'GRUB_CMDLINE_LINUX=""')
+    run("grub-mkconfig -o /boot/grub/grub.cfg")
+    run("pacman --noconfirm -Rns initscripts sysvinit")
+    run("pacman --noconfirm -S systemd-sysvcompat")
 
-    # double check that system is up to date
-    run("pacman --noconfirm -Syyu")
-    run("reboot")
+    # ensure system is truly up-to-date
+    run("pacman --noconfirm -Syu")
 
 
 def install_salt(installer="aur"):
