@@ -78,7 +78,9 @@ def bootstrap():
     run("printf 'y\ny\nY\n' | pacman -S systemd ntp")
     sed("/etc/default/grub", 'GRUB_CMDLINE_LINUX=""', 'GRUB_CMDLINE_LINUX="init=/usr/lib/systemd/systemd"')
     run("grub-mkconfig -o /boot/grub/grub.cfg")
-    for daemon in ["netcfg", "sshd", "syslog-ng", "ntpd"]:
+    run("iptables-save > /etc/iptables/iptables.rules")
+    run("ip6tables-save > /etc/iptables/ip6tables.rules")
+    for daemon in ["netcfg", "sshd", "syslog-ng", "ntpd", "iptables"]:
         run("systemctl enable {0}.service".format(daemon))
     server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
     append("/etc/hostname", server.name)
@@ -92,8 +94,9 @@ def bootstrap():
     run("pacman --noconfirm -Rns initscripts sysvinit")
     run("pacman --noconfirm -S systemd-sysvcompat")
 
-    # ensure system is truly up-to-date
+    # ensure systemd, kernel, etc is truly up-to-date
     run("pacman --noconfirm -Syu")
+    run("reboot")
 
 
 def install_salt(installer="aur"):
