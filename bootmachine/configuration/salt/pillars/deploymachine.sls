@@ -2,6 +2,9 @@
 aur_salt_pkgver: 0.10.5
 aur_salt_pkgrel: 4
 
+# netcfg
+netcfg_profile: 'eth0 eth1'
+
 # put some custom salt data here
 
 # RC (rackspace)
