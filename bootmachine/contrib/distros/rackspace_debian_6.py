@@ -3,6 +3,7 @@ import time
 from fabric.api import env, run, sudo
 from fabric.contrib.files import append, sed
 from fabric.context_managers import settings as fabric_settings
+from fabric.operations import reboot
 
 import settings
 
@@ -21,7 +22,8 @@ def bootstrap():
     with fabric_settings(warn_only=True):
         run("aptitude update && aptitude -y dist-upgrade")
     append("/etc/hosts", "{0} saltmaster-private".format(env.master_server.private_ip))
-    run("reboot")
+    with fabric_settings(warn_only=True):
+        reboot()
     run("aptitude install -y build-essential rsync")
 
 

@@ -85,7 +85,8 @@ def bootstrap():
     server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
     append("/etc/hostname", server.name)
     append("/etc/locale.conf", "LANG=en_US.UTF-8\nLC_COLLATE=C")
-    reboot()
+    with fabric_settings(warn_only=True):
+        reboot()
     if not contains("/proc/1/comm", "systemd"):
         abort("systemd installation failure")
     run("timedatectl set-timezone US/Central")
@@ -96,7 +97,8 @@ def bootstrap():
 
     # ensure systemd, kernel, etc is truly up-to-date
     run("pacman --noconfirm -Syu")
-    run("reboot")
+    with fabric_settings(warn_only=True):
+        reboot()
 
 
 def install_salt(installer="aur"):

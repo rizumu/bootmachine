@@ -12,6 +12,7 @@ from fabric.api import env, local, task, run, sudo
 from fabric.decorators import parallel, task
 from fabric.colors import blue, cyan, green, magenta, red, white, yellow
 from fabric.contrib.files import exists
+from fabric.context_managers import settings as fabric_settings
 from fabric.exceptions import NetworkError
 from fabric.network import connect
 from fabric.operations import reboot
@@ -245,7 +246,8 @@ def reboot_server(name):
     env.host_string = "{0}:{1}".format(server.public_ip, env.port)
 
     env.keepalive = 30  # keep the ssh key active, see fabric issue #402
-    sudo("reboot")
+    with fabric_settings(warn_only=True):
+        reboot()
 
     env.user = original_user
     env.host_string = original_host_string

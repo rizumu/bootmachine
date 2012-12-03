@@ -13,11 +13,11 @@ SERVERS = [
      "flavor": "2",
      "image": "Arch 2012.08",
      "distro_module": "bootmachine.contrib.distros.rackspace_arch_201208"},
-    {"servername": "rackspacev2-salt-arch201208-b",
-     "roles": ["test-additional-minions"],
-     "flavor": "2",
-     "image": "Arch 2012.08",
-     "distro_module": "bootmachine.contrib.distros.rackspace_arch_201208"},
+    # {"servername": "rackspacev2-salt-arch201208-b",
+    #  "roles": ["test-additional-minions"],
+    #  "flavor": "2",
+    #  "image": "Arch 2012.08",
+    #  "distro_module": "bootmachine.contrib.distros.rackspace_arch_201208"},
 ]
 
 SSH_PUBLIC_KEY = os.path.join(os.environ["HOME"], ".ssh", "id_ecdsa.pub")

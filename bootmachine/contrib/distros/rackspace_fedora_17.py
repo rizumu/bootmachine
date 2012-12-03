@@ -3,6 +3,7 @@ import time
 from fabric.api import env, run, sudo
 from fabric.context_managers import settings as fabric_settings
 from fabric.contrib.files import append, sed
+from fabric.operations import reboot
 
 import settings
 
@@ -31,7 +32,7 @@ def bootstrap():
     run("yum install --assumeyes {pkgs}".format(pkgs=" ".join(base_packages)))
     append("/etc/hosts", "{0} saltmaster-private".format(env.master_server.private_ip))
     with fabric_settings(warn_only=True):
-        run("reboot")
+        reboot()
 
 
 def install_salt(installer="rpm"):
