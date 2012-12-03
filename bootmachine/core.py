@@ -75,21 +75,10 @@ def bootmachine():
     local("fab each bootstrap_configurator")
     print(green("the configurator is bootstrapped on all servers."))
 
-    # run the configurator from the the master server, maximum of 5x
-    master()
-    __set_unconfigured_servers()
-    while env.unconfigured_servers and env.configure_attempts != 5:
-        print(env.unconfigured_servers, env.configure_attempts)
-        configure()
-
-    # lastly, double check that the SSH settings for each server are correct
-    output = local("fab each ssh_test", capture=True)
-    if "CONFIGURATOR FAIL!" in output:
-        print(red("configurator failure."))
-    else:
-        # change the following output with caution
-        # runtests.sh depends on exactly the following successful output
-        print(green("all servers are fully provisioned."))
+    configure()
+    # change the following output with caution
+    # runtests.sh depends on exactly the following successful output
+    print(green("all servers are fully provisioned."))
 
 
 @task
@@ -195,28 +184,34 @@ def configure():
         fab configure
     """
     master()
-    __set_unconfigured_servers()
+    configurator.launch()
 
-    # run the configurator and refresh the env variables by calling master()
-    if env.unconfigured_servers:
-        sudo("iptables -F")  # flush defaults before configuring
-        configurator.launch()
+    # run the configurator from the the master server, maximum of 5x
+    attempts = 0
+    __set_unconfigured_servers()
+    while env.unconfigured_servers:
+        if attempts == 5:
+            abort("unable to configure the servers")
+        print(yellow("attempt #{0} for {1}".format(attempts, env.unconfigured_servers)))
         configurator.configure()
-        # determine if configuration was a success and reboot just in case.
-        # for example, a reboot is required when rebuilding a custom kernel
-        env.configure_attempts += 1
+        attempts += 1
         master()
         for server in env.unconfigured_servers:
-            server = __set_ssh_vars(server)
+            # if configuration was a success, reboot.
+            # for example, a reboot is required when rebuilding a custom kernel
+            server = __set_ssh_vars(server)  # mask the server
             if server.port == int(settings.SSH_PORT):
                 reboot_server(server.name)
             else:
-                print(red("after {0} attempt, server {1} is still unconfigured".format(env.configure_attempts, server.name)))
+                print(red("after #{0} attempts, server {1} is still unconfigured".format(
+                          attempts, server.name)))
+            __set_ssh_vars(env)  # back to default
+        __set_unconfigured_servers()
 
-    __set_unconfigured_servers()
-    __set_ssh_vars(env)
-    if not env.unconfigured_servers:
-        print(green("all servers are configured."))
+    # last, ensure that SSH is configured (locked down) for each server
+    output = local("fab each ssh_test", capture=True)
+    if "CONFIGURATOR FAIL!" in output:
+        print(red("configurator failure."))
 
 
 @task
@@ -325,6 +320,7 @@ def __shared_setup():
         except NetworkError:
             known_hosts.add(server.public_ip)
 
+
 def __set_ssh_vars(valid_object):
     """
     This method takes a valid_object, either the env or a server,
@@ -359,9 +355,6 @@ def __set_ssh_vars(valid_object):
 
 
 def __set_unconfigured_servers():
-    if not hasattr(env, "configure_attempts"):
-        env.configure_attempts = 0
-
     env.unconfigured_servers = []
     for server in env.bootmachine_servers:
         if server.port != int(settings.SSH_PORT):
