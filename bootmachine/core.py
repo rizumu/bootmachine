@@ -202,10 +202,10 @@ def configure():
         configurator.launch()
         sudo("iptables -F")  # flush defaults before configuring
         configurator.configure()
-        env.configure_attempts += 1
-        master()
         # determine if configuration was a success and reboot just in case.
         # for example, a reboot is required when rebuilding a custom kernel
+        env.configure_attempts += 1
+        master()
         for server in env.unconfigured_servers:
             server = __set_ssh_vars(server)
             if server.port == int(settings.SSH_PORT):
