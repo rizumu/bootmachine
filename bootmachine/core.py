@@ -199,8 +199,8 @@ def configure():
 
     # run the configurator and refresh the env variables by calling master()
     if env.unconfigured_servers:
-        configurator.launch()
         sudo("iptables -F")  # flush defaults before configuring
+        configurator.launch()
         configurator.configure()
         # determine if configuration was a success and reboot just in case.
         # for example, a reboot is required when rebuilding a custom kernel
