@@ -163,7 +163,7 @@ def update_master_iptables():
 def launch():
     """
     After the salt packages are installed, accept the new minions,
-    upload states, and call highstate.
+    upload states.
     """
     if env.host != env.master_server.public_ip:
         abort("tried to launch on a non-master server")
@@ -176,8 +176,6 @@ def launch():
 
     time.sleep(10)  # sleep a little to give minions a chance to become visible
     accept_minions()
-
-    highstate()
 
 
 @task
