@@ -119,11 +119,11 @@ def pillar_update():
     else:
         scp_dir = "/tmp/"
     try:
-        local("scp -P {0} {1}bootmachine.sls {2}@{3}:{4}/bootmachine.sls".format(
+        local("scp -P {0} {1}bootmachine.sls {2}@{3}:{4}bootmachine.sls".format(
               env.port, local_pillars_dir, env.user, env.host, scp_dir))
     except:
         known_hosts.update(env.host)
-        local("scp -P {0} {1}bootmachine.sls {2}@{3}:$(eval echo ~${4})/bootmachine.sls".format(
+        local("scp -P {0} {1}bootmachine.sls {2}@{3}:$(eval echo ~${4})bootmachine.sls".format(
               env.port, local_pillars_dir, env.user, env.host, scp_dir))
     sudo("mv {0}/bootmachine.sls {1}bootmachine.sls".format(scp_dir, remote_pillars_dir))
     sudo("salt '*' saltutil.refresh_pillar &")  # background because it hangs on debian 6
@@ -188,17 +188,24 @@ def accept_minions():
     if env.host != env.master_server.public_ip:
         abort("tried to accept minions on a non-master server")
 
-    accepted = filter(None, sudo("salt-key --raw-out --list acc").translate(None, "'[]\ ").split(","))
-
+    def __get_accepted_minions():
+        """TODO: remove when all distros support salt 0.10.5"""
+        accepted = eval(sudo("salt-key --raw-out --list acc"))
+        if type(accepted) == dict:
+            return accepted["minions"]
+        else:
+            return accepted  # support salt version < 0.10.5
+    minions = __get_accepted_minions()
     slept = 0
-    while len(accepted) != len(settings.SERVERS):
-        unaccepted = [s["servername"] for s in settings.SERVERS if s["servername"] not in accepted]
+
+    while len(minions) != len(settings.SERVERS):
+        unaccepted = [s["servername"] for s in settings.SERVERS if s["servername"] not in minions]
 
         with fabric_settings(warn_only=True):
             for server in unaccepted:
                 sudo("salt-key --quiet --accept={0}".format(server))
-        accepted = filter(None, sudo("salt-key --raw-out --list acc").translate(None, "'[]\ ").split(","))
-        if len(accepted) != len(settings.SERVERS):
+        minions = __get_accepted_minions()
+        if len(minions) != len(settings.SERVERS):
             local("fab each configurator.restart")
             time.sleep(5)
             slept += 5
