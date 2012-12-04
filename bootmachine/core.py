@@ -31,8 +31,7 @@ env.connection_attempts = 12
 
 def import_module(module):
     """
-    This allows one to write a custom backend for a provider, configurator,
-    or distro.
+    Allows custom providers, configurators and distros.
 
     Import the provider, configurator, or distro module via a string.
         ex. ``bootmachine.contrib.providers.rackspace_openstack_v2``
@@ -192,10 +191,9 @@ def configure():
     while env.unconfigured_servers:
         if attempts == 5:
             abort("unable to configure the servers")
+        attempts += 1
         print(yellow("attempt #{0} for {1}".format(attempts, env.unconfigured_servers)))
         configurator.configure()
-        attempts += 1
-        master()
         for server in env.unconfigured_servers:
             # if configuration was a success, reboot.
             # for example, a reboot is required when rebuilding a custom kernel
