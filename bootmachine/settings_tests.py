@@ -18,6 +18,7 @@ SALT_INSTALLER_DEBIAN_6 = "backports"
 SALT_INSTALLER_FEDORA_16 = "rpm-stable"
 SALT_INSTALLER_FEDORA_17 = "rpm-stable"
 SALT_INSTALLER_UBUNTU_1204LTS = "ppa"
+SALT_INSTALLER_UBUNTU_1210 = "ppa"
 
 # puppet (not yet implemented)
 PUPPET_VERSION = NotImplementedError()

@@ -1,4 +1,3 @@
-
 """
 BOOTMACHINE: A-Z transmutation of aluminium into rhodium.
 """

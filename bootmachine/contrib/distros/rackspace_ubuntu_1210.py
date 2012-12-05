@@ -8,7 +8,7 @@ from fabric.operations import reboot
 import settings
 
 
-DISTRO = "UBUNTU_1204LTS"
+DISTRO = "UBUNTU_1210"
 SALT_INSTALLERS = ["ppa"]
 
 
@@ -42,16 +42,19 @@ def install_salt(installer="ppa"):
     Install salt with the chosen installer.
     """
     if installer == "ppa":
-        run("aptitude install -y python-software-properties")
-        run("add-apt-repository --yes ppa:saltstack/salt")
-        with fabric_settings(warn_only=True):
-            run("aptitude update")
+        run("echo deb http://ppa.launchpad.net/saltstack/salt/ubuntu `lsb_release -sc` main | sudo tee /etc/apt/sources.list.d/saltstack.list")
+        run("wget -q -O- 'http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0x4759FA960E27C0A6' | sudo apt-key add -")
+        run("aptitude update")
         if env.host == env.master_server.public_ip:
             run("aptitude install -y salt-master")
         run("aptitude install -y salt-minion salt-syndic")
     else:
         raise NotImplementedError()
-
+"""
+echo deb http://ppa.launchpad.net/saltstack/salt/ubuntu `lsb_release -sc` main | sudo tee /etc/apt/sources.list.d/saltstack.list
+wget -q -O- "http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0x4759FA960E27C0A6" | sudo apt-key add -
+sudo apt-get update
+"""
 
 def setup_salt():
     """
