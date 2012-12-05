@@ -58,6 +58,8 @@ salt-config-templates:
       - /etc/salt/master.template
       - /etc/salt/minion.template
 
-salt-master:
+ect-hosts:
   host.present:
     - ip: {{ pillar['saltmaster_private_ip'] }}
+    - names:
+      - salt-master

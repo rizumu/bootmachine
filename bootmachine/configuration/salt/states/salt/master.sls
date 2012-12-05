@@ -6,9 +6,6 @@ include:
 {% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
 salt-master:
   pkg.installed
-{% elif grains['os'] == 'Fedora' %}
-salt:
-  pkg.installed
 {% endif %}
 
 /etc/salt/master:
