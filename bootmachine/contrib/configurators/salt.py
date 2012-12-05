@@ -97,8 +97,8 @@ def pillar_update():
     remote_pillars_dir = settings.REMOTE_PILLARS_DIR
     if not exists(remote_pillars_dir, use_sudo=True):
         sudo("mkdir --parents {0}".format(remote_pillars_dir))
-    bootmachine_sls_j2 = Template(open("{0}bootmachine.sls.j2".format(local_pillars_dir), "r", 0).read())
-    bootmachine_sls = open("{0}bootmachine.sls".format(local_pillars_dir), "w", 0)
+    bootmachine_sls_j2 = Template(open(os.path.join(local_pillars_dir, "bootmachine.sls.j2"), "r", 0).read())
+    bootmachine_sls = open(os.path.join(local_pillars_dir, "bootmachine.sls"), "w", 0)
     bootmachine_sls.write(bootmachine_sls_j2.render(
         bootmachine_servers=env.bootmachine_servers,
         salt_remote_states_dir=settings.REMOTE_STATES_DIR,
@@ -119,13 +119,23 @@ def pillar_update():
     else:
         scp_dir = "/tmp/"
     try:
-        local("scp -P {0} {1}bootmachine.sls {2}@{3}:{4}bootmachine.sls".format(
-              env.port, local_pillars_dir, env.user, env.host, scp_dir))
+        local("scp -P {0} {1} {2}@{3}:{4}".format(
+              env.port,
+              os.path.join(local_pillars_dir, "bootmachine.sls"),
+              env.user,
+              env.host,
+              os.path.join(scp_dir, "bootmachine.sls")))
     except:
         known_hosts.update(env.host)
-        local("scp -P {0} {1}bootmachine.sls {2}@{3}:$(eval echo ~${4})bootmachine.sls".format(
-              env.port, local_pillars_dir, env.user, env.host, scp_dir))
-    sudo("mv {0}bootmachine.sls {1}bootmachine.sls".format(scp_dir, remote_pillars_dir))
+        local("scp -P {0} {1} {2}@{3}:$(eval echo ~${4})bootmachine.sls".format(
+              env.port,
+              os.path.join(local_pillars_dir,"bootmachine.sls"),
+              env.user,
+              env.host,
+              scp_dir))
+    sudo("mv {0} {1}".format(
+        os.path.join(scp_dir, "bootmachine.sls"),
+        os.path.join(remote_pillars_dir, "bootmachine.sls")))
     sudo("salt '*' saltutil.refresh_pillar &")  # background because it hangs on debian 6
 
 
