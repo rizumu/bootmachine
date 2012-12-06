@@ -223,10 +223,12 @@ def reboot_server(name):
         fab reboot_server:name
     """
     __shared_setup()
-    server = [s for s in env.bootmachine_servers if s.name == name][0]
+    try:
+        server = [s for s in env.bootmachine_servers if s.name == name][0]
+    except IndexError:
+        abort("The server '{0}' was not found.".format(name))
     original_user = env.user
     original_host_string = env.host_string
-
     try:
         env.port = 22
         telnetlib.Telnet(server.public_ip, env.port)
