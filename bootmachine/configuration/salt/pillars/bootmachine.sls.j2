@@ -1,0 +1,48 @@
+# Permission of 600 recommended for this file
+
+# SERVERS
+servers:
+{% for server in bootmachine_servers %}
+  {{ server.name }}:
+    public_ip: {{ server.public_ip }}
+    private_ip: {{ server.private_ip }}
+    roles: {{ server.roles }}
+{% endfor %}
+
+# SSH
+ssh_port: {{ ssh_port }}
+
+# USERS
+users:
+{% for user in ssh_users %}
+  {{ user.username }}:
+    fullname: {{ user.fullname }}
+    uid: {{ user.uid }}
+    gid: {{ user.uid }}
+    group: {{ user.username }}
+    extra_groups: [sshers, wheel, ops]
+    ssh_auth:
+      keys: [
+{% for key in user.ssh_keys %}
+       {{ key.enc }} {{ key.hash }}== {{ key.comment }},
+{% endfor %}
+      ]
+{% endfor %}
+
+# SALT
+saltmaster_hostname: {{ saltmaster_hostname }}
+saltmaster_private_ip: {{ saltmaster_private_ip }}
+saltmaster_public_ip: {{ saltmaster_public_ip }}
+saltminion_private_ips:
+{% for server in bootmachine_servers %}
+  - {{ server.private_ip }}
+{% endfor %}
+salt_remote_states_dir: {{ salt_remote_states_dir }}
+salt_remote_pillars_dir: {{ salt_remote_pillars_dir }}
+
+# ARCH SPECIFIC
+pacman_extra_repos:
+  archlinuxfr:
+    url: http://repo.archlinux.fr
+salt_aur_pkgver: {{ salt_aur_pkgver }}
+salt_aur_pkgrel: {{ salt_aur_pkgrel }}

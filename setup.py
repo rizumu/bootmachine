@@ -117,13 +117,13 @@ setup(
     long_description=read("README.rst"),
     dependency_links=["http://github.com/rizumu/openstack.compute/tarball/master#egg=openstack.compute-2.0a1"],
     author="Thomas Schreiber",
-    author_email="tom@rizu.mu",
+    author_email="tom@nillab.com",
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
         "apache-libcloud==0.11.1"
         "python-novaclient>=2.9.0",
-        "Fabric==1.4.3",
+        "Fabric==1.5.1",
         "Jinja2==2.6",
     ],
     zip_safe=False,

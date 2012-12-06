@@ -13,16 +13,21 @@ CONFIGURATOR_MODULE = "bootmachine.contrib.configurators.salt"
 MASTER = "loadbalancer"
 
 # salt
-SALTSTATES_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                              "configuration", "bootmachine-salt-states/")
-PILLAR_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                          "configuration", "bootmachine-pillar/")
+LOCAL_STATES_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                "configuration", "states/")
+LOCAL_PILLARS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                 "configuration", "pillars/")
+REMOTE_STATES_DIR = "/srv/salt/states/"
+REMOTE_PILLARS_DIR = "/srv/salt/pillars/"
 SALT_INSTALLER_ARCH_201110 = "aur"
 SALT_INSTALLER_ARCH_201208 = "aur"
+AUR_PKGVER = "0.10.5"
+AUR_PKGREL = "4"
 SALT_INSTALLER_DEBIAN_6 = "pip"
 SALT_INSTALLER_FEDORA_16 = "rpm-stable"
 SALT_INSTALLER_FEDORA_17 = "rpm-stable"
 SALT_INSTALLER_UBUNTU_1204LTS = "ppa"
+SALT_INSTALLER_UBUNTU_1210 = "ppa"
 
 # puppet (not yet implemented)
 PUPPET_VERSION = NotImplementedError()
@@ -31,6 +36,7 @@ PUPPET_RECIPES_DIR = NotImplementedError()
 # chef (not yet implemented)
 CHEF_VERSION = NotImplementedError()
 CHEF_RECIPIES_DIR = NotImplementedError()
+
 
 """
 PROVIDERS AND SERVER STACK
@@ -127,6 +133,7 @@ SERVERS = [
     #  "image": "openSUSE 12",
     #  "distro_module": "bootmachine.contrib.distros.rackspace_opensuse_12"},
 ]
+
 
 """
 SECURITY

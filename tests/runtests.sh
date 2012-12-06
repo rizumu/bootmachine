@@ -10,6 +10,7 @@ source ~/.virtualenvs/bootmachine/bin/activate
 # run `fab bootmachine` in parallel for each and save the output in a log file
 # sleep in between each call to avoid api abuse
 for dir in $dirs; do
+  mkdir -p logs/$dir
   sleep 7
   $activate && cd ./$dir && $cmd > ../logs/"$dir"bootmachine_`date +%H%M%S`.log &
 done

@@ -1,0 +1,9 @@
+#
+# /etc/fstab: static file system information
+#
+# <file system>   <dir>      <type>    <options>                   <dump> <pass>
+/dev/xvda1        /          ext3      defaults,noatime,barrier=0  0      1
+/dev/xvdc1        swap       swap      defaults                    0      0
+devpts            /dev/pts   devpts    defaults                    0      0
+shm               /dev/shm   tmpfs     nodev,nosuid                0      0
+xen               /proc/xen  xenfs     defaults                    0      0

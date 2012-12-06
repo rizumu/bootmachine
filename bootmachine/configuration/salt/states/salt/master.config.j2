@@ -1,0 +1,13 @@
+interface: 0.0.0.0
+
+worker_threads: 2
+
+file_roots:
+  base:
+    - {{ pillar['salt_remote_states_dir'] }}
+
+pillar_roots:
+  base:
+    - {{ pillar['salt_remote_pillars_dir'] }}
+
+state_verbose: False

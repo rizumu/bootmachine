@@ -7,4 +7,3 @@ docs/_build/
 
 *.pyc
 bootmachine.sls
-*.log

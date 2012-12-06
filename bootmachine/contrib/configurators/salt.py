@@ -5,7 +5,7 @@ import time
 from fabric.api import env, local, sudo
 from fabric.colors import blue, cyan, green, magenta, red, white, yellow
 from fabric.context_managers import settings as fabric_settings
-from fabric.contrib.files import contains, exists
+from fabric.contrib.files import exists
 from fabric.contrib.project import rsync_project
 from fabric.decorators import task, parallel
 from fabric.utils import abort
@@ -51,34 +51,36 @@ def upload_saltstates():
     """
     if env.host != env.master_server.public_ip:
         abort("tried to upload salttates on a non-master server")
+    local_states_dir = settings.LOCAL_STATES_DIR
+    local_pillars_dir = settings.LOCAL_PILLARS_DIR
+    remote_states_dir = settings.REMOTE_STATES_DIR
+    remote_pillars_dir = settings.REMOTE_PILLARS_DIR
+    if not exists(remote_states_dir, use_sudo=True):
+        sudo("mkdir --parents {0}".format(remote_states_dir))
 
     # catch rsync issue with emacs autosave files
-    for path in (settings.SALTSTATES_DIR, settings.PILLAR_DIR):
+    temp_files = []
+    for path in (local_states_dir, local_pillars_dir):
         for match in ("#*#", ".#*"):
-            if local('find {0} -name "{1}"'.format(path, match), capture=True):
-                abort("A temp file matching '{0}' exists in the {1} directory.".format(match, path))
+            temp_file = local('find {0} -name "{1}"'.format(path, match), capture=True)
+            if temp_file:
+                temp_files.append(temp_file)
+    if temp_files:
+        print(red("Temp files must not exist in the saltstates or pillars dirs."))
+        for temp_file in temp_files:
+            print(yellow("found: {0}".format(temp_file)))
+        abort("Found temp files in the saltstates or pillars dirs.")
 
     # rsync pillar and salt files to the fabric users local directory
-
-    rsync_project(local_dir=settings.SALTSTATES_DIR, remote_dir="./salt/", delete=True,
+    rsync_project(local_dir=local_states_dir, remote_dir="./states/", delete=True,
                   extra_opts="--compress --copy-links", ssh_opts="-o StrictHostKeyChecking=no")
-    rsync_project(local_dir=settings.PILLAR_DIR, remote_dir="./pillar/", delete=True,
+    rsync_project(local_dir=local_pillars_dir, remote_dir="./pillars/", delete=True,
                   extra_opts="--compress --copy-links", ssh_opts="-o StrictHostKeyChecking=no")
 
-    # backup the jinja2 created pillar files
-    if exists("/srv/pillar/salt.sls"):
-        sudo("mv /srv/pillar/salt.sls /srv/salt.sls")
-    if exists("/srv/pillar/users.sls"):
-        sudo("mv /srv/pillar/users.sls /srv/users.sls")
     # delete the pillar and state files
-    sudo("rm -rf /srv/salt && rm -rf /srv/pillar")
+    sudo("rm -rf {0} && rm -rf {1}".format(remote_states_dir, remote_pillars_dir))
     # copy the rsynced versions over as root
-    sudo("cp -r ./salt /srv/salt && cp -r ./pillar /srv/pillar")
-    # put the jinja2 created pillar files back in place
-    if exists("/srv/salt.sls"):
-        sudo("mv /srv/salt.sls /srv/pillar/salt.sls")
-    if exists("/srv/users.sls"):
-        sudo("mv /srv/users.sls /srv/pillar/users.sls")
+    sudo("cp -r ./states {0} && cp -r ./pillars {1}".format(remote_states_dir, remote_pillars_dir))
 
 
 @task
@@ -91,24 +93,49 @@ def pillar_update():
     if env.host != env.master_server.public_ip:
         abort("tried to pillar_update on a non-master server")
 
-    pillar_dir = settings.PILLAR_DIR
-    bootmachine_sls_j2 = Template(open("{0}bootmachine.sls.j2".format(pillar_dir), "r", 0).read())
-    bootmachine_sls = open("{0}bootmachine.sls".format(pillar_dir), "w", 0)
+    local_pillars_dir = settings.LOCAL_PILLARS_DIR
+    remote_pillars_dir = settings.REMOTE_PILLARS_DIR
+    if not exists(remote_pillars_dir, use_sudo=True):
+        sudo("mkdir --parents {0}".format(remote_pillars_dir))
+    bootmachine_sls_j2 = Template(open(os.path.join(local_pillars_dir, "bootmachine.sls.j2"), "r", 0).read())
+    bootmachine_sls = open(os.path.join(local_pillars_dir, "bootmachine.sls"), "w", 0)
     bootmachine_sls.write(bootmachine_sls_j2.render(
         bootmachine_servers=env.bootmachine_servers,
+        salt_remote_states_dir=settings.REMOTE_STATES_DIR,
+        salt_remote_pillars_dir=remote_pillars_dir,
         saltmaster_hostname=settings.MASTER,
         saltmaster_public_ip=env.master_server.public_ip,
         saltmaster_private_ip=env.master_server.private_ip,
-        ssh_port = settings.SSH_PORT,
-        ssh_users = settings.SSH_USERS,
+        ssh_port=settings.SSH_PORT,
+        ssh_users=settings.SSH_USERS,
+        salt_aur_pkgver=settings.AUR_PKGVER,
+        salt_aur_pkgrel=settings.AUR_PKGREL,
     ))
+
     # TODO: only upload and refresh when file has changes
+    home_dir = local("eval echo ~${0}".format(env.user), capture=True)
+    if exists(home_dir, use_sudo=True):
+        scp_dir = home_dir
+    else:
+        scp_dir = "/tmp/"
     try:
-        local("scp -P {0} {1}bootmachine.sls {2}@{3}:/tmp/bootmachine.sls".format(env.port, pillar_dir, env.user, env.host))
+        local("scp -P {0} {1} {2}@{3}:{4}".format(
+              env.port,
+              os.path.join(local_pillars_dir, "bootmachine.sls"),
+              env.user,
+              env.host,
+              os.path.join(scp_dir, "bootmachine.sls")))
     except:
         known_hosts.update(env.host)
-        local("scp -P {0} {1}bootmachine.sls {2}@{3}:/tmp/bootmachine.sls".format(env.port, pillar_dir, env.user, env.host))
-    sudo("mv /tmp/bootmachine.sls /srv/pillar/bootmachine.sls")
+        local("scp -P {0} {1} {2}@{3}:$(eval echo ~${4})bootmachine.sls".format(
+              env.port,
+              os.path.join(local_pillars_dir,"bootmachine.sls"),
+              env.user,
+              env.host,
+              scp_dir))
+    sudo("mv {0} {1}".format(
+        os.path.join(scp_dir, "bootmachine.sls"),
+        os.path.join(remote_pillars_dir, "bootmachine.sls")))
     sudo("salt '*' saltutil.refresh_pillar &")  # background because it hangs on debian 6
 
 
@@ -146,7 +173,7 @@ def update_master_iptables():
 def launch():
     """
     After the salt packages are installed, accept the new minions,
-    upload states, and call highstate.
+    upload states.
     """
     if env.host != env.master_server.public_ip:
         abort("tried to launch on a non-master server")
@@ -159,8 +186,7 @@ def launch():
 
     time.sleep(10)  # sleep a little to give minions a chance to become visible
     accept_minions()
-
-    highstate()
+    restart()
 
 
 @task
@@ -173,17 +199,24 @@ def accept_minions():
     if env.host != env.master_server.public_ip:
         abort("tried to accept minions on a non-master server")
 
-    accepted = filter(None, sudo("salt-key --raw-out --list acc").translate(None, "'[]\ ").split(","))
-
+    def __get_accepted_minions():
+        """TODO: remove when all distros support salt 0.10.5"""
+        accepted = eval(sudo("salt-key --raw-out --list acc"))
+        if type(accepted) == dict:
+            return accepted["minions"]
+        else:
+            return accepted  # support salt version < 0.10.5
+    minions = __get_accepted_minions()
     slept = 0
-    while len(accepted) != len(settings.SERVERS):
-        unaccepted = [s["servername"] for s in settings.SERVERS if s["servername"] not in accepted]
+
+    while len(minions) != len(settings.SERVERS):
+        unaccepted = [s["servername"] for s in settings.SERVERS if s["servername"] not in minions]
 
         with fabric_settings(warn_only=True):
             for server in unaccepted:
                 sudo("salt-key --quiet --accept={0}".format(server))
-        accepted = filter(None, sudo("salt-key --raw-out --list acc").translate(None, "'[]\ ").split(","))
-        if len(accepted) != len(settings.SERVERS):
+        minions = __get_accepted_minions()
+        if len(minions) != len(settings.SERVERS):
             local("fab each configurator.restart")
             time.sleep(5)
             slept += 5

@@ -1,0 +1,15 @@
+master: {{ saltmaster_private_ip }}
+
+id: {{ id }}
+
+grains:
+  roles:
+{% for servername, args in servers.iteritems() %}
+{% for role in args['roles'] %}
+{% if servername == id %}
+    - {{ role }}
+{% endif %}
+{% endfor %}
+{% endfor %}
+
+state_verbose: True

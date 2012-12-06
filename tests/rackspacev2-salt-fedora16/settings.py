@@ -9,12 +9,12 @@ MASTER = "rackspacev2-salt-fedora16-a"
 PROVIDER_MODULE = "bootmachine.contrib.providers.rackspace_openstack_v2"
 SERVERS = [
     {"servername": "rackspacev2-salt-fedora16-a",
-     "roles": ["loadbalancer"],
+     "roles": ["salt-master"],
      "flavor": "2",
      "image": "Fedora 16 (Verne)",
      "distro_module": "bootmachine.contrib.distros.rackspace_fedora_16"},
     {"servername": "rackspacev2-salt-fedora16-b",
-     "roles": ["application"],
+     "roles": ["test-additional-minions"],
      "flavor": "2",
      "image": "Fedora 16 (Verne)",
      "distro_module": "bootmachine.contrib.distros.rackspace_fedora_16"},

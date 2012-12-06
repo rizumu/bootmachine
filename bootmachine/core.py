@@ -1,4 +1,3 @@
-
 """
 BOOTMACHINE: A-Z transmutation of aluminium into rhodium.
 """
@@ -12,6 +11,7 @@ from fabric.api import env, local, task, run, sudo
 from fabric.decorators import parallel, task
 from fabric.colors import blue, cyan, green, magenta, red, white, yellow
 from fabric.contrib.files import exists
+from fabric.context_managers import settings as fabric_settings
 from fabric.exceptions import NetworkError
 from fabric.network import connect
 from fabric.operations import reboot
@@ -24,10 +24,13 @@ from bootmachine.settings_validator import validate_settings
 validate_settings(settings)
 
 
+# Incrase reconnection attempts when rebooting
+env.connection_attempts = 12
+
+
 def import_module(module):
     """
-    This allows one to write a custom backend for a provider, configurator,
-    or distro.
+    Allows custom providers, configurators and distros.
 
     Import the provider, configurator, or distro module via a string.
         ex. ``bootmachine.contrib.providers.rackspace_openstack_v2``
@@ -57,34 +60,23 @@ def bootmachine():
     # set environment variables
     master()
     env.new_server_booted = False
-
     # boot new servers in serial to avoid api overlimit
     boot()
-
     output = local("fab each ssh_test", capture=True)
     if "CONFIGURATOR FAIL!" not in output:
         print(green("all servers are fully provisioned."))
         return
 
-    # bootstrap all servers in parallel for speed
-    local("fab each bootstrap")
-    print(green("all servers are bootstrapped."))
+    local("fab each bootstrap_distro")
+    print(green("the distro is bootstrapped on all servers."))
 
-    # run the configurator from the the master server, maximum of 5x
-    master()
-    __set_unconfigured_servers()
-    while env.unconfigured_servers and env.configure_attempts != 5:
-        print(env.unconfigured_servers, env.configure_attempts)
-        configure()
+    local("fab each bootstrap_configurator")
+    print(green("the configurator is bootstrapped on all servers."))
 
-    # lastly, double check that the SSH settings for each server are correct
-    output = local("fab each ssh_test", capture=True)
-    if "CONFIGURATOR FAIL!" in output:
-        print(red("configurator failure."))
-    else:
-        # change the following output with caution
-        # runtests.sh depends on exactly the following successful output
-        print(green("all servers are fully provisioned."))
+    configure()
+    # change the following output with caution
+    # runtests.sh depends on exactly the following successful output
+    print(green("all servers are fully provisioned."))
 
 
 @task
@@ -112,41 +104,69 @@ def boot():
 
 @task
 @parallel
-def bootstrap():
+def bootstrap_distro():
     """
-    Bootstraps the configurator on all newly booted servers.
-    Installs the configurator and starts its processes.
-    Does not run the configurator.
+    Bootstraps the distro.
+
+    In parallel for speed.
 
     Usage:
-        fab each bootstrap
+        fab each bootstrap_distro
     """
     if not hasattr(env, "bootmachine_servers"):
-        abort("bootstrap(): Try `fab each bootstrap`")
-
-    if int(settings.SSH_PORT) == 22:
-        abort("bootstrap(): Security Error! Change ``settings.SSH_PORT`` to something other than ``22``")
+        abort("bootstrap_distro(): Try `fab each bootstrap_distro`")
 
     __set_ssh_vars(env)
 
-    if exists("/root/.bootmachine_bootstrapped", use_sudo=True):
-        print(green("{ip_addr} is already bootstrapped, skipping.".format(ip_addr=env.host)))
+    if exists("/root/.bootmachine_distro_bootstrapped", use_sudo=True):
+        print(green("{ip_addr} distro is already bootstrapped, skipping.".format(ip_addr=env.host)))
         return
 
-    print(cyan("... {ip_addr} has begun bootstrapping .".format(ip_addr=env.host)))
+    print(cyan("... {ip_addr} distro has begun bootstrapping .".format(ip_addr=env.host)))
 
     # upgrade distro
     server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
     distro = import_module(server.distro_module)
     distro.bootstrap()
 
+    sudo("touch /root/.bootmachine_distro_bootstrapped")
+    print(green("{0} is bootstrapped.".format(server.name)))
+
+
+@task
+@parallel
+def bootstrap_configurator():
+    """
+    Bootstraps the configurator.
+    Installs the configurator and starts its processes.
+    Does not run the configurator.
+
+    Assumes the distro has been bootstrapped on all servers.
+
+    In parallel for speed.
+
+    Usage:
+        fab each bootstrap_distro
+    """
+    if not hasattr(env, "bootmachine_servers"):
+        abort("bootstrap_configurator(): Try `fab each bootstrap_configurator`")
+
+    __set_ssh_vars(env)
+
+    if exists("/root/.bootmachine_configurator_bootstrapped", use_sudo=True):
+        print(green("{ip_addr} configurator is already bootstrapped, skipping.".format(ip_addr=env.host)))
+        return
+
+    print(cyan("... {ip_addr} configurator has begun bootstrapping .".format(ip_addr=env.host)))
+
     # bootstrap configurator
+    server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
+    distro = import_module(server.distro_module)
     configurator.install(distro)
     configurator.setup(distro)
     configurator.start(distro)
-    run("iptables -F")  # flush defaults before configuring
-    run("touch /root/.bootmachine_bootstrapped")
 
+    sudo("touch /root/.bootmachine_configurator_bootstrapped")
     print(green("{0} is bootstrapped.".format(server.name)))
 
 
@@ -155,31 +175,40 @@ def configure():
     """
     Configure all unconfigured servers.
 
+    Assumes the distro and configurator have been bootstrapped on all
+    servers.
+
     Usage:
         fab configure
     """
     master()
-    __set_unconfigured_servers()
+    configurator.launch()
 
-    # run the configurator and refresh the env variables by calling master()
-    if env.unconfigured_servers:
-        configurator.launch()
+    # run the configurator from the the master server, maximum of 5x
+    attempts = 0
+    __set_unconfigured_servers()
+    while env.unconfigured_servers:
+        if attempts == 5:
+            abort("unable to configure the servers")
+        attempts += 1
+        print(yellow("attempt #{0} for {1}".format(attempts, env.unconfigured_servers)))
         configurator.configure()
-        env.configure_attempts += 1
-        master()
-        # determine if configuration was a success and reboot just in case.
-        # for example, a reboot is required when rebuilding a custom kernel
         for server in env.unconfigured_servers:
-            server = __set_ssh_vars(server)
+            # if configuration was a success, reboot.
+            # for example, a reboot is required when rebuilding a custom kernel
+            server = __set_ssh_vars(server)  # mask the server
             if server.port == int(settings.SSH_PORT):
                 reboot_server(server.name)
             else:
-                print(red("after {0} attempt, server {1} is still unconfigured".format(env.configure_attempts, server.name)))
+                print(red("after #{0} attempts, server {1} is still unconfigured".format(
+                          attempts, server.name)))
+            __set_ssh_vars(env)  # back to default
+        __set_unconfigured_servers()
 
-    __set_unconfigured_servers()
-    __set_ssh_vars(env)
-    if not env.unconfigured_servers:
-        print(green("all servers are configured."))
+    # last, ensure that SSH is configured (locked down) for each server
+    output = local("fab each ssh_test", capture=True)
+    if "CONFIGURATOR FAIL!" in output:
+        print(red("configurator failure."))
 
 
 @task
@@ -209,7 +238,8 @@ def reboot_server(name):
     env.host_string = "{0}:{1}".format(server.public_ip, env.port)
 
     env.keepalive = 30  # keep the ssh key active, see fabric issue #402
-    reboot()
+    with fabric_settings(warn_only=True):
+        reboot()
 
     env.user = original_user
     env.host_string = original_host_string
@@ -287,6 +317,7 @@ def __shared_setup():
         except NetworkError:
             known_hosts.add(server.public_ip)
 
+
 def __set_ssh_vars(valid_object):
     """
     This method takes a valid_object, either the env or a server,
@@ -321,9 +352,6 @@ def __set_ssh_vars(valid_object):
 
 
 def __set_unconfigured_servers():
-    if not hasattr(env, "configure_attempts"):
-        env.configure_attempts = 0
-
     env.unconfigured_servers = []
     for server in env.bootmachine_servers:
         if server.port != int(settings.SSH_PORT):

@@ -1,1 +1,0 @@
-../../../../bootmachine/configuration/bootmachine-pillar/deploymachine.sls

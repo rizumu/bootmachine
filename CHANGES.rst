@@ -1,6 +1,19 @@
 Bootmachine Changelog
 =====================
 
+0.5.10 (dev)
+------------
+
+* require the salt package and release version in the settings, when
+  building salt on a rolling release such as Arch.
+* Arch 2012.08 is now a pure systemd installation
+* nova client now requires specifying pub and priv networks
+  during a build. sleep longer during boot stage to prevent
+  extra api calls to rackspace.
+* refactor salt states and move them to a new folder.
+* add support for changing the remote directory of states and pillars.
+* bump Fabric to 1.5.1 (which helpfully resolved some rebooting issues)
+
 0.5.9 (25.10.2012)
 ------------------
 CHANGES:

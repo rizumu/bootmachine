@@ -9,12 +9,12 @@ MASTER = "rackspacev2-salt-ubuntu1204-a"
 PROVIDER_MODULE = "bootmachine.contrib.providers.rackspace_openstack_v2"
 SERVERS = [
     {"servername": "rackspacev2-salt-ubuntu1204-a",
-     "roles": ["loadbalancer"],
+     "roles": ["salt-master"],
      "flavor": "2",
      "image": "Ubuntu 12.04 LTS (Precise Pangolin)",
      "distro_module": "bootmachine.contrib.distros.rackspace_ubuntu_1204"},
     {"servername": "rackspacev2-salt-ubuntu1204-b",
-     "roles": ["application"],
+     "roles": ["test-additional-minions"],
      "flavor": "2",
      "image": "Ubuntu 12.04 LTS (Precise Pangolin)",
      "distro_module": "bootmachine.contrib.distros.rackspace_ubuntu_1204"},

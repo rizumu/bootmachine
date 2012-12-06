@@ -9,12 +9,12 @@ MASTER = "rackspacev2-salt-arch201208-a"
 PROVIDER_MODULE = "bootmachine.contrib.providers.rackspace_openstack_v2"
 SERVERS = [
     {"servername": "rackspacev2-salt-arch201208-a",
-     "roles": ["loadbalancer"],
+     "roles": ["salt-master"],
      "flavor": "2",
      "image": "Arch 2012.08",
      "distro_module": "bootmachine.contrib.distros.rackspace_arch_201208"},
     {"servername": "rackspacev2-salt-arch201208-b",
-     "roles": ["application"],
+     "roles": ["test-additional-minions"],
      "flavor": "2",
      "image": "Arch 2012.08",
      "distro_module": "bootmachine.contrib.distros.rackspace_arch_201208"},

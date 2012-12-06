@@ -5,6 +5,8 @@ from fabric.context_managers import cd, settings as fabric_settings
 from fabric.contrib.files import append, sed, uncomment
 from fabric.operations import reboot
 
+import settings
+
 
 DISTRO = "ARCH_201110"
 SALT_INSTALLERS = ["aur", "aur-git"]
@@ -67,13 +69,13 @@ def bootstrap():
     # create a user, named 'aur', to safely install AUR packages under fakeroot
     # uid and gid values auto increment from 1000
     # to prevent conficts set the 'aur' user's gid and uid to 902
-    run("groupadd -g 902 aur && useradd -u 902 -g 902 -G wheel aur")
+    run("groupadd -g 902 aur && useradd -m -u 902 -g 902 -G wheel aur")
     uncomment("/etc/sudoers", "wheel.*NOPASSWD")
 
     # more glibc crap, uninstall non-pacman rackspace installed packages
     run("rm -rf /lib/modules")
     run("pacman --noconfirm -Rns xe-guest-utilities kernel26-xen")
-    with cd("/tmp/"):
+    with cd("/home/aur/"):
         sudo("yaourt --noconfirm -S xe-guest-utilities", user="aur")
 
     # finally we can upgrade glibc and run a successful full system upgrade
@@ -100,14 +102,15 @@ def bootstrap():
     sed("/etc/mkinitcpio.conf", "xen-", "xen_")  # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6
     sed("/etc/mkinitcpio.conf", "usbinput", "usbinput fsck")
     run("mkinitcpio -p linux")
-    reboot()
+    with fabric_settings(warn_only=True):
+        reboot()
 
 
 def install_salt(installer="aur"):
     """
     Install salt with the chosen installer.
     """
-    with cd("/tmp/"):
+    with cd("/home/aur/"):
         if installer == "aur":
             sudo("yaourt --noconfirm -S salt", user="aur")
         elif installer == "aur-git":
@@ -126,11 +129,16 @@ def setup_salt():
     run("cp /etc/salt/minion.template /etc/salt/minion")
     if env.host == env.master_server.public_ip:
         run("cp /etc/salt/master.template /etc/salt/master")
+        append("/etc/salt/master", "file_roots:\n  base:\n    - {0}".format(
+               settings.REMOTE_STATES_DIR))
+        append("/etc/salt/master", "pillar_roots:\n  base:\n    - {0}".format(
+               settings.REMOTE_PILLARS_DIR))
         sed("/etc/rc.conf", "crond sshd", "crond sshd iptables @salt-master @salt-minion")
     else:
         sed("/etc/rc.conf", "crond sshd", "crond sshd iptables @salt-minion")
 
-    sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
+    sed("/etc/salt/minion", "#master: salt", "master: {0}".format(env.master_server.private_ip))
+    sed("/etc/salt/minion", "#id:", "id: {0}".format(server.name))
     append("/etc/salt/minion", "grains:\n  roles:")
     for role in server.roles:
         append("/etc/salt/minion", "    - {0}".format(role))

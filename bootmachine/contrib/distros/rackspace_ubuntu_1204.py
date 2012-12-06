@@ -5,6 +5,8 @@ from fabric.contrib.files import append, sed
 from fabric.context_managers import settings as fabric_settings
 from fabric.operations import reboot
 
+import settings
+
 
 DISTRO = "UBUNTU_1204LTS"
 SALT_INSTALLERS = ["ppa"]
@@ -23,7 +25,8 @@ def bootstrap():
         # http://askubuntu.com/questions/146921/how-do-i-apt-get-y-dist-upgrade-without-a-grub-config-prompt
         run('DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade')
     append("/etc/hosts", "{0} saltmaster-private".format(env.master_server.private_ip))
-    reboot()
+    with fabric_settings(warn_only=True):
+        reboot()
     run("aptitude install -y build-essential")
 
 
@@ -44,9 +47,8 @@ def install_salt(installer="ppa"):
         with fabric_settings(warn_only=True):
             run("aptitude update")
         if env.host == env.master_server.public_ip:
-            run("aptitude install -y salt-master salt-minion salt-syndic")
-        else:
-            run("aptitude install -y salt-minion salt-syndic")
+            run("aptitude install -y salt-master")
+        run("aptitude install -y salt-minion salt-syndic")
     else:
         raise NotImplementedError()
 
@@ -57,7 +59,14 @@ def setup_salt():
     """
     server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
 
-    sed("/etc/salt/minion", "#master: salt", "master: saltmaster-private")
+    if env.host == env.master_server.public_ip:
+        append("/etc/salt/master", "file_roots:\n  base:\n    - {0}".format(
+               settings.REMOTE_STATES_DIR))
+        append("/etc/salt/master", "pillar_roots:\n  base:\n    - {0}".format(
+               settings.REMOTE_PILLARS_DIR))
+
+    sed("/etc/salt/minion", "#master: salt", "master: {0}".format(env.master_server.private_ip))
+    sed("/etc/salt/minion", "#id:", "id: {0}".format(server.name))
     append("/etc/salt/minion", "grains:\n  roles:")
     for role in server.roles:
         append("/etc/salt/minion", "    - {0}".format(role))
