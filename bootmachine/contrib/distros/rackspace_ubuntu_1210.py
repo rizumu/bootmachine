@@ -20,10 +20,6 @@ def bootstrap():
     """
     run("/usr/sbin/locale-gen en_US.UTF-8 && /usr/sbin/update-locale LANG=en_US.UTF-8")
     run("aptitude update")
-    with fabric_settings(warn_only=True):
-        # dist-upgrade without a grub config prompt
-        # http://askubuntu.com/questions/146921/how-do-i-apt-get-y-dist-upgrade-without-a-grub-config-prompt
-        run('DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade')
     append("/etc/hosts", "{0} saltmaster-private".format(env.master_server.private_ip))
     with fabric_settings(warn_only=True):
         reboot()
@@ -32,9 +28,12 @@ def bootstrap():
 
 def upgrade_ubuntu():
     """
-    When a provider doesn't offer the latest version.
+    When a provider doesn't offer the latest version, and you want to automate the upgrade.
     """
-    raise NotImplementedError()
+    with fabric_settings(warn_only=True):
+        # dist-upgrade without a grub config prompt
+        # http://askubuntu.com/questions/146921/how-do-i-apt-get-y-dist-upgrade-without-a-grub-config-prompt
+        run('DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade')
 
 
 def install_salt(installer="ppa"):
