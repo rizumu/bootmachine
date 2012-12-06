@@ -254,8 +254,10 @@ def ssh_test():
     Usage:
         fab each ssh_test
     """
+    for server in env.bootmachine_servers:
+        if server.status != "ACTIVE":
+            abort("The server '{0}' is in the '{1}' state.".format(server.name, server.status))
     __set_ssh_vars(env)
-
     if ":{0}".format(settings.SSH_PORT) not in env.host_string:
         local("echo 'CONFIGURATOR FAIL!'")
         return
