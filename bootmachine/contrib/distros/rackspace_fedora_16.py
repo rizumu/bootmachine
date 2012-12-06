@@ -54,6 +54,7 @@ def setup_salt():
     server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
 
     if env.host == env.master_server.public_ip:
+        run("iptables -F")  # default iptables are too strict to accept minions
         append("/etc/salt/master", "file_roots:\n  base:\n    - {0}".format(
                settings.REMOTE_STATES_DIR))
         append("/etc/salt/master", "pillar_roots:\n  base:\n    - {0}".format(
@@ -78,7 +79,6 @@ def start_salt():
             sudo("systemctl start salt-master.service")
             time.sleep(3)
         sudo("systemctl start salt-minion.service")
-
 
 
 def restart_salt():
