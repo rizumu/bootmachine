@@ -19,6 +19,7 @@ def bootstrap():
     Only the bare essentials, the configuration manager will take care of the rest.
     """
     run("/usr/sbin/locale-gen en_US.UTF-8 && /usr/sbin/update-locale LANG=en_US.UTF-8")
+    run("rm -rf /var/lib/apt/lists/*")
     run("aptitude update")
     append("/etc/hosts", "{0} saltmaster-private".format(env.master_server.private_ip))
     with fabric_settings(warn_only=True):
@@ -77,23 +78,26 @@ def start_salt():
     """
     Starts salt master and minions.
     """
-    # use warn_only to catch already running errors
-    # probably should use pgrep instead
     with fabric_settings(warn_only=True):
         if env.host == env.master_server.public_ip:
-            sudo("service salt-master start", pty=False)
-            time.sleep(3)
-        sudo("service salt-minion start", pty=False)
+            sudo("service salt-master start")
+        time.sleep(3)
+        sudo("service salt-minion start")
+
+
+def stop_salt():
+    """
+    Stops salt master and minions.
+    """
+    with fabric_settings(warn_only=True):
+        if env.host == env.master_server.public_ip:
+            sudo("service salt-master stop")
+        sudo("service salt-minion stop")
 
 
 def restart_salt():
     """
     Restarts salt master and minions.
     """
-    # use warn_only to catch already running errors
-    # probably should use pgrep instead
-    with fabric_settings(warn_only=True):
-        if env.host == env.master_server.public_ip:
-            sudo("service salt-master restart", pty=False)
-            time.sleep(3)
-        sudo("service salt-minion restart", pty=False)
+    stop_salt()
+    start_salt()

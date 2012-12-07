@@ -7,7 +7,7 @@ from fabric.colors import blue, cyan, green, magenta, red, white, yellow
 from fabric.context_managers import settings as fabric_settings
 from fabric.contrib.files import exists
 from fabric.contrib.project import rsync_project
-from fabric.decorators import task, parallel
+from fabric.decorators import task
 from fabric.utils import abort
 
 from jinja2 import Template
@@ -188,7 +188,7 @@ def launch():
 
     time.sleep(10)  # sleep a little to give minions a chance to become visible
     accept_minions()
-    restart()
+    local("fab master configurator.restartall")
 
 
 @task
@@ -219,7 +219,7 @@ def accept_minions():
                 sudo("salt-key --quiet --accept={0}".format(server))
         minions = __get_accepted_minions()
         if len(minions) != len(settings.SERVERS):
-            local("fab each configurator.restart")
+            local("fab master configurator.restart")
             time.sleep(5)
             slept += 5
             print(yellow("there are still unaccpeted keys, trying again."))
@@ -249,28 +249,29 @@ def change_master_ip(ip_address):
 
 
 @task
-@parallel
-def restart():
+def restartall():
     """
-    Restart all salt masters and minion daemons.
-    Simply wrap salt's reestart method cor the chose distro.
+    Restart first the salt master than all minion daemons.
+    Usage:
+        fab master configurator.restartall
     """
-    server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
-    env.servername = server.name
-    env.port = server.port
-    env.user = server.user
+    if env.host != env.master_server.public_ip:
+        abort("tried to restartall from a non-master server")
 
-    for server in settings.SERVERS:
-        if env.servername == server["servername"]:
-            distro_module = server["distro_module"]
-
-    try:
-        __import__(distro_module)
-        distro = sys.modules[distro_module]
-    except ImportError:
-        abort("Unable to import the module: {0}".format(distro_module))
-
-    distro.restart_salt()
+    for server in env.bootmachine_servers:
+        stop(__getdistro_setenv(server.name))
+    time.sleep(5)
+    start(__getdistro_setenv(env.master_server.name))
+    for server in env.bootmachine_servers:
+        if server.name != env.master_server.name:
+            start(__getdistro_setenv(server.name))
+    env.servername = env.master_server.name
+    env.host = server.public_ip
+    env.host_string = "{0}:{1}".format(env.master_server.public_ip,
+                                       env.master_server.port)
+    env.hosts = [env.master_server.public_ip]
+    env.port = env.master_server.port
+    env.user = env.master_server.user
 
 
 def revoke(servername):
@@ -303,3 +304,31 @@ def start(distro):
     Simply wrap salt's start method for the chosen distro.
     """
     distro.start_salt()
+
+
+def stop(distro):
+    """
+    Stop the salt master and minion daemons.
+    Simply wrap salt's stop method for the chosen distro.
+    """
+    distro.stop_salt()
+
+
+def __getdistro_setenv(servername):
+    """
+    """
+    server = [s for s in env.bootmachine_servers
+              if s.name == servername][0]
+    env.servername = server.name
+    env.host = server.public_ip
+    env.host_string = "{0}:{1}".format(server.public_ip, server.port)
+    env.hosts = [server.public_ip]
+    env.port = server.port
+    env.user = server.user
+    distro_module = [s for s in settings.SERVERS
+                     if s["servername"] == server.name][0]["distro_module"]
+    try:
+        __import__(distro_module)
+        return sys.modules[distro_module]
+    except ImportError:
+        abort("Unable to import the module: {0}".format(distro_module))

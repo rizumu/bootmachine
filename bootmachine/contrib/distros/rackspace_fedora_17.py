@@ -73,23 +73,26 @@ def start_salt():
     """
     Starts salt master and minions.
     """
-    # use warn_only to catch already running errors
-    # probably should use pgrep instead
     with fabric_settings(warn_only=True):
         if env.host == env.master_server.public_ip:
-            sudo("systemctl start salt-master.service")
-            time.sleep(3)
-        sudo("systemctl start salt-minion.service")
+            sudo("systemctl start salt-master")
+        time.sleep(3)
+        sudo("systemctl start salt-minion")
+
+
+def stop_salt():
+    """
+    Stops salt master and minions.
+    """
+    with fabric_settings(warn_only=True):
+        if env.host == env.master_server.public_ip:
+            sudo("systemctl stop salt-master")
+        sudo("systemctl stop salt-minion")
 
 
 def restart_salt():
     """
-    Restarts salt master and minions.
+    Restart salt master and the minions.
     """
-    # use warn_only to catch already running errors
-    # probably should use pgrep instead
-    with fabric_settings(warn_only=True):
-        if env.host == env.master_server.public_ip:
-            sudo("systemctl restart salt-master.service")
-            time.sleep(3)
-        sudo("systemctl restart salt-minion.service")
+    stop_salt()
+    start_salt()

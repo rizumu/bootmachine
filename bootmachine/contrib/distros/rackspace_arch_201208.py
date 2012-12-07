@@ -20,8 +20,8 @@ def validate_configurator_version():
     the configurator version is current.
     """
     if settings.CONFIGURATOR_MODULE == "bootmachine.contrib.configurators.salt":
-        pkgver = settings.AUR_PKGVER
-        pkgrel = settings.AUR_PKGREL
+        pkgver = settings.SALT_AUR_PKGVER
+        pkgrel = settings.SALT_AUR_PKGREL
         response = urllib2.urlopen("https://aur.archlinux.org/packages/sa/salt/PKGBUILD")
         for line in response:
             if line.startswith("pkgver=") and not pkgver in line:
@@ -151,20 +151,19 @@ def start_salt():
         sudo("systemctl start salt-minion")
 
 
-def restart_salt():
+def stop_salt():
     """
-    Restarts salt master and minions.
+    Stops salt master and minions.
     """
     with fabric_settings(warn_only=True):
-        master_running = run("pgrep salt-master")
-        minion_running = run("pgrep salt-minion")
-    if env.host == env.master_server.public_ip:
-        if master_running:
-            sudo("systemctl restart salt-master.service")
-        else:
-            sudo("systemctl restart salt-master.service")
-            time.sleep(3)
-    if minion_running:
-        sudo("systemctl restart salt-minion.service")
-    else:
-        sudo("systemctl start salt-minion.service")
+        if env.host == env.master_server.public_ip:
+            sudo("systemctl stop salt-master")
+        sudo("systemctl stop salt-minion")
+
+
+def restart_salt():
+    """
+    Restart salt master and the minions.
+    """
+    stop_salt()
+    start_salt()

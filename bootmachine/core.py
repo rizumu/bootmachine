@@ -188,6 +188,8 @@ def configure():
     attempts = 0
     __set_unconfigured_servers()
     while env.unconfigured_servers:
+        if attempts != 0:
+            local("fab master configurator.restartall")
         if attempts == 5:
             abort("unable to configure the servers")
         attempts += 1
