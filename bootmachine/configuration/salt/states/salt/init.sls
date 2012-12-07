@@ -7,8 +7,8 @@ salt-minion:
 su - aur -c 'yaourt --noconfirm -S salt':
   cmd.run:
     - user: root
-    - unless: yaourt -Q salt | grep '{{ pillar['aur_salt_pkgver'] }}'
-    - onlyif: curl -s https://aur.archlinux.org/packages/sa/salt/PKGBUILD | grep -A 1 'pkgver={{ pillar['aur_salt_pkgver'] }}' | grep 'pkgrel={{ pillar['aur_salt_pkgrel'] }}'
+    - unless: yaourt -Q salt | grep '{{ pillar['salt_aur_pkgver'] }}'
+    - onlyif: curl -s https://aur.archlinux.org/packages/sa/salt/PKGBUILD | grep -A 1 'pkgver={{ pillar['salt_aur_pkgver'] }}' | grep 'pkgrel={{ pillar['salt_aur_pkgrel'] }}'
     - cwd: /home/aur/
     - require:
       - user: aur

@@ -108,8 +108,8 @@ def pillar_update():
         saltmaster_private_ip=env.master_server.private_ip,
         ssh_port=settings.SSH_PORT,
         ssh_users=settings.SSH_USERS,
-        salt_aur_pkgver=settings.AUR_PKGVER,
-        salt_aur_pkgrel=settings.AUR_PKGREL,
+        salt_aur_pkgver=settings.SALT_AUR_PKGVER,
+        salt_aur_pkgrel=settings.SALT_AUR_PKGREL,
     ))
 
     # TODO: only upload and refresh when file has changes
