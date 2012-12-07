@@ -2,7 +2,7 @@ import time
 
 from fabric.api import env, run, sudo
 from fabric.context_managers import settings as fabric_settings
-from fabric.contrib.files import append, sed
+from fabric.contrib.files import append, sed, uncomment
 from fabric.operations import reboot
 
 import settings
@@ -31,6 +31,8 @@ def bootstrap():
     run("yum groupinstall --assumeyes 'Development Tools'")
     run("yum install --assumeyes {pkgs}".format(pkgs=" ".join(base_packages)))
     append("/etc/hosts", "{0} saltmaster-private".format(env.master_server.private_ip))
+    # allow users in the wheel group to sudo without a password
+    uncomment("/etc/sudoers", "wheel.*NOPASSWD")
     with fabric_settings(warn_only=True):
         reboot()
 

@@ -66,11 +66,13 @@ def bootstrap():
     run("pacman -Syy")
     run("pacman --noconfirm -S yaourt")
 
+    # allow users in the wheel group to sudo without a password
+    uncomment("/etc/sudoers", "wheel.*NOPASSWD")
+
     # create a user, named 'aur', to safely install AUR packages under fakeroot
     # uid and gid values auto increment from 1000
     # to prevent conficts set the 'aur' user's gid and uid to 902
     run("groupadd -g 902 aur && useradd -m -u 902 -g 902 -G wheel aur")
-    uncomment("/etc/sudoers", "wheel.*NOPASSWD")
 
     # more glibc crap, uninstall non-pacman rackspace installed packages
     run("rm -rf /lib/modules")

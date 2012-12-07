@@ -1,7 +1,7 @@
 import time
 
 from fabric.api import env, run, sudo
-from fabric.contrib.files import append, sed
+from fabric.contrib.files import append, sed, uncomment
 from fabric.context_managers import settings as fabric_settings
 from fabric.operations import reboot
 
@@ -25,6 +25,8 @@ def bootstrap():
     with fabric_settings(warn_only=True):
         reboot()
     run("aptitude install -y build-essential rsync")
+    # allow users in the wheel group to sudo without a password
+    uncomment("/etc/sudoers", "wheel.*NOPASSWD")
 
 
 def upgrade():
