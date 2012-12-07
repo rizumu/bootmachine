@@ -37,24 +37,29 @@ def bootstrap():
     Only the bare essentials, the configurator will take care of the rest.
     """
     validate_configurator_version()
-    # configure kernel
+
+    # configure kernel before upgrade
     sed("/etc/mkinitcpio.conf", "xen-", "xen_")  # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6
     sed("/etc/mkinitcpio.conf", "usbinput", "usbinput fsck")
 
-    # pre upgrade maintenance
+    # upgrade pacakges
     run("pacman --noconfirm -Syu")
+    run("pacman --noconfirm -Syu")  # requires a second run!
 
     # install essential packages
     run("pacman --noconfirm -S base-devel")
     run("pacman --noconfirm -S curl git rsync")
+
+    # install and configure yaourt
     append("/etc/pacman.conf", "\n[archlinuxfr]\nServer = http://repo.archlinux.fr/$arch", use_sudo=True)
     run("pacman -Syy")
     run("pacman --noconfirm -S yaourt")
-
     # create a user, named 'aur', to safely install AUR packages under fakeroot
     # uid and gid values auto increment from 1000
     # to prevent conficts set the 'aur' user's gid and uid to 902
     run("groupadd -g 902 aur && useradd -m -u 902 -g 902 -G wheel aur")
+
+    # allow users in the wheel group to sudo without a password
     uncomment("/etc/sudoers", "wheel.*NOPASSWD")
 
     # upgrade non-pacman rackspace installed packages
@@ -82,23 +87,18 @@ def bootstrap():
     run("ip6tables-save > /etc/iptables/ip6tables.rules")
     for daemon in ["netcfg", "sshd", "syslog-ng", "ntpd", "iptables"]:
         run("systemctl enable {0}.service".format(daemon))
-    server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
-    append("/etc/hostname", server.name)
-    append("/etc/locale.conf", "LANG=en_US.UTF-8\nLC_COLLATE=C")
     with fabric_settings(warn_only=True):
         reboot()
     if not contains("/proc/1/comm", "systemd"):
         abort("systemd installation failure")
-    run("timedatectl set-timezone US/Central")
-    sed("/etc/default/grub", 'GRUB_CMDLINE_LINUX="init=/usr/lib/systemd/systemd"', 'GRUB_CMDLINE_LINUX=""')
-    run("grub-mkconfig -o /boot/grub/grub.cfg")
     run("pacman --noconfirm -Rns initscripts sysvinit")
     run("pacman --noconfirm -S systemd-sysvcompat")
-
-    # ensure systemd, kernel, etc is truly up-to-date
-    run("pacman --noconfirm -Syu")
-    with fabric_settings(warn_only=True):
-        reboot()
+    sed("/etc/default/grub", 'GRUB_CMDLINE_LINUX="init=/usr/lib/systemd/systemd"', 'GRUB_CMDLINE_LINUX=""')
+    run("grub-mkconfig -o /boot/grub/grub.cfg")
+    server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
+    run("hostnamectl set-hostname {0}".format(server.name))
+    run("localectl set-locale LANG='de_US.utf8'")
+    run("timedatectl set-timezone US/Central")
 
 
 def install_salt(installer="aur"):
