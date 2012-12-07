@@ -130,28 +130,25 @@ def setup_salt():
                settings.REMOTE_STATES_DIR))
         append("/etc/salt/master", "pillar_roots:\n  base:\n    - {0}".format(
                settings.REMOTE_PILLARS_DIR))
-        run("systemctl enable salt-master.service")
+        run("systemctl enable salt-master")
     run("touch /etc/salt/minion")
     append("/etc/salt/minion", "master: {0}".format(env.master_server.private_ip))
     append("/etc/salt/minion", "id: {0}".format(server.name))
     append("/etc/salt/minion", "grains:\n  roles:")
     for role in server.roles:
         append("/etc/salt/minion", "    - {0}".format(role))
-    run("systemctl enable salt-minion.service")
+    run("systemctl enable salt-minion")
 
 
 def start_salt():
     """
-    Starts salt master and minions if not already running.
+    Starts salt master and minions.
     """
     with fabric_settings(warn_only=True):
-        master_running = run("pgrep salt-master")
-        minion_running = run("pgrep salt-minion")
-    if not master_running and env.host == env.master_server.public_ip:
-        sudo("systemctl start salt-master.service")
+        if env.host == env.master_server.public_ip:
+            sudo("systemctl start salt-master")
         time.sleep(3)
-    if not minion_running:
-        sudo("systemctl start salt-minion.service")
+        sudo("systemctl start salt-minion")
 
 
 def restart_salt():

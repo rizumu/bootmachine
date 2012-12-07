@@ -174,6 +174,8 @@ def launch():
     """
     After the salt packages are installed, accept the new minions,
     upload states.
+    Usage:
+        fab master configurator.launch
     """
     if env.host != env.master_server.public_ip:
         abort("tried to launch on a non-master server")
@@ -194,7 +196,7 @@ def accept_minions():
     """
     Accept salt-key's for all minions.
     Usage:
-        fab master salt.accept_minions
+        fab master configurator.accept_minions
     """
     if env.host != env.master_server.public_ip:
         abort("tried to accept minions on a non-master server")
@@ -232,10 +234,10 @@ def list_minions():
     """
     List all minions.
     Usage:
-        fab master salt.list_minions
+        fab master configurator.list_minions
     """
     if env.host != env.master_server.public_ip:
-        abort("tried to list minions on a non-master server")
+        abort("tried to list minions from a non-master server")
 
     sudo("salt-key --list all")
 

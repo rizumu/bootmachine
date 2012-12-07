@@ -37,7 +37,7 @@ ssh:
       - file: /etc/ssh/sshd_config
 
 {% elif grains['os'] == 'Arch' %}
-systemctl restart sshd.service:
+systemctl restart sshd:
   cmd:
     - run
     - unless: "P1=$(netstat -ano --tcp --programs | grep LISTEN | grep sshd | grep -o :[0-9]* | grep -o [0-9]* | head -1); P2=$(cat /etc/ssh/sshd_config | grep Port | grep -o [0-9]*); [[ $P1 == $P2 ]]"
