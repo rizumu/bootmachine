@@ -44,7 +44,7 @@ systemctl restart sshd:
     - require:
       - pkg: net-tools
       - file: /etc/ssh/sshd_config
-sshd.socket:
+sshd:
   service.running:
     - enable: True
     - watch:
