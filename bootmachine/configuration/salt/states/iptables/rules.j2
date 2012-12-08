@@ -5,7 +5,7 @@
 -A INPUT ! -i lo -d 127.0.0.0/8 -j REJECT
 
 # Accepts all established inbound connections
--A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
 # Allows all outbound traffic
 # You can modify this to only allow certain traffic
@@ -13,12 +13,12 @@
 
 # Allow salt minions connections
 {% for minion_ip in saltminion_private_ips %}
--A INPUT -s {{ minion_ip }} -m state --state new -m tcp -p tcp --dport 4505 -j ACCEPT
--A INPUT -s {{ minion_ip }} -m state --state new -m tcp -p tcp --dport 4506 -j ACCEPT
+-A INPUT -s {{ minion_ip }} -m conntrack --ctstate new -m tcp -p tcp --dport 4505 -j ACCEPT
+-A INPUT -s {{ minion_ip }} -m conntrack --ctstate new -m tcp -p tcp --dport 4506 -j ACCEPT
 {% endfor %}
 
 # Allows SSH connections
--A INPUT -p tcp -m state --state NEW --dport {{ ssh_port }} -j ACCEPT
+-A INPUT -p tcp -m conntrack --ctstate NEW --dport {{ ssh_port }} -j ACCEPT
 
 # Allow ping
 -A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
