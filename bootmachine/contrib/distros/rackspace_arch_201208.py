@@ -97,7 +97,10 @@ def bootstrap():
     run("grub-mkconfig -o /boot/grub/grub.cfg")
     server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
     run("hostnamectl set-hostname {0}".format(server.name))
-    run("localectl set-locale LANG='de_US.utf8'")
+    uncomment("/etc/locale.gen", "en_US.UTF-8 UTF-8")
+    uncomment("/etc/locale.gen", "en_US ISO-8859-1")
+    run("localegen")
+    run("localectl set-locale LANG='en_US.utf8'")
     run("timedatectl set-timezone US/Central")
 
 
