@@ -99,7 +99,7 @@ def bootstrap():
     run("hostnamectl set-hostname {0}".format(server.name))
     uncomment("/etc/locale.gen", "en_US.UTF-8 UTF-8")
     uncomment("/etc/locale.gen", "en_US ISO-8859-1")
-    run("localegen")
+    run("locale-gen")
     run("localectl set-locale LANG='en_US.utf8'")
     run("timedatectl set-timezone US/Central")
 
