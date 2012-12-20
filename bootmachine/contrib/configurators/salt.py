@@ -203,7 +203,7 @@ def accept_minions():
 
     def __get_accepted_minions():
         """TODO: remove when all distros support salt 0.10.5"""
-        accepted = eval(sudo("salt-key --raw-out --list acc"))
+        accepted = eval(sudo("salt-key --out raw --list acc"))
         if type(accepted) == dict:
             return accepted["minions"]
         else:

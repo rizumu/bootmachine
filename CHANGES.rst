@@ -4,6 +4,7 @@ Bootmachine Changelog
 0.5.10 (dev)
 ------------
 
+* bump Arch salt version to 0.11.1
 * require the salt package and release version in the settings, when
   building salt on a rolling release such as Arch.
 * Arch 2012.08 is now a pure systemd installation
