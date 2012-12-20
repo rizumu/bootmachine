@@ -67,6 +67,7 @@ def setup_salt():
     for role in server.roles:
         append("/etc/salt/minion", "    - {0}".format(role))
     run("systemctl enable salt-minion.service")
+    run("iptables -F")  # Fedora 17 iptables block the salt port by default
 
 
 def start_salt():
