@@ -203,7 +203,10 @@ def accept_minions():
 
     def __get_accepted_minions():
         """TODO: remove when all distros support salt 0.10.5"""
-        accepted = eval(sudo("salt-key --out raw --list acc"))
+        try:
+            accepted = eval(sudo("salt-key --out raw --list acc"))
+        except:
+            accepted = eval(sudo("salt-key --raw-out --list acc"))
         if type(accepted) == dict:
             return accepted["minions"]
         else:
@@ -219,7 +222,7 @@ def accept_minions():
                 sudo("salt-key --quiet --accept={0}".format(server))
         minions = __get_accepted_minions()
         if len(minions) != len(settings.SERVERS):
-            local("fab master configurator.restart")
+            local("fab master configurator.restartall")
             time.sleep(5)
             slept += 5
             print(yellow("there are still unaccpeted keys, trying again."))
