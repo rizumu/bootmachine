@@ -309,19 +309,14 @@ def __shared_setup():
     Set the env variables common to both master() and each().
     """
     provider.set_bootmachine_servers()
-
     for server in env.bootmachine_servers:
         if server.name == settings.MASTER:
             env.master_server = server
         server = __set_ssh_vars(server)
-
-        # prevent prompts and warnings related to ssh keys:
-        # a) skips false man-in-the-middle warnings
-        # b) adds a missing key to ~/.ssh/known_hosts
-        try:
-            connect(server.user, server.public_ip, server.port)
-        except NetworkError:
-            known_hosts.add(server.public_ip)
+        # the following prevent prompts and warnings related to ssh keys by:
+        # a) skipping false man-in-the-middle warnings
+        # b) adding hosts to ~/.ssh/known_hosts
+        known_hosts.add(server.user, server.public_ip, server.port)
 
 
 def __set_ssh_vars(valid_object):
