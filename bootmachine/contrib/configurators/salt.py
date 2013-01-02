@@ -6,7 +6,6 @@ from fabric.api import env, local, sudo
 from fabric.colors import blue, cyan, green, magenta, red, white, yellow
 from fabric.context_managers import settings as fabric_settings
 from fabric.contrib.files import exists
-from fabric.contrib.project import rsync_project
 from fabric.decorators import task
 from fabric.utils import abort
 
@@ -51,16 +50,12 @@ def upload_saltstates():
     """
     if env.host != env.master_server.public_ip:
         abort("tried to upload salttates on a non-master server")
-    local_states_dir = settings.LOCAL_STATES_DIR
-    local_pillars_dir = settings.LOCAL_PILLARS_DIR
-    remote_states_dir = settings.REMOTE_STATES_DIR
-    remote_pillars_dir = settings.REMOTE_PILLARS_DIR
-    if not exists(remote_states_dir, use_sudo=True):
-        sudo("mkdir --parents {0}".format(remote_states_dir))
+    if not exists(settings.REMOTE_STATES_DIR, use_sudo=True):
+        sudo("mkdir --parents {0}".format(settings.REMOTE_STATES_DIR))
 
     # catch rsync issue with emacs autosave files
     temp_files = []
-    for path in (local_states_dir, local_pillars_dir):
+    for path in (settings.LOCAL_STATES_DIR, settings.LOCAL_PILLARS_DIR):
         for match in ("#*#", ".#*"):
             temp_file = local('find {0} -name "{1}"'.format(path, match), capture=True)
             if temp_file:
@@ -72,15 +67,10 @@ def upload_saltstates():
         abort("Found temp files in the saltstates or pillars dirs.")
 
     # rsync pillar and salt files to the fabric users local directory
-    rsync_project(local_dir=local_states_dir, remote_dir="./states/", delete=True,
-                  extra_opts="--compress --copy-links", ssh_opts="-o StrictHostKeyChecking=no")
-    rsync_project(local_dir=local_pillars_dir, remote_dir="./pillars/", delete=True,
-                  extra_opts="--compress --copy-links", ssh_opts="-o StrictHostKeyChecking=no")
-
-    # delete the pillar and state files
-    sudo("rm -rf {0} && rm -rf {1}".format(remote_states_dir, remote_pillars_dir))
-    # copy the rsynced versions over as root
-    sudo("cp -r ./states {0} && cp -r ./pillars {1}".format(remote_states_dir, remote_pillars_dir))
+    local('rsync -a -e "ssh -p {0}" --rsync-path="sudo rsync" {1} {2}@{3}:{4}'.format(
+        env.port, local_states_dir, env.user, env.host, settings.REMOTE_STATES_DIR))
+    local('rsync -a -e "ssh -p {0}" --rsync-path="sudo rsync" {1} {2}@{3}:{4}'.format(
+        env.port, local_pillars_dir, env.user, env.host, settings.LOCAL_PILLARS_DIR))
 
 
 @task
