@@ -194,7 +194,8 @@ def destroyem(force=False):
     """
     if not force:
         servers = ", ".join([s["servername"] for s in settings.SERVERS])
-        reply = prompt("Permanently destroying *EVERY* server:\n{0}\n\nAre you sure? y/N".format(servers))
+        reply = prompt("Permanently destroying *EVERY* server:\n{0}\n\nAre you sure? y/N".format(
+            servers))
         if reply is not "y":
             abort("Did not destroy *ANY* servers")
 
@@ -211,8 +212,8 @@ def set_bootmachine_servers(roles=None, ip_type="public", append_port=True):
 
     for server in env.bootmachine_servers:
         if server.status != "ACTIVE":
-            console.confirm("The server `{0}` is not `ACTIVE` and is in the `{1}` phase. Continue?".format(
-                server.name, server.status))
+            console.confirm("The server `{0}` is not `ACTIVE` and is in the `{1}` phase. \
+Continue?".format(server.name, server.status))
     for server in env.bootmachine_servers:
         # Verify (by name) that the live server was defined in the settings.
         try:
@@ -233,5 +234,6 @@ def set_bootmachine_servers(roles=None, ip_type="public", append_port=True):
                 ips.append(server.public_ip + ":" + str(settings.SSH_PORT))
         else:
             ips.append(server.addresses[ip_type][0])
-        server.distro_module = [n["distro_module"] for n in settings.SERVERS if n["servername"] == server.name][0]
+        server.distro_module = [n["distro_module"] for n in settings.SERVERS
+                                if n["servername"] == server.name][0]
     return ips

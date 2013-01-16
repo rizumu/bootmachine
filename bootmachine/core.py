@@ -152,7 +152,8 @@ def bootstrap_configurator():
     __set_ssh_vars(env)
 
     if exists("/root/.bootmachine_configurator_bootstrapped", use_sudo=True):
-        print(green("{ip_addr} configurator is already bootstrapped, skipping.".format(ip_addr=env.host)))
+        print(green("{ip_addr} configurator is already bootstrapped, skipping.".format(
+            ip_addr=env.host)))
         return
 
     print(cyan("... {ip_addr} configurator has begun bootstrapping .".format(ip_addr=env.host)))

@@ -87,7 +87,8 @@ def pillar_update():
     remote_pillars_dir = settings.REMOTE_PILLARS_DIR
     if not exists(remote_pillars_dir, use_sudo=True):
         sudo("mkdir --parents {0}".format(remote_pillars_dir))
-    bootmachine_sls_j2 = Template(open(os.path.join(local_pillars_dir, "bootmachine.sls.j2"), "r", 0).read())
+    bootmachine_sls_j2 = Template(
+        open(os.path.join(local_pillars_dir, "bootmachine.sls.j2"), "r", 0).read())
     bootmachine_sls = open(os.path.join(local_pillars_dir, "bootmachine.sls"), "w", 0)
     bootmachine_sls.write(bootmachine_sls_j2.render(
         bootmachine_servers=env.bootmachine_servers,
@@ -155,8 +156,8 @@ def update_master_iptables():
         match = sudo("iptables -nvL | grep {0}".format(port))
         for server in env.bootmachine_servers:
             if server.private_ip not in match:
-                sudo("iptables -I INPUT {0} -s {1} -m state --state new -m tcp -p tcp --dport {2} -j ACCEPT".format(
-                    insert_line[0], server.private_ip, port))
+                sudo("iptables -I INPUT {0} -s {1} -m state --state new -m tcp -p tcp \
+                --dport {2} -j ACCEPT".format(insert_line[0], server.private_ip, port))
 
 
 @task

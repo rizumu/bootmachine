@@ -25,9 +25,11 @@ def validate_configurator_version():
         response = urllib2.urlopen("https://aur.archlinux.org/packages/sa/salt/PKGBUILD")
         for line in response:
             if line.startswith("pkgver=") and not pkgver in line:
-                abort("The requested Salt 'pkgrel={0}' in the AUR was updated to '{1}'.".format(pkgver, line.strip()))
+                abort("The requested Salt 'pkgrel={0}' in the AUR was updated to '{1}'.".format(
+                    pkgver, line.strip()))
             if line.startswith("pkgrel=") and not pkgrel in line:
-                abort("The requested Salt 'pkgrel={0}' in the AUR was updated to '{1}'.".format(pkgrel, line.strip()))
+                abort("The requested Salt 'pkgrel={0}' in the AUR was updated to '{1}'.".format(
+                    pkgrel, line.strip()))
 
 
 def bootstrap():
@@ -39,7 +41,7 @@ def bootstrap():
     validate_configurator_version()
 
     # configure kernel before upgrade
-    # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6
+    # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6  # nopep8
     sed("/etc/mkinitcpio.conf", "xen-", "xen_")
     sed("/etc/mkinitcpio.conf", "usbinput", "usbinput fsck")
 
@@ -52,7 +54,8 @@ def bootstrap():
     run("pacman --noconfirm -S curl git rsync")
 
     # install and configure yaourt
-    append("/etc/pacman.conf", "\n[archlinuxfr]\nServer = http://repo.archlinux.fr/$arch", use_sudo=True)
+    append("/etc/pacman.conf", "\n[archlinuxfr]\nServer = http://repo.archlinux.fr/$arch",
+           use_sudo=True)
     run("pacman -Syy")
     run("pacman --noconfirm -S yaourt")
     # create a user, named 'aur', to safely install AUR packages under fakeroot
@@ -77,13 +80,15 @@ def bootstrap():
     run("grub-mkconfig -o /boot/grub/grub.cfg")
 
     # allow fabric to sftp with contrib.files.put
-    # http://stackoverflow.com/questions/10221839/cant-use-fabric-put-is-there-any-server-configuration-needed
+    # http://stackoverflow.com/questions/10221839/cant-use-fabric-put-is-there-any-server-configuration-needed  # nopep8
     # change before reboot because then the sshd config will be reloaded
-    sed("/etc/ssh/sshd_config", "Subsystem sftp /usr/lib/openssh/sftp-server", "Subsystem sftp internal-sftp")
+    sed("/etc/ssh/sshd_config", "Subsystem sftp /usr/lib/openssh/sftp-server",
+        "Subsystem sftp internal-sftp")
 
     # a pure systemd installation
     run("printf 'y\ny\nY\n' | pacman -S systemd ntp")
-    sed("/etc/default/grub", 'GRUB_CMDLINE_LINUX=""', 'GRUB_CMDLINE_LINUX="init=/usr/lib/systemd/systemd"')
+    sed("/etc/default/grub", 'GRUB_CMDLINE_LINUX=""',
+        'GRUB_CMDLINE_LINUX="init=/usr/lib/systemd/systemd"')
     run("grub-mkconfig -o /boot/grub/grub.cfg")
     run("iptables-save > /etc/iptables/iptables.rules")
     run("ip6tables-save > /etc/iptables/ip6tables.rules")
@@ -95,7 +100,8 @@ def bootstrap():
         abort("systemd installation failure")
     run("pacman --noconfirm -Rns initscripts sysvinit")
     run("pacman --noconfirm -S systemd-sysvcompat")
-    sed("/etc/default/grub", 'GRUB_CMDLINE_LINUX="init=/usr/lib/systemd/systemd"', 'GRUB_CMDLINE_LINUX=""')
+    sed("/etc/default/grub", 'GRUB_CMDLINE_LINUX="init=/usr/lib/systemd/systemd"',
+        'GRUB_CMDLINE_LINUX=""')
     run("grub-mkconfig -o /boot/grub/grub.cfg")
     server = [s for s in env.bootmachine_servers if s.public_ip == env.host][0]
     run("hostnamectl set-hostname {0}".format(server.name))

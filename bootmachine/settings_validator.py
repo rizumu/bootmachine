@@ -45,7 +45,7 @@ def validate_settings(settings):
 
     # Validate non-standard port
     if int(settings.SSH_PORT) == 22:
-        abort("bootstrap(): Security Error! Change ``settings.SSH_PORT`` to something other than ``22``")
+        abort("bootstrap(): Security Error! Change ``settings.SSH_PORT`` to anything except ``22``")
 
     # Validate unique servernames and existence of a configurator master
     servernames = [server["servername"] for server in settings.SERVERS]
@@ -66,7 +66,8 @@ def validate_settings(settings):
     for server in settings.SERVERS:
         for key in required_server_keys:
             if key not in server:
-                abort("The `{0}` key was not found for a server in the settings.SERVER dictionary".format(key, server))
+                abort("The `{0}` key was not found\
+for a server in the settings.SERVER dictionary".format(key, server))
 
     # Validate user settings
     required_user_keys = [
@@ -85,7 +86,8 @@ def validate_settings(settings):
     for user in settings.SSH_USERS:
         for key in required_user_keys:
             if key not in user:
-                abort("The `{0}` key was not found for a server in the settings.SSH_USERS dictionary".format(key, user))
+                abort("The `{0}` key was not found\
+for a server in the settings.SSH_USERS dictionary".format(key, user))
         for key in required_key_keys:
             for sshkey in user["ssh_keys"]:
                 if key not in sshkey:

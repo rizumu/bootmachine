@@ -51,19 +51,23 @@ def bootstrap():
     run("rc.d stop haveged")
     run("pacman --noconfirm -Rns haveged")
     # sign the master pacman keys https://wiki.archlinux.org/index.php/Pacman-key#Master_keys
-    # Note: Level 3 'marginal trust' is suggested, but had to trust level of 4 because of an unknown error.
+    # Note: Level 3 'marginal trust' is suggested. Increased to 4 because of an unknown error.
     run("for key in 6AC6A4C2 824B18E8 4C7EA887 FFF979E7 CDFD6BB0; \
-           do pacman-key --recv-keys $key; pacman-key --lsign-key $key; \
-           printf 'trust\n4\nquit\n' | \
-           gpg --homedir /etc/pacman.d/gnupg/ --no-permission-warning --command-fd 0 --edit-key $key; \
-         done")
+           do  pacman-key --recv-keys $key; pacman-key --lsign-key $key; \
+               printf 'trust\n4\nquit\n' | \
+               gpg --homedir /etc/pacman.d/gnupg/ \
+                   --no-permission-warning \
+                   --command-fd 0 \
+                   --edit-key $key; \
+           done")
     # ARGH!!! printf won't work here!!!
     #run("printf 'Y\nY\nY\nY\nY\nY\nY\nY\n' | pacman-key --populate archlinux", shell=False)
 
     # install essential packages
     run("pacman --noconfirm -S base-devel")
     run("pacman --noconfirm -S curl git rsync")
-    append("/etc/pacman.conf", "\n[archlinuxfr]\nServer = http://repo.archlinux.fr/$arch", use_sudo=True)
+    append("/etc/pacman.conf", "\n[archlinuxfr]\nServer = http://repo.archlinux.fr/$arch",
+           use_sudo=True)
     run("pacman -Syy")
     run("pacman --noconfirm -S yaourt")
 
@@ -84,9 +88,10 @@ def bootstrap():
     # finally we can upgrade glibc and run a successful full system upgrade
     run("pacman --noconfirm -Su")
 
-    # tweak sshd_config (before reboot so it is restarted!) so fabric can sftp with contrib.files.put, see:
-    # http://stackoverflow.com/questions/10221839/cant-use-fabric-put-is-there-any-server-configuration-needed
-    sed("/etc/ssh/sshd_config", "Subsystem sftp /usr/lib/openssh/sftp-server", "Subsystem sftp internal-sftp")
+    # update sshd_config (before reboot!) so fabric can sftp with contrib.files.put
+    # http://stackoverflow.com/questions/10221839/cant-use-fabric-put-is-there-any-server-configuration-needed  # nopep8
+    sed("/etc/ssh/sshd_config", "Subsystem sftp /usr/lib/openssh/sftp-server",
+        "Subsystem sftp internal-sftp")
     run("rc.d restart sshd")
 
     # force netcfg to automatically connect to eth0 and eth1 on reboot
@@ -103,7 +108,7 @@ def bootstrap():
     run("grub-mkconfig -o /boot/grub/grub.cfg")
 
     # configure new kernel and reboot
-    # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6
+    # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6  # nopep8
     sed("/etc/mkinitcpio.conf", "xen-", "xen_")
     sed("/etc/mkinitcpio.conf", "usbinput", "usbinput fsck")
     run("mkinitcpio -p linux")

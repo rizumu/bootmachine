@@ -8,7 +8,7 @@ from fabric.operations import reboot
 import settings
 
 
-DISTRO = "UBUNTU_1210"
+Distro = "UBUNTU_1210"
 SALT_INSTALLERS = ["ppa"]
 
 
@@ -34,9 +34,9 @@ def upgrade_ubuntu():
     """
     with fabric_settings(warn_only=True):
         # dist-upgrade without a grub config prompt
-        # http://askubuntu.com/questions/146921/how-do-i-apt-get-y-dist-upgrade-without-a-grub-config-prompt
-        run('DEBIAN_FRONTEND=noninteractive \
-        apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade')
+        # http://askubuntu.com/questions/146921/how-do-i-apt-get-y-dist-upgrade-without-a-grub-config-prompt  # nopep8
+        run('DEBIAN_FRONTEND=noninteractive apt-get -y \
+        -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade')
 
 
 def install_salt(installer="ppa"):
@@ -46,8 +46,8 @@ def install_salt(installer="ppa"):
     if installer == "ppa":
         run("echo deb http://ppa.launchpad.net/saltstack/salt/ubuntu `lsb_release -sc` main | \
              sudo tee /etc/apt/sources.list.d/saltstack.list")
-        run("wget -q -O- 'http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0x4759FA960E27C0A6' | \
-            sudo apt-key add -")
+        key_url = "http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0x4759FA960E27C0A6"
+        run("wget -q -O- '{0}' | sudo apt-key add -".format(key_url))
         run("aptitude update")
         if env.host == env.master_server.public_ip:
             run("aptitude install -y salt-master")

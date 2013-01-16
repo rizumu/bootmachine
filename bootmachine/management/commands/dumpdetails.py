@@ -31,9 +31,9 @@ class Command(BaseCommand):
         #indent = options.get("indent")
 
         if not os.path.exists("fabfile.py"):
-            raise CommandError("`fabfile.py` does not exists in the current directory.")
+            raise CommandError("`fabfile.py` was not found in the current directory.")
         if not os.path.exists("bootmachine_settings.py"):
-            raise CommandError("`bootmachine_settings.py` does not exists in the current directory.")
+            raise CommandError("`bootmachine_settings.py` was not found in the current directory.")
 
         # Check that the serialization format exists; this is a shortcut to
         # avoid collating all the objects and _then_ failing.
@@ -109,7 +109,9 @@ class Serializers(object):
             self.register_serializer(format, BUILTIN_SERIALIZERS[format], serializers)
         if hasattr(settings, "SERIALIZATION_MODULES"):
             for format in settings.SERIALIZATION_MODULES:
-                self.register_serializer(format, settings.SERIALIZATION_MODULES[format], serializers)
+                self.register_serializer(format,
+                                         settings.SERIALIZATION_MODULES[format],
+                                         serializers)
         _serializers = serializers
 
     def register_serializer(self, format, serializer_module, serializers=None):

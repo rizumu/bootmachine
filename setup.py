@@ -125,7 +125,7 @@ setup(
     license="BSD",
     description="A fabric library to bootstrap servers and configuration management software.",
     long_description=read("README.rst"),
-    dependency_links=["http://github.com/rizumu/openstack.compute/tarball/master#egg=openstack.compute-2.0a1"],
+    dependency_links=["http://github.com/rizumu/openstack.compute/tarball/master#egg=openstack.compute-2.0a1"],  # nopep8
     author="Thomas Schreiber",
     author_email="tom@nillab.com",
     packages=find_packages(),
