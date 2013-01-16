@@ -108,6 +108,16 @@ leading ``./``), and all searching is case-insensitive.
                 out.setdefault(package, []).append(prefix + name)
     return out
 
+docs_extras = [
+    "Sphinx",
+    "docutils",
+]
+
+testing_extras = [
+    "nose",
+    "coverage",
+]
+
 setup(
     name="bootmachine",
     version=find_version("bootmachine", "__init__.py"),
@@ -142,4 +152,8 @@ setup(
     setup_requires=[
         "flake8",
     ],
+    extras_require={
+        "testing": testing_extras,
+        "docs": docs_extras,
+    },
 )
