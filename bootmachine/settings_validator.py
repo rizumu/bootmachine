@@ -89,4 +89,5 @@ def validate_settings(settings):
         for key in required_key_keys:
             for sshkey in user["ssh_keys"]:
                 if key not in sshkey:
-                    abort("The `{0}` key was not found for a server in a `settings.SSH_USERS` `ssh_keys` dictionary".format(key, sshkey))
+                    abort("The `{0}` key was not found\
+for a server in a `settings.SSH_USERS` `ssh_keys` dictionary".format(key, sshkey))

@@ -7,13 +7,11 @@ import logging
 import sys
 import telnetlib
 
-from fabric.api import env, local, task, run, sudo
+from fabric.api import env, local, run, sudo
 from fabric.decorators import parallel, task
-from fabric.colors import blue, cyan, green, magenta, red, white, yellow
+from fabric.colors import blue, cyan, green, magenta, red, white, yellow  # noqa
 from fabric.contrib.files import exists
 from fabric.context_managers import settings as fabric_settings
-from fabric.exceptions import NetworkError
-from fabric.network import connect
 from fabric.operations import reboot
 from fabric.utils import abort
 

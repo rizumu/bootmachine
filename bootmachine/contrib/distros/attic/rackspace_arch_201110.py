@@ -54,7 +54,8 @@ def bootstrap():
     # Note: Level 3 'marginal trust' is suggested, but had to trust level of 4 because of an unknown error.
     run("for key in 6AC6A4C2 824B18E8 4C7EA887 FFF979E7 CDFD6BB0; \
            do pacman-key --recv-keys $key; pacman-key --lsign-key $key; \
-           printf 'trust\n4\nquit\n' | gpg --homedir /etc/pacman.d/gnupg/ --no-permission-warning --command-fd 0 --edit-key $key; \
+           printf 'trust\n4\nquit\n' | \
+           gpg --homedir /etc/pacman.d/gnupg/ --no-permission-warning --command-fd 0 --edit-key $key; \
          done")
     # ARGH!!! printf won't work here!!!
     #run("printf 'Y\nY\nY\nY\nY\nY\nY\nY\n' | pacman-key --populate archlinux", shell=False)
@@ -97,11 +98,13 @@ def bootstrap():
     run("printf 'y\nY\nY\nY\nY\nY\nY\nY\nY\nY\n' | pacman -S grub-bios")
     with fabric_settings(warn_only=True):
         run("modprobe dm_mod")
-    run("grub-install --directory=/usr/lib/grub/i386-pc --target=i386-pc --boot-directory=/boot --recheck --debug /dev/xvda")
+    run("grub-install --directory=/usr/lib/grub/i386-pc --target=i386-pc --boot-directory=/boot \
+        --recheck --debug /dev/xvda")
     run("grub-mkconfig -o /boot/grub/grub.cfg")
 
     # configure new kernel and reboot
-    sed("/etc/mkinitcpio.conf", "xen-", "xen_")  # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6
+    # see: https://projects.archlinux.org/mkinitcpio.git/commit/?id=5b99f78331f567cc1442460efc054b72c45306a6
+    sed("/etc/mkinitcpio.conf", "xen-", "xen_")
     sed("/etc/mkinitcpio.conf", "usbinput", "usbinput fsck")
     run("mkinitcpio -p linux")
     with fabric_settings(warn_only=True):

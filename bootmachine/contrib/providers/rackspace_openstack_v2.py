@@ -7,7 +7,7 @@ import novaclient.v1_1
 from fabric.api import env, local
 from fabric.contrib import console
 from fabric.decorators import task
-from fabric.colors import blue, cyan, green, magenta, red, white, yellow
+from fabric.colors import blue, cyan, green, magenta, red, white, yellow  # noqa
 from fabric.operations import prompt
 from fabric.utils import abort
 
@@ -137,9 +137,9 @@ def boot(servername, image, flavor=2, servers=None):
 
     print(green("... sending boot request to rackspace for ``{name}``".format(name=servername)))
     local("nova boot --image={image_id} --flavor={flavor} --file /root/.ssh/authorized_keys={key} \
-           --nic net-id=00000000-0000-0000-0000-000000000000 \
-           --nic net-id=11111111-1111-1111-1111-111111111111 {name}".format(
-           image_id=image_id, flavor=flavor, name=servername, key=settings.SSH_PUBLIC_KEY))
+    --nic net-id=00000000-0000-0000-0000-000000000000 \
+    --nic net-id=11111111-1111-1111-1111-111111111111 {name}".format(
+        image_id=image_id, flavor=flavor, name=servername, key=settings.SSH_PUBLIC_KEY))
     env.new_server_booted = True
 
 
@@ -235,12 +235,13 @@ def set_bootmachine_servers(roles=None, ip_type="public", append_port=True):
 
     for server in env.bootmachine_servers:
         if server.status != "ACTIVE":
-            console.confirm("The server `{0}` is not `ACTIVE` and is in the `{1}` phase. Continue?".format(server.name, server.status))
+            console.confirm("The server `{0}` is not `ACTIVE` and is in the `{1}` phase. Continue?".format(
+                server.name, server.status))
 
     for server in env.bootmachine_servers:
         # Verify (by name) that the live server was defined in the settings.
         try:
-            instance = [n for n in settings.SERVERS if n["servername"] == server.name][0]
+            [n for n in settings.SERVERS if n["servername"] == server.name][0]
         except IndexError:
             continue
         # If a ``roles`` list was passed in, verify it identically matches the server's roles.

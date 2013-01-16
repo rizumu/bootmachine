@@ -1,10 +1,11 @@
 import os
-import shutil
+#import shutil
 import importlib
+import settings
 
 from optparse import make_option
-import bootmachine
 
+import bootmachine
 from bootmachine.management.base import BaseCommand, CommandError
 
 
@@ -18,16 +19,16 @@ BOOTMACHINE_SETTINGS = os.path.join(os.path.dirname(bootmachine.__file__), "sett
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + [
         make_option("--format", default="json", dest="format",
-            help="Specifies the output serialization format for fixtures."),
+                    help="Specifies the output serialization format for fixtures."),
         make_option("--indent", default=None, dest="indent", type="int",
-            help="Specifies the indent level to use when pretty-printing output"),
+                    help="Specifies the indent level to use when pretty-printing output"),
     ]
     help = "Output the server details as a fixture of the given format."
     args = "[appname appname.ModelName ...]"
 
     def handle(self, *args, **options):
         format = options.get("format")
-        indent = options.get("indent")
+        #indent = options.get("indent")
 
         if not os.path.exists("fabfile.py"):
             raise CommandError("`fabfile.py` does not exists in the current directory.")
@@ -66,14 +67,14 @@ class Command(BaseCommand):
 
 # Built-in serializers
 BUILTIN_SERIALIZERS = {
-    "xml" : "django.core.serializers.xml_serializer",
-    "python" : "django.core.serializers.python",
-    "json" : "django.core.serializers.json",
+    "xml": "django.core.serializers.xml_serializer",
+    "python": "django.core.serializers.python",
+    "json": "django.core.serializers.json",
 }
 
 # Check for PyYaml and register the serializer if it's available.
 try:
-    import yaml
+    import yaml  # noqa
     BUILTIN_SERIALIZERS["yaml"] = "django.core.serializers.pyyaml"
 except ImportError:
     pass
@@ -87,7 +88,7 @@ class Serializers(object):
         Serialize a queryset (or any iterator that returns database objects) using
         a certain serializer.
         """
-        s = get_serializer(format)()
+        s = get_serializer(format)()  # noqa
         s.serialize(queryset, **options)
         return s.getvalue()
 
@@ -125,7 +126,7 @@ class Serializers(object):
         directly is not a thread-safe operation.
         """
         if serializers is None and not _serializers:
-            _load_serializers()
+            _load_serializers()  # noqa
         module = importlib.import_module(serializer_module)
         if serializers is None:
             _serializers[format] = module

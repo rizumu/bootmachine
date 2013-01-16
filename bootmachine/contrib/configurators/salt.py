@@ -3,7 +3,7 @@ import sys
 import time
 
 from fabric.api import env, local, sudo
-from fabric.colors import blue, cyan, green, magenta, red, white, yellow
+from fabric.colors import blue, cyan, green, magenta, red, white, yellow  # noqa
 from fabric.context_managers import settings as fabric_settings
 from fabric.contrib.files import exists
 from fabric.decorators import task
@@ -68,9 +68,9 @@ def upload_saltstates():
 
     # rsync pillar and salt files to the fabric users local directory
     local('rsync -a -e "ssh -p {0}" --rsync-path="sudo rsync" {1} {2}@{3}:{4}'.format(
-        env.port, local_states_dir, env.user, env.host, settings.REMOTE_STATES_DIR))
+        env.port, settings.LOCAL_STATES_DIR, env.user, env.host, settings.REMOTE_STATES_DIR))
     local('rsync -a -e "ssh -p {0}" --rsync-path="sudo rsync" {1} {2}@{3}:{4}'.format(
-        env.port, local_pillars_dir, env.user, env.host, settings.LOCAL_PILLARS_DIR))
+        env.port, settings.LOCAL_PILLARS_DIR, env.user, env.host, settings.LOCAL_PILLARS_DIR))
 
 
 @task
@@ -119,7 +119,7 @@ def pillar_update():
         known_hosts.update(env.host)
         local("scp -P {0} {1} {2}@{3}:$(eval echo ~${4})bootmachine.sls".format(
               env.port,
-              os.path.join(local_pillars_dir,"bootmachine.sls"),
+              os.path.join(local_pillars_dir, "bootmachine.sls"),
               env.user,
               env.host,
               scp_dir))

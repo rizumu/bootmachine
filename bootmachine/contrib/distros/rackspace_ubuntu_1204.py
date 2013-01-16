@@ -32,11 +32,13 @@ def bootstrap():
 def upgrade_ubuntu():
     """
     When a provider doesn't offer the latest version.
+    see:
+        http://askubuntu.com/questions/146921/how-do-i-apt-get-y-dist-upgrade-without-a-grub-config-prompt
     """
     with fabric_settings(warn_only=True):
         # dist-upgrade without a grub config prompt
-        # http://askubuntu.com/questions/146921/how-do-i-apt-get-y-dist-upgrade-without-a-grub-config-prompt
-        run('DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade')
+        run('DEBIAN_FRONTEND=noninteractive \
+        apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade')
 
 
 def install_salt(installer="ppa"):

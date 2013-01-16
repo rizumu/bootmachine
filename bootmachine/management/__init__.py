@@ -61,6 +61,7 @@ class CommandRunner(object):
         loader, usage = self.loader, self.usage
         # use BaseCommand for --version
         from bootmachine.management.base import BaseCommand
+
         class HelpCommand(BaseCommand):
             def handle(self, *args, **options):
                 print "Usage: %s" % usage

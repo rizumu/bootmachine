@@ -29,10 +29,10 @@ class BaseCommand(object):
 
     def create_parser(self, prog_name, command):
         return optparse.OptionParser(
-            prog = prog_name,
-            usage = self.usage(command),
-            version = self.version(),
-            option_list = self.option_list
+            prog=prog_name,
+            usage=self.usage(command),
+            version=self.version(),
+            option_list=self.option_list
         )
 
     def print_help(self, prog_name, command):

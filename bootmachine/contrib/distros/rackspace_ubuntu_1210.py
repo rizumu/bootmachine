@@ -35,7 +35,8 @@ def upgrade_ubuntu():
     with fabric_settings(warn_only=True):
         # dist-upgrade without a grub config prompt
         # http://askubuntu.com/questions/146921/how-do-i-apt-get-y-dist-upgrade-without-a-grub-config-prompt
-        run('DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade')
+        run('DEBIAN_FRONTEND=noninteractive \
+        apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade')
 
 
 def install_salt(installer="ppa"):
@@ -43,19 +44,17 @@ def install_salt(installer="ppa"):
     Install salt with the chosen installer.
     """
     if installer == "ppa":
-        run("echo deb http://ppa.launchpad.net/saltstack/salt/ubuntu `lsb_release -sc` main | sudo tee /etc/apt/sources.list.d/saltstack.list")
-        run("wget -q -O- 'http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0x4759FA960E27C0A6' | sudo apt-key add -")
+        run("echo deb http://ppa.launchpad.net/saltstack/salt/ubuntu `lsb_release -sc` main | \
+             sudo tee /etc/apt/sources.list.d/saltstack.list")
+        run("wget -q -O- 'http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0x4759FA960E27C0A6' | \
+            sudo apt-key add -")
         run("aptitude update")
         if env.host == env.master_server.public_ip:
             run("aptitude install -y salt-master")
         run("aptitude install -y salt-minion salt-syndic")
     else:
         raise NotImplementedError()
-"""
-echo deb http://ppa.launchpad.net/saltstack/salt/ubuntu `lsb_release -sc` main | sudo tee /etc/apt/sources.list.d/saltstack.list
-wget -q -O- "http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0x4759FA960E27C0A6" | sudo apt-key add -
-sudo apt-get update
-"""
+
 
 def setup_salt():
     """

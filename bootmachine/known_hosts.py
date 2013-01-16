@@ -1,4 +1,4 @@
-from fabric.api import env, local
+from fabric.api import local
 
 
 def add(user, public_ip, port):
@@ -8,7 +8,8 @@ def add(user, public_ip, port):
     """
     if search(public_ip):
         remove(public_ip)
-    local('ssh -q {user}@{ip_addr} -p {port} -o StrictHostKeyChecking=no "echo 2>&1"'.format(user=user, ip_addr=public_ip, port=port))
+    local('ssh -q {user}@{ip_addr} -p {port} -o StrictHostKeyChecking=no "echo 2>&1"'.format(
+        user=user, ip_addr=public_ip, port=port))
 
 
 def update(user, public_ip, port):

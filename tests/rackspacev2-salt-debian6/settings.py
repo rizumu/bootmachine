@@ -1,6 +1,6 @@
 import os
 
-from bootmachine.settings_tests import *
+from bootmachine.settings_tests import *  # noqa
 
 
 CONFIGURATOR_MODULE = "bootmachine.contrib.configurators.salt"
