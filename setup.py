@@ -139,4 +139,7 @@ setup(
         "Programming Language :: Python",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
+    setup_requires=[
+        "flake8",
+    ],
 )
