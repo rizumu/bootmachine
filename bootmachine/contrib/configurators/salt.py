@@ -70,7 +70,7 @@ def upload_saltstates():
     local('rsync -a -e "ssh -p {0}" --rsync-path="sudo rsync" {1} {2}@{3}:{4}'.format(
         env.port, settings.LOCAL_STATES_DIR, env.user, env.host, settings.REMOTE_STATES_DIR))
     local('rsync -a -e "ssh -p {0}" --rsync-path="sudo rsync" {1} {2}@{3}:{4}'.format(
-        env.port, settings.LOCAL_PILLARS_DIR, env.user, env.host, settings.LOCAL_PILLARS_DIR))
+        env.port, settings.LOCAL_PILLARS_DIR, env.user, env.host, settings.REMOTE_PILLARS_DIR))
 
 
 @task
