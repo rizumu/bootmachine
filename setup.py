@@ -132,7 +132,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "python-novaclient==2.10.0",
-        "Fabric==1.5.1",
+        "Fabric==1.5.2",
         "Jinja2==2.6",
     ],
     zip_safe=False,
