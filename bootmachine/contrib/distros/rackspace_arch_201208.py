@@ -45,6 +45,9 @@ def bootstrap():
     sed("/etc/mkinitcpio.conf", "xen-", "xen_")
     sed("/etc/mkinitcpio.conf", "usbinput", "usbinput fsck")
 
+    # remove existing files that break the upgrade
+    run("rm /etc/profile.d/locale.sh && rm /usr/share/man/man7/archlinux.7.gz")
+
     # upgrade pacakges
     run("pacman --noconfirm -Syu")
     run("pacman --noconfirm -Syu")  # requires a second run!
