@@ -205,8 +205,8 @@ def destroy(servername, destroy_all=False, force=False):
 
     # calling list_servers immediately after deleting returns the deleted servers
     if not destroy_all:
-        time.sleep(5)
         env.bootmachine_servers = list_servers(as_list=True)
+        print("It may take up to a minute for a server to be completely deleted.")
 
 
 @task
@@ -225,7 +225,7 @@ def destroyem(force=False):
 
     for server in settings.SERVERS:
         destroy(server["servername"], destroy_all=True)
-    time.sleep(5)
+    print("It may take up to a minute for a server to be completely deleted.")
 
 
 def set_bootmachine_servers(roles=None, ip_type="public", append_port=True):
