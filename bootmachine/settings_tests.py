@@ -53,4 +53,4 @@ AWS_SECRET_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 SECURITY
 """
 # Change the default SSH port of 22, suggestion is between 20000 and 65535.
-SSH_PORT = "30000"
+SSH_PORT = "30303"

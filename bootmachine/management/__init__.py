@@ -44,7 +44,7 @@ class CommandLoader(object):
             if isinstance(command, tuple):
                 # an exception occurred when importing the command so let's
                 # re-raise it here
-                raise command[0], command[1], command[2]
+                raise(command[0], command[1], command[2])
             return command
 
 
@@ -64,15 +64,13 @@ class CommandRunner(object):
 
         class HelpCommand(BaseCommand):
             def handle(self, *args, **options):
-                print "Usage: %s" % usage
-                print
-                print "Options:"
-                print "  --version   show program's version number and exit"
-                print "  -h, --help  show this help message and exit"
-                print
-                print "Available commands:"
+                print("Usage: {}\n".format(usage))
+                print("Options:"
+                      "  --version   show program's version number and exit\n"
+                      "  -h, --help  show this help message and exit\n"
+                      "Available commands:\n")
                 for command in loader.commands.keys():
-                    print "  %s" % command
+                    print(" {}".format(command))
         return HelpCommand()
 
     def execute(self):
@@ -95,8 +93,8 @@ class CommandRunner(object):
         # load command and run it!
         try:
             self.loader.load(command).run_from_argv(argv)
-        except CommandNotFound, e:
-            sys.stderr.write("%s\n" % e.args[0])
+        except CommandNotFound as e:
+            sys.stderr.write("{}\n".format(e.args[0]))
             sys.exit(1)
 
 
