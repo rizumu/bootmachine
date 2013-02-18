@@ -52,6 +52,7 @@ Currently supported:
 
 Next in the queue:
 
+    * FreeBSD
     * Gentoo
     * openSUSE
     * CentOS
