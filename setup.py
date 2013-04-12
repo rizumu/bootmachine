@@ -33,12 +33,12 @@ standard_exclude_directories = (".*", "CVS", "_darcs", "./build",
 # that package is installed yet.
 
 
-def find_package_data(
-    where=".", package="",
-    exclude=standard_exclude,
-    exclude_directories=standard_exclude_directories,
-    only_in_packages=True,
-    show_ignored=False):  # nopep8
+def find_package_data(where=".",
+                      package="",
+                      exclude=standard_exclude,
+                      exclude_directories=standard_exclude_directories,
+                      only_in_packages=True,
+                      show_ignored=False):
     """\
 Return a dictionary suitable for use in ``package_data``
 in a distutils ``setup.py`` file.
@@ -65,7 +65,6 @@ purposes).
 Note patterns use wildcards, or can be exact paths (including
 leading ``./``), and all searching is case-insensitive.
 """
-
     out = {}
     stack = [(convert_path(where), "", package, only_in_packages)]
     while stack:

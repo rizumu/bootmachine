@@ -91,7 +91,7 @@ def boot():
     servers = copy.copy(settings.SERVERS)
     while servers:
         server = servers.pop(0)
-        if not server["servername"] in [server.name for server in env.bootmachine_servers]:
+        if not server["servername"] in [s.name for s in env.bootmachine_servers]:
             provider.bootem(settings.SERVERS)
             print(green("new server(s) have been booted."))
             env.new_server_booted = True
