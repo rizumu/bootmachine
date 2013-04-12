@@ -9,6 +9,9 @@ The bootmachine's goal is to allow getting started with, maintenance
 of, and exploring new stack options through a simple, pluggable and highly
 customizable interface.
 
+|buildstatus|_
+
+
 Configuration Management Tools
 ------------------------------
 
@@ -64,3 +67,6 @@ can be found at: http://bootmachine.readthedocs.org
 
 The source code and issue tracker can be found on GitHub:
 https://github.com/rizumu/bootmachine
+
+.. |buildstatus| image:: https://secure.travis-ci.org/rizumu/bootmachine.png?branch=master
+.. _buildstatus: http://travis-ci.org/#!/rizumu/bootmachine
