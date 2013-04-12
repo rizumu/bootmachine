@@ -13,7 +13,9 @@ Bootmachine Changelog
   extra api calls to rackspace.
 * refactor salt states and move them to a new folder.
 * add support for changing the remote directory of states and pillars.
-* bump Fabric to 1.5.1 (which helpfully resolved some rebooting issues)
+* bump Fabric to 1.5.1, later ot 1.6 (which helpfully resolved some
+  rebooting issues)
+* bump python-novaclient to 2.13.0
 
 0.5.9 (25.10.2012)
 ------------------
