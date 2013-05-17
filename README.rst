@@ -11,12 +11,12 @@ customizable interface.
 
 |buildstatus|_
 
-.. image:: https://pypip.in/v/$REPO/badge.png
-    :target: https://crate.io/packages/$REPO/
+.. image:: https://pypip.in/v/bootmachine/badge.png
+    :target: https://crate.io/packages/bootmachine/
     :alt: Latest PyPI version
 
 .. image:: https://pypip.in/d/$REPO/badge.png
-    :target: https://crate.io/packages/$REPO/
+    :target: https://crate.io/packages/bootmachine/
     :alt: Number of PyPI downloads
 
 Configuration Management Tools
