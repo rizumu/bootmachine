@@ -10,7 +10,6 @@ of, and exploring new stack options through a simple, pluggable and highly
 customizable interface.
 
 |buildstatus|_
-
 .. image:: https://pypip.in/v/bootmachine/badge.png
     :target: https://crate.io/packages/bootmachine/
     :alt: Latest PyPI version
