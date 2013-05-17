@@ -15,7 +15,7 @@ customizable interface.
     :target: https://crate.io/packages/bootmachine/
     :alt: Latest PyPI version
 
-.. image:: https://pypip.in/d/$REPO/badge.png
+.. image:: https://pypip.in/d/bootmachine/badge.png
     :target: https://crate.io/packages/bootmachine/
     :alt: Number of PyPI downloads
 
