@@ -10,7 +10,7 @@ base:
     - salt
     - ssh
     - sudo
-    - swap
+    - sysctl
     - users
   '^{{ pillar['saltmaster_hostname'] }}':
     - match: pcre

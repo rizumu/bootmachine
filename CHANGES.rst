@@ -1,9 +1,12 @@
 Bootmachine Changelog
 =====================
 
-0.5.10 (dev)
-------------
+0.6.0 (25.05.2013)
+------------------
 
+* add support for debian7, arch20132, fedora18 and ubuntu1304
+  rackspace images.
+* drop support for arch201208 and fedora16 rackspace images
 * bump Arch salt version to 0.11.1
 * require the salt package and release version in the settings, when
   building salt on a rolling release such as Arch.
@@ -13,9 +16,10 @@ Bootmachine Changelog
   extra api calls to rackspace.
 * refactor salt states and move them to a new folder.
 * add support for changing the remote directory of states and pillars.
-* bump Fabric to 1.5.1, later ot 1.6 (which helpfully resolved some
+* bump Fabric to 1.5.1, later to 1.6 (which helpfully resolved some
   rebooting issues)
 * bump python-novaclient to 2.13.0
+* bump Jinja2 to 2.7
 
 0.5.9 (25.10.2012)
 ------------------

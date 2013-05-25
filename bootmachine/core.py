@@ -128,7 +128,7 @@ def bootstrap_distro():
     distro.bootstrap()
 
     sudo("touch /root/.bootmachine_distro_bootstrapped")
-    print(green("{0} is bootstrapped.".format(server.name)))
+    print(green("{0} distro is bootstrapped.".format(server.name)))
 
 
 @task
@@ -166,7 +166,7 @@ def bootstrap_configurator():
     configurator.start(distro)
 
     sudo("touch /root/.bootmachine_configurator_bootstrapped")
-    print(green("{0} is bootstrapped.".format(server.name)))
+    print(green("{0} configurator is bootstrapped.".format(server.name)))
 
 
 @task

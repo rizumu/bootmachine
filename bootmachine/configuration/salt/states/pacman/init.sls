@@ -6,6 +6,3 @@
     - template: jinja
     - context:
         extra_repos: {{ pillar.pacman_extra_repos or [] }}
-
-pacman-contrib:
-  pkg.installed

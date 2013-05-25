@@ -19,15 +19,17 @@ LOCAL_PILLARS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
                                  "configuration", "pillars/")
 REMOTE_STATES_DIR = "/srv/salt/states/"
 REMOTE_PILLARS_DIR = "/srv/salt/pillars/"
-SALT_INSTALLER_ARCH_201110 = "aur"
-SALT_INSTALLER_ARCH_201208 = "aur"
-SALT_AUR_PKGVER = "0.12.1"
+SALT_INSTALLER_ARCH_20132 = "aur"
+SALT_AUR_PKGVER = "0.15.1"
 SALT_AUR_PKGREL = "1"
-SALT_INSTALLER_DEBIAN_6 = "pip"
+SALT_INSTALLER_DEBIAN_6 = "backports"
+SALT_INSTALLER_DEBIAN_7 = "saltstack"
 SALT_INSTALLER_FEDORA_16 = "rpm-stable"
 SALT_INSTALLER_FEDORA_17 = "rpm-stable"
+SALT_INSTALLER_FEDORA_18 = "rpm-stable"
 SALT_INSTALLER_UBUNTU_1204LTS = "ppa"
 SALT_INSTALLER_UBUNTU_1210 = "ppa"
+SALT_INSTALLER_UBUNTU_1304 = "ppa"
 
 # puppet (not yet implemented)
 PUPPET_VERSION = NotImplementedError()

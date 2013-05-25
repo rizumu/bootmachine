@@ -23,6 +23,15 @@ iptables-rules:
 {% if grains['os'] == 'Arch' or grains['os'] == 'Fedora' %}
       - pkg: iptables
 {% endif %}
+{% if grains['os'] == 'Fedora' %}
+      - pkg: iptables-services
+{% endif %}
+
+{% if grains['os'] == 'Fedora' %}
+iptables-services:
+  pkg:
+    - installed
+{% endif %}
 
 {% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
 /etc/network/if-pre-up.d/iptables:
@@ -46,6 +55,9 @@ iptables:
     - enabled: True
     - require:
       - pkg: iptables
+{% if grains['os'] == 'Fedora' %}
+      - pkg: iptables-services
+{% endif %}
       - file: /etc/iptables/iptables.rules
 
 iptables-restore < /etc/iptables/iptables.rules:

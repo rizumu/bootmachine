@@ -2,7 +2,6 @@ systemdpkgs:
   pkg.installed:
     - names:
       - systemd
-      - systemd-sysvcompat
 
 /etc/systemd/system/default.target:
   file.symlink:

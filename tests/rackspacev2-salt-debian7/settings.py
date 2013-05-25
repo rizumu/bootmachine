@@ -4,20 +4,20 @@ from bootmachine.settings_tests import *  # noqa
 
 
 CONFIGURATOR_MODULE = "bootmachine.contrib.configurators.salt"
-MASTER = "rackspacev2-salt-fedora16-a"
+MASTER = "rackspacev2-salt-debian7-a"
 
 PROVIDER_MODULE = "bootmachine.contrib.providers.rackspace_openstack_v2"
 SERVERS = [
-    {"servername": "rackspacev2-salt-fedora16-a",
+    {"servername": "rackspacev2-salt-debian7-a",
      "roles": ["salt-master"],
      "flavor": "2",
-     "image": "Fedora 16 (Verne)",
-     "distro_module": "bootmachine.contrib.distros.rackspace_fedora_16"},
-    {"servername": "rackspacev2-salt-fedora16-b",
+     "image": "Debian 7 (Wheezy)",
+     "distro_module": "bootmachine.contrib.distros.rackspace_debian_7"},
+    {"servername": "rackspacev2-salt-debian7-b",
      "roles": ["test-additional-minions"],
      "flavor": "2",
-     "image": "Fedora 16 (Verne)",
-     "distro_module": "bootmachine.contrib.distros.rackspace_fedora_16"},
+     "image": "Debian 7 (Wheezy)",
+     "distro_module": "bootmachine.contrib.distros.rackspace_debian_7"},
 ]
 
 SSH_PUBLIC_KEY = os.path.join(os.environ["HOME"], ".ssh", "id_rsa.pub")
