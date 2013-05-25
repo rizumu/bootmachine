@@ -44,7 +44,7 @@ def bootstrap():
     run("mv /etc/mkinitcpio.conf.pacnew /etc/mkinitcpio.conf")
     sed("/etc/mkinitcpio.conf",
         'MODULES=""',
-        'MODULES="xen-blkfront xen-fbfront xen-kbdfront xen-netfront xen-pcifront xenbus_probe_frontend xenfs"')
+        'MODULES="xen-blkfront xen-fbfront xen-kbdfront xen-netfront xen-pcifront xenbus_probe_frontend xenfs"')  # nopep8
     sed("/etc/mkinitcpio.conf",
         'HOOKS="base udev autodetect modconf block filesystems keyboard fsck',
         'HOOKS="base udev block filesystems shutdown autodetect"')

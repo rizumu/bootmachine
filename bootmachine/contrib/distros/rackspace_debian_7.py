@@ -29,7 +29,6 @@ def bootstrap():
            "## allow members of group wheel to execute any command\n%wheel ALL=(ALL) ALL")
 
 
-
 def upgrade():
     """
     When a provider doesn't offer the latest version.
