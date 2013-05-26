@@ -52,7 +52,7 @@ iptables:
   pkg:
     - installed
   service.running:
-    - enabled: True
+    - enable: True
     - require:
       - pkg: iptables
 {% if grains['os'] == 'Fedora' %}
