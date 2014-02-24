@@ -195,7 +195,7 @@ def accept_minions():
     def __get_accepted_minions():
         """TODO: remove when all distros support salt 0.10.5"""
         try:
-            accepted = eval(sudo("salt-key --out raw --list acc"))
+            accepted = eval(sudo("salt-key --yes --out raw --list acc"))
         except:
             accepted = eval(sudo("salt-key --raw-out --list acc"))
         if type(accepted) == dict:
@@ -210,7 +210,7 @@ def accept_minions():
 
         with fabric_settings(warn_only=True):
             for server in unaccepted:
-                sudo("salt-key --quiet --accept={0}".format(server))
+                sudo("salt-key --quiet --yes --accept={0}".format(server))
         minions = __get_accepted_minions()
         if len(minions) != len(settings.SERVERS):
             local("fab master configurator.restartall")
@@ -272,7 +272,7 @@ def revoke(servername):
     """
     Simply revoke a minion's key by servername
     """
-    sudo("salt-key --quiet --delete={0}".format(servername))
+    sudo("salt-key --quiet --yes --delete={0}".format(servername))
 
 
 def install(distro):

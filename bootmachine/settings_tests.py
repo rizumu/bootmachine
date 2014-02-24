@@ -11,8 +11,8 @@ LOCAL_PILLARS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
                                  "configuration", "salt", "pillars/")
 REMOTE_STATES_DIR = "/srv/salt/states/"
 REMOTE_PILLARS_DIR = "/srv/salt/pillars/"
-SALT_INSTALLER_ARCH_20132 = "aur"
-SALT_AUR_PKGVER = "0.15.1"
+SALT_INSTALLER_ARCH_20139 = "aur"
+SALT_AUR_PKGVER = "0.17.5"
 SALT_AUR_PKGREL = "1"
 SALT_INSTALLER_DEBIAN_6 = "backports"
 SALT_INSTALLER_DEBIAN_7 = "saltstack"
@@ -56,4 +56,4 @@ AWS_SECRET_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 SECURITY
 """
 # Change the default SSH port of 22, suggestion is between 20000 and 65535.
-SSH_PORT = "30303"
+SSH_PORT = "30000"
