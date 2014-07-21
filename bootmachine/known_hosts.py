@@ -6,8 +6,8 @@ def add(user, public_ip, port):
     Permanently add server to the local list of known hosts, but
     first remove any matching keys to prevent conflicts.
     """
-    if search(public_ip):
-        remove(public_ip)
+    # if search(public_ip):
+    #     remove(public_ip)
     local('ssh -q {user}@{ip_addr} -p {port} -o StrictHostKeyChecking=no "echo 2>&1"'.format(
         user=user, ip_addr=public_ip, port=port))
 

@@ -24,7 +24,7 @@ salt-master:
 salt-master-daemon:
   service.running:
     - name: salt-master
-    - enabled: True
+    - enable: True
 {% if grains['os'] == 'Ubuntu' %}
     - watch:
       - file: /etc/salt/master

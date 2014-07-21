@@ -193,6 +193,7 @@ def configure():
             abort("unable to configure the servers")
         attempts += 1
         print(yellow("attempt #{0} for {1}".format(attempts, env.unconfigured_servers)))
+        import ipdb; ipdb.set_trace()
         configurator.configure()
         for server in env.unconfigured_servers:
             # if configuration was a success, reboot.

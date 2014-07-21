@@ -11,9 +11,7 @@ LOCAL_PILLARS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
                                  "configuration", "salt", "pillars/")
 REMOTE_STATES_DIR = "/srv/salt/states/"
 REMOTE_PILLARS_DIR = "/srv/salt/pillars/"
-SALT_INSTALLER_ARCH_20139 = "aur"
-SALT_AUR_PKGVER = "0.17.5"
-SALT_AUR_PKGREL = "1"
+SALT_INSTALLER_ARCH_20145 = "pacman"
 SALT_INSTALLER_DEBIAN_6 = "backports"
 SALT_INSTALLER_DEBIAN_7 = "saltstack"
 SALT_INSTALLER_FEDORA_16 = "rpm-stable"

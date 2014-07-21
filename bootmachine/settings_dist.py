@@ -19,10 +19,7 @@ LOCAL_PILLARS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
                                  "configuration", "pillars/")
 REMOTE_STATES_DIR = "/srv/salt/states/"
 REMOTE_PILLARS_DIR = "/srv/salt/pillars/"
-SALT_INSTALLER_ARCH_20132 = "aur"
-SALT_INSTALLER_ARCH_20139 = "bootstrap"
-SALT_AUR_PKGVER = "0.17.5"
-SALT_AUR_PKGREL = "1"
+SALT_INSTALLER_ARCH_20145 = "pacman"
 SALT_INSTALLER_DEBIAN_6 = "backports"
 SALT_INSTALLER_DEBIAN_7 = "saltstack"
 SALT_INSTALLER_FEDORA_16 = "rpm-stable"
@@ -71,29 +68,29 @@ SERVERS = [
     {"servername": "loadbalancer",
      "roles": ["loadbalancer"],
      "flavor": "1",
-     "image": "Arch 2012.08",
-     "distro_module": "bootmachine.contrib.distros.rackspace_arch_201208"},
+     "image": "Arch 2014.5 (PVHVM)",
+     "distro_module": "bootmachine.contrib.distros.rackspace_arch_20145"},
     # {"servername": "application1",
     #  "roles": ["application"],
     #  "flavor": "1",
-    #  "image": "Arch 2012.08",
-    #  "distro_module": "bootmachine.contrib.distros.rackspace_arch_201208"},
+    #  "image": "Arch 2014.5 (PVHVM)",
+    #  "distro_module": "bootmachine.contrib.distros.rackspace_arch_20145"},
     # {"servername": "database",
     #  "roles": ["database"],
     #  "flavor": "1",
-    #  "image": "Arch 2012.08",
-    #  "distro_module": "bootmachine.contrib.distros.rackspace_arch_201208"},
+    #  "image": "Arch 2014.5 (PVHVM)",
+    #  "distro_module": "bootmachine.contrib.distros.rackspace_arch_20145"},
     # {"servername": "cache",
     #  "roles": ["cache"],
     #  "flavor": "1",
-    #  "image": "Arch 2012.08",
-    #  "distro_module": "bootmachine.contrib.distros.rackspace_arch_201208"},
+    #  "image": "Arch 2014.5 (PVHVM)",
+    #  "distro_module": "bootmachine.contrib.distros.rackspace_arch_20145"},
     # WORKING DISTRO EXAMPLES
     # {"servername": "arch",
     #  "roles": [],
     #  "flavor": "1",
-    #  "image": "Arch 2012.08",
-    #  "distro_module": "bootmachine.contrib.distros.rackspace_arch_201208"},
+    #  "image": "Arch 2014.5 (PVHVM)",
+    #  "distro_module": "bootmachine.contrib.distros.rackspace_arch_20145"},
     # {"servername": "ubuntu",
     #  "roles": [],
     #  "flavor": "1",

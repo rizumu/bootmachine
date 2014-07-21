@@ -30,7 +30,7 @@ salt:
 salt-minion-daemon:
   service.running:
     - name: salt-minion
-    - enabled: True
+    - enable: True
 {% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
     - watch:
       - file: /etc/salt/minion

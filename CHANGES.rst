@@ -1,8 +1,16 @@
 Bootmachine Changelog
 =====================
 
+0.6.1 (development)
+-------------------
+CHANGES:
+
+* add support for arch20145 with pacman.
+* drop yaourt complexities.
+
 0.6.0 (25.05.2013)
 ------------------
+CHANGES:
 
 * add support for debian7, arch20132, fedora18 and ubuntu1304
   rackspace images.

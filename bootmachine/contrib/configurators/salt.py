@@ -99,8 +99,6 @@ def pillar_update():
         saltmaster_private_ip=env.master_server.private_ip,
         ssh_port=settings.SSH_PORT,
         ssh_users=settings.SSH_USERS,
-        salt_aur_pkgver=settings.SALT_AUR_PKGVER,
-        salt_aur_pkgrel=settings.SALT_AUR_PKGREL,
     ))
 
     # TODO: only upload and refresh when file has changes
@@ -210,7 +208,7 @@ def accept_minions():
 
         with fabric_settings(warn_only=True):
             for server in unaccepted:
-                sudo("salt-key --quiet --yes --accept={0}".format(server))
+                sudo("salt-key --quiet --accept={0} --yes".format(server))
         minions = __get_accepted_minions()
         if len(minions) != len(settings.SERVERS):
             local("fab master configurator.restartall")
