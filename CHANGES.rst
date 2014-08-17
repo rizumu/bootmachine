@@ -5,7 +5,7 @@ Bootmachine Changelog
 -------------------
 CHANGES:
 
-* add support for arch20145 with pacman.
+* add support for arch20147 with pacman.
 * drop yaourt complexities.
 
 0.6.0 (25.05.2013)
