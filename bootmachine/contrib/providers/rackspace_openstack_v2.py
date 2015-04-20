@@ -2,7 +2,7 @@ import time
 
 from telnetlib import Telnet
 
-import novaclient.v1_1
+from novaclient.client import Client
 
 from fabric.api import env, local
 from fabric.contrib import console
@@ -20,12 +20,13 @@ To view info on existing machines:
 For more info on the Python Nova Client:
     https://github.com/openstack/python-novaclient
 """
-
-COMPUTE_CONN = novaclient.v1_1.client.Client(
-    settings.OS_USERNAME,
-    settings.OS_PASSWORD,
-    settings.OS_TENANT_NAME,
-    settings.OS_AUTH_URL,
+VERSION = 3
+nova = Client(
+    VERSION,
+    username=settings.OS_USERNAME,
+    api_key=settings.OS_PASSWORD,
+    project_id=settings.OS_TENANT_NAME,
+    auth_url=settings.OS_AUTH_URL,
     region_name=settings.OS_REGION_NAME,
 )
 
@@ -47,13 +48,13 @@ def list_servers(as_list=False):
     bootmachine_servers = []
 
     # only return servers that are explicitly defined in the settings
-    for booted in COMPUTE_CONN.servers.list():
+    for booted in nova.servers.list():
         for defined in settings.SERVERS:
             if booted.name == defined["servername"]:
                 # wait for newly booted servers to be assigned addresses
                 while ("public" or "private") not in booted.addresses:
                     time.sleep(10)
-                    booted = [s for s in COMPUTE_CONN.servers.list() if s.name == booted.name][0]
+                    booted = [s for s in nova.servers.list() if s.name == booted.name][0]
                 booted.roles = defined["roles"]
                 public_addresses = booted.addresses["public"]
                 private_addresses = booted.addresses["private"]
@@ -74,7 +75,7 @@ def list_images(as_list=False):
     """
     print(cyan("... querying rackspace for available images."))
     if as_list:
-        return COMPUTE_CONN.servers.api.images.list()
+        return nova.servers.api.images.list()
     print(local("nova image-list"))
 
 
@@ -102,7 +103,7 @@ def list_flavors(as_list=False):
     """
     print(cyan("... querying rackspace for available flavors."))
     if as_list:
-        return COMPUTE_CONN.servers.api.flavors.list()
+        return nova.servers.api.flavors.list()
     print(local("nova flavor-list"))
 
 
