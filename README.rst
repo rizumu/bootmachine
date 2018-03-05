@@ -11,11 +11,11 @@ customizable interface.
 
 |buildstatus|_
 
-.. image:: https://pypip.in/v/bootmachine/badge.png
+.. image:: https://img.shields.io/pypi/v/bootmachine.svg
     :target: https://crate.io/packages/bootmachine/
     :alt: Latest PyPI version
 
-.. image:: https://pypip.in/d/bootmachine/badge.png
+.. image:: https://img.shields.io/pypi/dm/bootmachine.svg
     :target: https://crate.io/packages/bootmachine/
     :alt: Number of PyPI downloads
 
